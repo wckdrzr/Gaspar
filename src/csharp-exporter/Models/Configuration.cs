@@ -54,6 +54,10 @@ namespace CSharpExporter.Models
         public string HelperFile { get; set; }
         public string ModelPath { get; set; }
 
+        //For Angular
+        public string ErrorHandlerPath { get; set; }
+        public AngularServiceErrorMessage DefaultErrorMessage { get; set; }
+
         //For Ocelot
         public bool NoAuth { get; set; }
         public bool ExcludeScopes { get; set; }

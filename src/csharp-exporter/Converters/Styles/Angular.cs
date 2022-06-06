@@ -37,15 +37,16 @@ namespace CSharpExporter.Converters
             return TypeScriptConverter.ConvertEnum(enumModel);
         }
 
-        public List<string> ControllerHelperFile()
+        public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
         {
             List<string> lines = new();
 
             lines.Add("import { Injectable } from \"@angular/core\";");
             lines.Add("import { of } from \"rxjs\";");
-            lines.Add("import { MatSnackBar } from \"@angular/material/snack-bar\";");
-            lines.Add("import { TranslateService } from \"@ngx-translate/core\";");
-            lines.Add("import { Translations } from \"../components/translations\";");
+            if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
+            {
+                lines.Add($"import {{ ServiceErrorHandler }} from \"{outputConfig.ErrorHandlerPath}\";");
+            }
             lines.Add("");
             lines.Add("export interface IServiceResponse<T> {");
             lines.Add("    data?: T,");
@@ -60,19 +61,25 @@ namespace CSharpExporter.Converters
             lines.Add("    type: string,");
             lines.Add("}");
             lines.Add("export enum ServiceErrorMessage {");
-            lines.Add("    None,");
-            lines.Add("    Generic,");
-            lines.Add("    ServerResponse,");
+            lines.Add($"    {AngularServiceErrorMessage.None},");
+            lines.Add($"    {AngularServiceErrorMessage.Generic},");
+            lines.Add($"    {AngularServiceErrorMessage.ServerResponse},");
             lines.Add("}");
             lines.Add("");
             lines.Add("@Injectable({ providedIn: 'root' })");
             lines.Add("export class ServiceErrorHelper {");
-            lines.Add("    constructor(private matSnackBar: MatSnackBar, private translate: TranslateService, public translations: Translations) {");
-            lines.Add("    }");
+            if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
+            {
+                lines.Add("    constructor(private errorHandler: ServiceErrorHandler) {");
+                lines.Add("    }");
+            }
             lines.Add("    handler(error: ActionResultError, showError: ServiceErrorMessage) {");
-            lines.Add("        if (showError != ServiceErrorMessage.None) {");
-            lines.Add("            this.matSnackBar.open(showError == ServiceErrorMessage.ServerResponse && error?.detail ? error.detail : this.translate.instant(this.translations.services.unknownError), '', { horizontalPosition: 'center', verticalPosition: 'top', panelClass: 'snackbar-error', duration: 3000 });");
-            lines.Add("        }");
+            if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
+            {
+                lines.Add("        if (showError != ServiceErrorMessage.None) {");
+                lines.Add("            this.errorHandler.showError(showError == ServiceErrorMessage.ServerResponse && error?.detail ? error.detail : null);");
+                lines.Add("        }");
+            }
             lines.Add("        return of({ error: error || {} });");
             lines.Add("    }");
             lines.Add("}");
@@ -102,7 +109,7 @@ namespace CSharpExporter.Converters
             if (outputConfig.HelperFile == null)
             {
                 lines.Add("import { Observable } from \"rxjs\";");
-                lines.AddRange(ControllerHelperFile());
+                lines.AddRange(ControllerHelperFile(outputConfig));
             }
             else
             {
@@ -155,7 +162,10 @@ namespace CSharpExporter.Converters
                 {
                     parameters.Add($"body: {action.BodyType}");
                 }
-                parameters.Add("showError = ServiceErrorMessage.Generic");
+                if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
+                {
+                    parameters.Add($"showError = ServiceErrorMessage.{outputConfig.DefaultErrorMessage}");
+                }
 
                 if (action.BadMethodReason != null) {
 
@@ -189,7 +199,7 @@ namespace CSharpExporter.Converters
                     lines.Add($"        {actionName}({string.Join(", ", parameters)}): Observable<IServiceResponse<{TypeScriptConverter.ParseType(returnType)}>> {{");
                     lines.Add($"            return this.http.{httpMethod}<{TypeScriptConverter.ParseType(returnType)}>(`{url}`{bodyParam}).pipe(");
                     lines.Add($"                map(data => ({{ data }})),");
-                    lines.Add($"                catchError(error => this.errorHelper.handler(error, showError))");
+                    lines.Add($"                catchError(error => this.errorHelper.handler(error, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")}))");
                     lines.Add($"            );");
                     lines.Add($"        }}");
                 }

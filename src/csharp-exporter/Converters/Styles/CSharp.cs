@@ -19,7 +19,7 @@ namespace CSharpExporter.Converters
             return $"//{comment}{new String('\n', followingBlankLines)}";
         }
 
-        public List<string> ControllerHelperFile()
+        public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
         {
             throw new NotImplementedException();
         }

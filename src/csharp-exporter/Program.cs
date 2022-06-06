@@ -17,7 +17,7 @@ namespace CSharpExporter
         static void Main(string[] args)
         {
             string configFile = args.Length > 0 ? args[0] : null;
-            //configFile = "/Users/ben/WCKDRZR/csharp-exporter/csharp-exporter.config.json"; //test file
+            //configFile = "../../../../../csharp-exporter.config.json"; //test file
 
             if (configFile == null)
             {

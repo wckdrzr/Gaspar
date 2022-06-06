@@ -153,7 +153,7 @@ namespace CSharpExporter.Converters
             return lines;
         }
 
-        public List<string> ControllerHelperFile()
+        public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
         {
             throw new NotImplementedException();
         }

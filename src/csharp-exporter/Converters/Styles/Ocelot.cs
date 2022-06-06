@@ -21,7 +21,7 @@ namespace CSharpExporter.Converters
             return $"{new String(' ', currentIndent * 4)}//{comment}{new String('\n', followingBlankLines)}";
         }
 
-        public List<string> ControllerHelperFile()
+        public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
         {
             return new();
         }

@@ -14,7 +14,7 @@ namespace CSharpExporter.Converters
         List<string> ConvertModel(Model model);
         List<string> ConvertEnum(EnumModel enumModel);
 
-        List<string> ControllerHelperFile();
+        List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig);
         List<string> ControllerHeader(ConfigurationTypeOutput outputConfig, List<string> customTypes);
         List<string> ControllerFooter();
         List<string> ConvertController(Controller controller, ConfigurationTypeOutput outputConfig, bool lastController);
@@ -76,7 +76,7 @@ namespace CSharpExporter.Converters
             IConverter converter = GetConverter(outputConfig);
 
             lines.AddRange(OutputHeader.ControllerHelper(converter));
-            lines.AddRange(converter.ControllerHelperFile());
+            lines.AddRange(converter.ControllerHelperFile(outputConfig));
 
             return string.Join('\n', lines);
         }
