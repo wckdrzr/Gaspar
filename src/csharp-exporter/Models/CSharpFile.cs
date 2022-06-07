@@ -89,7 +89,7 @@ namespace CSharpExporter.Models
             {
                 newType = ((GenericNameSyntax)newType).TypeArgumentList.Arguments[0];
             }
-            if (newType != null && newType is not PredefinedTypeSyntax)
+            if (newType != null && newType is not PredefinedTypeSyntax && newType is not NullableTypeSyntax)
             {
                 AddUniqueCustomType(ref types, newType.ToString());
             }

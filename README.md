@@ -11,7 +11,7 @@ It's built from [Jonathan Svenheden's C# models to TypeScript project](https://g
 | Export to TypeScript    | ✅ |  |
 | Export to Angular       | ✅ | ✅ |
 | Export to Ocelot Config |  | ✅ |
-| Export to C#            |  | soon |
+| Export to C#            |  | ✅ |
 
 ## Dependencies
 
@@ -41,7 +41,10 @@ It's built from [Jonathan Svenheden's C# models to TypeScript project](https://g
 	    "Output": [{
 			"Type": "TypeScript",
 	    	"Location": "./api.d.ts"
-	    }],
+	    },{
+			"Type": "CSharp",
+	    	"Location": "./ServiceComms/Api.cs"
+		}],
 		"CamelCaseEnums": false,
 		"NumericEnums": true,
 		"StringLiteralTypesInsteadOfEnums": false

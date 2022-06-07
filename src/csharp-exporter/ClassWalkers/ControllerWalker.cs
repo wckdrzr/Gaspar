@@ -56,13 +56,13 @@ namespace CSharpExporter.ClassWalkers
                         AttributeSyntax httpAttribute = node.AttributeLists.GetAttribute("Http", true);
                         AttributeSyntax routeAttribute = node.AttributeLists.GetAttribute("Route");
                         if (httpAttribute != null)
-                        {
+                        { 
                             action.HttpMethod = httpAttribute.Name.ToString()[4..].ToUpper();
                         }
                         if (routeAttribute != null || httpAttribute?.ArgumentList?.Arguments[0] != null)
                         {
                             AttributeArgumentSyntax argument = routeAttribute?.ArgumentList?.Arguments[0] ?? httpAttribute.ArgumentList.Arguments[0];
-                            action.Route = argument.ToString()[1..^1];
+                            action.Route = argument.ToString()[1..^1].Replace("?", "");
                             action.Route = action.Route.Replace(("[controller]"), controller.ControllerName);
                             action.Route = action.Route.Replace(("[action]"), action.ActionName);
                             action.Route = Regex.Replace(action.Route, "({.*?)(:.*?)}", "$1}");
@@ -72,15 +72,12 @@ namespace CSharpExporter.ClassWalkers
                             action.Route = controller.ControllerName + "/" + action.ActionName;
                         }
 
-                        action.ReturnTypeOverride = node.AttributeLists.ReturnTypeOveride();
-                        if (action.ReturnTypeOverride == null && node.ReturnType is GenericNameSyntax)
+                        GenericNameSyntax returnGenericName = (GenericNameSyntax)node.ReturnType;
+                        if (returnGenericName.Identifier.ToString() == "ActionResult")
                         {
-                            GenericNameSyntax returnGenericName = (GenericNameSyntax)node.ReturnType;
-                            if (returnGenericName.Identifier.ToString() == "ActionResult")
-                            {
-                                action.ReturnType = returnGenericName.TypeArgumentList.Arguments[0];
-                            }
+                            action.ReturnType = returnGenericName.TypeArgumentList.Arguments[0];
                         }
+                        action.ReturnTypeOverride = node.AttributeLists.ReturnTypeOveride();
                         if (action.ReturnTypeOverride == null && action.ReturnType == null)
                         {
                             action.BadMethodReason = "Action should return ActionResult<T>";

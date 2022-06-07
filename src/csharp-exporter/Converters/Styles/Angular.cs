@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using CSharpExporter.Helpers;
+using CSharpExporter.Extensions;
 using CSharpExporter.Models;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSharpExporter.Converters
 {
@@ -145,7 +143,6 @@ namespace CSharpExporter.Converters
 
             foreach (ControllerAction action in controller.Actions)
             {
-                string httpMethod = action.HttpMethod.ToLower();
                 string actionName = TypeScriptConverter.ConvertIdentifier(action.ActionName);
 
                 List<string> parameters = new();
@@ -176,15 +173,10 @@ namespace CSharpExporter.Converters
                 else
                 {
                     string url = $"/{Config.Controllers.Gateway}/{Config.Controllers.ServiceName}/{action.Route.Replace("{", "${")}";
-                    List<Parameter> queryStringParameters = action.Parameters.Where(p => p.OnQueryString).ToList();
-                    if (queryStringParameters.Count > 0) { url += "?"; }
-                    for (int i = 0; i < queryStringParameters.Count; i++)
-                    {
-                        string parameterIdentifier = queryStringParameters[i].Identifier;
-                        url += parameterIdentifier + "=${" + parameterIdentifier + " ?? ''}" + (i < queryStringParameters.Count - 1 ? "&" : "");
-                    }
+                    url += action.Parameters.QueryString("$");
 
                     string bodyParam = "";
+                    string httpMethod = action.HttpMethod.ToLower();
                     if (httpMethod == "post" || httpMethod == "put")
                     {
                         bodyParam = $", {(action.BodyType != null ? "body" : "null")}";

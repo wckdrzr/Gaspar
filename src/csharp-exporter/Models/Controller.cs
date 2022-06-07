@@ -55,6 +55,7 @@ namespace CSharpExporter.Models
         public TypeSyntax Type { get; set; }
         public string DefaultValue { get; set; }
         public bool OnQueryString { get; set; }
+        public bool IsNullable { get; set; }
 
         public Parameter(ParameterSyntax parameterSyntax, bool onQueryString)
         {
@@ -62,6 +63,7 @@ namespace CSharpExporter.Models
             Type = parameterSyntax.Type;
             DefaultValue = parameterSyntax.Default == null ? null : parameterSyntax.Default.Value.ToString();
             OnQueryString = onQueryString;
+            IsNullable = parameterSyntax.Type is NullableTypeSyntax;
         }
     }
 }
