@@ -12,18 +12,20 @@ namespace CSharpExporter.Models
         TypeScript
     }
 
+
     public class Configuration
     {
         public string ConfigFilePath { get; set; }
 
-        public ModelConfiguration Models { get; set; }
-        public ControllerConfiguration Controllers { get; set; }
+        public ModelTypeConfiguration Models { get; set; }
+        public ControllerTypeConfiguration Controllers { get; set; }
 
         public string OnlyWhenAttributed { get; set; }
         public bool UseAttribute => !string.IsNullOrEmpty(OnlyWhenAttributed);
 
         public Dictionary<string, string> CustomTypeTranslations { get; set; }
     }
+
 
     public class ConfigurationType
     {
@@ -32,20 +34,21 @@ namespace CSharpExporter.Models
         public List<ConfigurationTypeOutput> Output { get; set; }
     }
 
-    public class ModelConfiguration : ConfigurationType
+    public class ModelTypeConfiguration : ConfigurationType
     {
         public bool CamelCaseEnums { get; set; }
         public bool NumericEnums { get; set; }
         public bool StringLiteralTypesInsteadOfEnums { get; set; }
     }
 
-    public class ControllerConfiguration : ConfigurationType
+    public class ControllerTypeConfiguration : ConfigurationType
     {
         public string Gateway { get; set; }
         public string ServiceName { get; set; }
         public int ServicePort { get; set; }
         public bool SecureService { get; set; }
     }
+
 
     public class ConfigurationTypeOutput
     {
@@ -65,4 +68,8 @@ namespace CSharpExporter.Models
         public bool NoAuth { get; set; }
         public bool ExcludeScopes { get; set; }
     }
+
+    public class ConfigurationTypeOutputAngular { }
+    public class ConfigurationTypeOutputCSharp { }
+    public class ConfigurationTypeOutputOcelot { }
 }

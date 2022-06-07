@@ -20,9 +20,8 @@ It's built from [Jonathan Svenheden's C# models to TypeScript project](https://g
 
 ## Install
 
-```
-# will be NuGet...
-```
+Install from NuGet: https://www.nuget.org/packages/WckdRzr.CSharpExporter/
+
 
 ## How to use
 

@@ -37,7 +37,7 @@ namespace CSharpExporter.Models
 
         public int Count => Files.Count();
 
-        public void DeDuplicateControllerNames(ControllerConfiguration config)
+        public void DeDuplicateControllerNames(ControllerTypeConfiguration config)
         {
             List<string> UsedControllerNames = new();
             foreach (CSharpFile file in Files)

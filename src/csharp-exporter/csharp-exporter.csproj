@@ -3,6 +3,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
+    <PackageId>WckdRzr.CSharpExporter</PackageId>
+    <Version>0.1.3</Version>
+    <Authors>Ben Robinson</Authors>
+    <Company>Wckd Rzr</Company>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIcon>logo.png</PackageIcon>
+    <Description>Consumes your C# domain models, types and controllers and exports them for other services and languages to consume</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/wckdrzr/csharp-exporter</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,18 +21,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Models\" />
-    <None Remove="Extensions\" />
-    <None Remove="Helpers\" />
-    <None Remove="Converters\" />
-    <None Remove="Converters\Styles\" />
-    <None Remove="Json.Net" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Models\" />
     <Folder Include="Extensions\" />
     <Folder Include="Helpers\" />
     <Folder Include="Converters\" />
     <Folder Include="Converters\Styles\" />
+    <None Include="..\..\logo.png" Pack="true" PackagePath=""/>
+    <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
+    <None Include="..\..\README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
+
 </Project>
