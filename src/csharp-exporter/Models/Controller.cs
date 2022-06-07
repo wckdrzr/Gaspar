@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using CSharpExporter.Extensions;
+using WCKDRZR.CSharpExporter.Extensions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace CSharpExporter.Models
+namespace WCKDRZR.CSharpExporter.Models
 {
     public class Controller
     {

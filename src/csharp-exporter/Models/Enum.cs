@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CSharpExporter.Models
+namespace WCKDRZR.CSharpExporter.Models
 {
     public class EnumModel
     {

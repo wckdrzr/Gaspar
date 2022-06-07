@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace CSharpExporter.Models
+namespace WCKDRZR.CSharpExporter.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum OutputType
@@ -24,6 +24,9 @@ namespace CSharpExporter.Models
         public bool UseAttribute => !string.IsNullOrEmpty(OnlyWhenAttributed);
 
         public Dictionary<string, string> CustomTypeTranslations { get; set; }
+
+        public bool HasModels => Models != null && Models.Include != null && Models.Include.Count > 0;
+        public bool HasControllers => Controllers != null && Controllers.Include != null && Controllers.Include.Count > 0;
     }
 
 

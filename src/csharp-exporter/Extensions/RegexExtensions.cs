@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace CSharpExporter.Extensions
+namespace WCKDRZR.CSharpExporter.Extensions
 {
     public static class RegexExtensions
     {

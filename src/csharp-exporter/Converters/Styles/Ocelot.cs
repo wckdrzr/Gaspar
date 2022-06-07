@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CSharpExporter.Models;
+using WCKDRZR.CSharpExporter.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace CSharpExporter.Converters
+namespace WCKDRZR.CSharpExporter.Converters
 {
 	public class OcelotConverter : IConverter
 	{

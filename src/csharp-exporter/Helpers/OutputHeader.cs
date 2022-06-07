@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using CSharpExporter.Models;
-using CSharpExporter.Converters;
+using WCKDRZR.CSharpExporter.Models;
+using WCKDRZR.CSharpExporter.Converters;
 using Ganss.IO;
 
-namespace CSharpExporter.Helpers
+namespace WCKDRZR.CSharpExporter.Helpers
 {
 	public static class OutputHeader
 	{

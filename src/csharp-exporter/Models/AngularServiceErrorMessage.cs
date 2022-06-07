@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace CSharpExporter.Models
+namespace WCKDRZR.CSharpExporter.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum AngularServiceErrorMessage

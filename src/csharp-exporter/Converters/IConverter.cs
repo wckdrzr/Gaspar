@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using CSharpExporter;
-using CSharpExporter.Helpers;
-using CSharpExporter.Models;
+using WCKDRZR.CSharpExporter;
+using WCKDRZR.CSharpExporter.Helpers;
+using WCKDRZR.CSharpExporter.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace CSharpExporter.Converters
+namespace WCKDRZR.CSharpExporter.Converters
 {
     public interface IConverter
     {

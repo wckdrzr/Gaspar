@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using CSharpExporter.Extensions;
-using CSharpExporter.Models;
+using WCKDRZR.CSharpExporter.Extensions;
+using WCKDRZR.CSharpExporter.Models;
 
-namespace CSharpExporter.Converters
+namespace WCKDRZR.CSharpExporter.Converters
 {
 	public class AngularConverter : IConverter
 	{

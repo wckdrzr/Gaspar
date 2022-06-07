@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace CSharpExporter.Models
+namespace WCKDRZR.CSharpExporter.Models
 {
     public class Model
     {
