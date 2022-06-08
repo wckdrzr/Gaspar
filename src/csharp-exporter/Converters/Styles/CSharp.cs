@@ -84,6 +84,8 @@ namespace WCKDRZR.CSharpExporter.Converters
                     string url = $"http{(Config.Controllers.SecureService ? "s" : "")}://{Config.Controllers.ServiceName}:{Config.Controllers.ServicePort}/{action.Route}";
                     url += action.Parameters.QueryString();
 
+                    //!! if return type is bool (int/any primative); should be nullable
+
                     lines.Add($"        public static ServiceResponse<{action.ReturnType}> {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
                     lines.Add($"            return new(ServiceHttpMethod.{httpMethod}, $\"{url}\", {(action.BodyType != null ? "body" : "null")});");
