@@ -77,11 +77,13 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
                         {
                             action.ReturnType = returnGenericName.TypeArgumentList.Arguments[0];
                         }
-                        action.ReturnTypeOverride = node.AttributeLists.ReturnTypeOveride();
+                        action.ReturnTypeOverride = node.AttributeLists.AttributeValue("ReturnTypeOverride");
                         if (action.ReturnTypeOverride == null && action.ReturnType == null)
                         {
                             action.BadMethodReason = "Action should return ActionResult<T>";
                         }
+
+                        action.CustomSerializer = node.AttributeLists.AttributeValue("Serializer");
 
                         List<string> routeParameters = Regex.Matches(action.Route, "{(.*?)}").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
                         foreach (ParameterSyntax parameter in node.ParameterList.Parameters)

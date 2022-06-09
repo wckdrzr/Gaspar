@@ -87,11 +87,14 @@ namespace WCKDRZR.CSharpExporter.Converters
                     string urlHandler = "";
                     if (!string.IsNullOrEmpty(outputConfig.UrlHandlerFunction)) { urlHandler = $".{outputConfig.UrlHandlerFunction}()"; }
 
+                    string customSerializer = "";
+                    if (action.CustomSerializer != null) { customSerializer = $", typeof({action.CustomSerializer})"; }
+
                     //!! if return type is bool (int/any primative); should be nullable
 
                     lines.Add($"        public static ServiceResponse<{action.ReturnType}> {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return new(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")});");
+                    lines.Add($"            return new(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}{customSerializer});");
                     lines.Add($"        }}");
                 }
             }

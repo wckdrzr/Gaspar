@@ -10,7 +10,7 @@
 
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/wckdrzr/csharp-exporter</RepositoryUrl>
+    <RepositoryUrl>https://github.com/wckdrzr/CSharpExporter</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
 
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="17.2.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
+    <ProjectReference Include="..\CSharpExporter.AspNetCore\CSharpExporter.AspNetCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +41,13 @@
     <ItemGroup>
       <_PackageFiles Include="bin\$(Configuration)\*\Glob.dll;bin\$(Configuration)\*\Microsoft.CodeAnalysis.CSharp.dll;bin\$(Configuration)\*\Microsoft.CodeAnalysis.dll;bin\$(Configuration)\*\System.IO.Abstractions.dll">
         <PackagePath>tools\%(RecursiveDir)</PackagePath>
+        <Visible>false</Visible>
+        <BuildAction>Content</BuildAction>
+      </_PackageFiles>
+    </ItemGroup>
+    <ItemGroup>
+      <_PackageFiles Include="..\CSharpExporter.AspNetCore\bin\$(Configuration)\*\CSharpExporter.AspNetCore.dll">
+        <PackagePath>lib\</PackagePath>
         <Visible>false</Visible>
         <BuildAction>Content</BuildAction>
       </_PackageFiles>

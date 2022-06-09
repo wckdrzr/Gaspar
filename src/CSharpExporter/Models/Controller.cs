@@ -39,6 +39,8 @@ namespace WCKDRZR.CSharpExporter.Models
         public TypeSyntax BodyType { get; set; }
         public List<Parameter> Parameters { get; set; }
 
+        public string CustomSerializer { get; set; }
+
         public string BadMethodReason { get; set; }
         
         public ControllerAction(string name)

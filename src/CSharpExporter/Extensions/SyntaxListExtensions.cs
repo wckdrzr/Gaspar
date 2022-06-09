@@ -39,7 +39,7 @@ namespace WCKDRZR.CSharpExporter.Extensions
             return null;
         }
 
-        public static string ReturnTypeOveride(this SyntaxList<AttributeListSyntax> propertyAttributeList)
+        public static string AttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
         {
             foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
             {
@@ -49,9 +49,16 @@ namespace WCKDRZR.CSharpExporter.Extensions
                     {
                         foreach (AttributeArgumentSyntax argument in attributeSyntax.ArgumentList.Arguments)
                         {
-                            if (argument.NameEquals?.Name?.ToString() == "ReturnTypeOverride")
+                            if (argument.NameEquals?.Name?.ToString() == attributeName)
                             {
-                                return argument.Expression.ToString()[1..^1];
+                                if (argument.Expression.ToString().StartsWith("\""))
+                                {
+                                    return argument.Expression.ToString()[1..^1];
+                                }
+                                if (argument.Expression.ToString().StartsWith("nameof("))
+                                {
+                                    return argument.Expression.ToString()[7..^1];
+                                }
                             }
                         }
                     }
