@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Converters
 {
-    public interface IConverter
+    internal interface IConverter
     {
         Configuration Config { get; set; }
 
@@ -22,7 +22,7 @@ namespace WCKDRZR.CSharpExporter.Converters
         string Comment(string comment, int followingBlankLines = 0);
     }
 
-    public class Converter
+    internal class Converter
     {
         private Configuration _config;
 

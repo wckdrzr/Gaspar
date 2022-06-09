@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Extensions
 {
-    public static class SyntaxListExtensions
+    internal static class SyntaxListExtensions
     {
         public static bool IsAccessible(this SyntaxTokenList modifiers) =>
             modifiers.All(modifier =>

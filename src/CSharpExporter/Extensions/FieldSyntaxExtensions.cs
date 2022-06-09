@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Extensions
 {
-    public static class FieldSyntaxExtensions
+    internal static class FieldSyntaxExtensions
     {
         public static Dictionary<string, object> ConvertEnumerations(this IEnumerable<FieldDeclarationSyntax> fields)
         {

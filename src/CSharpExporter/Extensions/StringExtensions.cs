@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Extensions
 {
-    public static class StringExtensions
+    internal static class StringExtensions
     {
         public static string ToProper(this string s) =>
             string.IsNullOrEmpty(s) ? s : s[..1].ToUpper() + s[1..].ToLower();

@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Converters
 {
-	public class OcelotConverter : IConverter
+    internal class OcelotConverter : IConverter
 	{
         public Configuration Config { get; set; }
         private int currentIndent = 0;

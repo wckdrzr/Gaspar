@@ -7,7 +7,7 @@ using Ganss.IO;
 
 namespace WCKDRZR.CSharpExporter.Helpers
 {
-	public static class OutputHeader
+    internal static class OutputHeader
 	{
         public static List<string> Models(IConverter converter, string outputPath)
         {

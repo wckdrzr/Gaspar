@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Extensions
 {
-    public static class RegexExtensions
+    internal static class RegexExtensions
     {
         public static bool HasMatch(this MatchCollection matches) =>
             matches.Count > 0;

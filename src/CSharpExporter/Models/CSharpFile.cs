@@ -6,7 +6,7 @@ using WCKDRZR.CSharpExporter.Extensions;
 
 namespace WCKDRZR.CSharpExporter.Models
 {
-    public class CSharpFiles : IEnumerable
+    internal class CSharpFiles : IEnumerable
     {
         List<CSharpFile> Files { get; set; }
 
@@ -108,7 +108,7 @@ namespace WCKDRZR.CSharpExporter.Models
         }
     }
 
-    public class CSharpFile
+    internal class CSharpFile
     {
         public string Path { get; set; }
         public List<Model> Models { get; set; }

@@ -15,7 +15,7 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
 
     //optionally specify onlyWhenAttributed
 
-    public class ControllerWalker : CSharpSyntaxWalker
+    internal class ControllerWalker : CSharpSyntaxWalker
     {
         public readonly List<Controller> Controllers = new();
         private readonly Configuration Config;

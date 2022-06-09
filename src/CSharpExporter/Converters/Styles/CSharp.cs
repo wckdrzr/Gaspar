@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Converters
 {
-	public class CSharpConverter : IConverter
+    internal class CSharpConverter : IConverter
 	{
         public Configuration Config { get; set; }
         private int currentIndent = 0;
@@ -36,7 +36,7 @@ namespace WCKDRZR.CSharpExporter.Converters
                 lines.Add($"using {ns};");
             }
             lines.Add("");
-            lines.Add($"namespace CSharpExporter.ServiceCommunciation.{Config.Controllers.ServiceName.ToProper()}Service");
+            lines.Add($"namespace WCKDRZR.CSharpExporter.ServiceCommunciation.{Config.Controllers.ServiceName.ToProper()}Service");
             lines.Add($"{{");
             currentIndent++;
             return lines;

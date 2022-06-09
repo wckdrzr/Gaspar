@@ -12,7 +12,7 @@ using WCKDRZR.CSharpExporter.Extensions;
 
 namespace WCKDRZR.CSharpExporter.Core
 {
-	public static class ConfigReader
+    internal static class ConfigReader
 	{
 		public static Configuration Read(string configFile) =>
 		    ParseConfigurationFile(configFile).ReplaceVariablesInConfig();

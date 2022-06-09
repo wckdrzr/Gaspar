@@ -6,7 +6,7 @@ using Ganss.IO;
 
 namespace WCKDRZR.CSharpExporter.Helpers
 {
-	public static class FileHelper
+    internal static class FileHelper
 	{
         public static List<string> GetFiles(ConfigurationType configuration)
         {

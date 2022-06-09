@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace WCKDRZR.CSharpExporter.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum OutputType
+    internal enum OutputType
     {
         Angular,
         CSharp,
@@ -13,7 +13,7 @@ namespace WCKDRZR.CSharpExporter.Models
     }
 
 
-    public class Configuration
+    internal class Configuration
     {
         public string ConfigFilePath { get; set; }
 
@@ -30,21 +30,21 @@ namespace WCKDRZR.CSharpExporter.Models
     }
 
 
-    public class ConfigurationType
+    internal class ConfigurationType
     {
         public List<string> Include { get; set; }
         public List<string> Exclude { get; set; }
         public List<ConfigurationTypeOutput> Output { get; set; }
     }
 
-    public class ModelTypeConfiguration : ConfigurationType
+    internal class ModelTypeConfiguration : ConfigurationType
     {
         public bool CamelCaseEnums { get; set; }
         public bool NumericEnums { get; set; }
         public bool StringLiteralTypesInsteadOfEnums { get; set; }
     }
 
-    public class ControllerTypeConfiguration : ConfigurationType
+    internal class ControllerTypeConfiguration : ConfigurationType
     {
         public string ServiceName { get; set; }
         public string ServiceHost { get; set; }
@@ -52,7 +52,7 @@ namespace WCKDRZR.CSharpExporter.Models
     }
 
 
-    public class ConfigurationTypeOutput
+    internal class ConfigurationTypeOutput
     {
         public OutputType Type { get; set; }
         public string Location { get; set; }
@@ -73,7 +73,7 @@ namespace WCKDRZR.CSharpExporter.Models
         public bool ExcludeScopes { get; set; }
     }
 
-    public class ConfigurationTypeOutputAngular { }
-    public class ConfigurationTypeOutputCSharp { }
-    public class ConfigurationTypeOutputOcelot { }
+    internal class ConfigurationTypeOutputAngular { }
+    internal class ConfigurationTypeOutputCSharp { }
+    internal class ConfigurationTypeOutputOcelot { }
 }

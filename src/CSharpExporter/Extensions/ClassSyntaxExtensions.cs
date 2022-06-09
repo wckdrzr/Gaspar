@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Extensions
 {
-    public static class ClassSyntaxExtensions
+    internal static class ClassSyntaxExtensions
     {
         public static bool IsController(this ClassDeclarationSyntax propertyClass) =>
             propertyClass.BaseList != null && propertyClass.BaseList.Types.Any(t =>

@@ -6,7 +6,7 @@ using WCKDRZR.CSharpExporter.Models;
 
 namespace WCKDRZR.CSharpExporter.Converters
 {
-	public class AngularConverter : IConverter
+    internal class AngularConverter : IConverter
 	{
         public Configuration Config { get; set; }
         private int currentIndent = 0;

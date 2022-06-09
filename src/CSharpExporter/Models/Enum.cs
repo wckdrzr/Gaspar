@@ -2,7 +2,7 @@
 
 namespace WCKDRZR.CSharpExporter.Models
 {
-    public class EnumModel
+    internal class EnumModel
     {
         public string Identifier { get; set; }
         public Dictionary<string, object> Values { get; set; }

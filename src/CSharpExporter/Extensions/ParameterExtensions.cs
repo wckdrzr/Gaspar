@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Extensions
 {
-    public static class ParameterExtensions
+    internal static class ParameterExtensions
     {
         public static string QueryString(this List<Parameter> parameters, string variablePrefix = "")
         {

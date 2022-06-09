@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Models
 {
-    public class Controller
+    internal class Controller
     {
         public string ControllerName { get; set; }
         public List<ControllerAction> Actions { get; set; }
@@ -27,7 +27,7 @@ namespace WCKDRZR.CSharpExporter.Models
         }
     }
 
-    public class ControllerAction
+    internal class ControllerAction
     {
         public string HttpMethod { get; set; }
         public string ActionName { get; set; }
@@ -51,7 +51,7 @@ namespace WCKDRZR.CSharpExporter.Models
         }
     }
 
-    public class Parameter
+    internal class Parameter
     {
         public string Identifier { get; set; }
         public TypeSyntax Type { get; set; }

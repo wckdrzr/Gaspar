@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.ClassWalkers
 {
-    public class ModelWalker : CSharpSyntaxWalker
+    internal class ModelWalker : CSharpSyntaxWalker
     {
         public readonly List<Model> Models = new List<Model>();
         private readonly Configuration Config;

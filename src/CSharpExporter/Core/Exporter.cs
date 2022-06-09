@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Core
 {
-	public class Exporter
+    internal class Exporter
 	{
 		public static void Export(string configFile)
 		{

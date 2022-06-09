@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Models
 {
-    public class Model
+    internal class Model
     {
         public string ModelName { get; set; }
         public List<Property> Fields { get; set; }
@@ -12,7 +12,7 @@ namespace WCKDRZR.CSharpExporter.Models
         public Dictionary<string, object> Enumerations { get; set; }
     }
 
-    public class Property
+    internal class Property
     {
         public string Identifier { get; set; }
         public string Type { get; set; }

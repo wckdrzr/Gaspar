@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.Converters
 {
-	public class TypeScriptConverter : IConverter
+    internal class TypeScriptConverter : IConverter
 	{
         public Configuration Config { get; set; }
 

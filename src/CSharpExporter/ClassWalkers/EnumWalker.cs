@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.ClassWalkers
 {
-    class EnumWalker : CSharpSyntaxWalker
+    internal class EnumWalker : CSharpSyntaxWalker
     {
         public readonly List<EnumModel> Enums = new List<EnumModel>();
         private readonly Configuration Config;
