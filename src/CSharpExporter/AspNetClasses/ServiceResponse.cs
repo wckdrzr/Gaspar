@@ -3,16 +3,16 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Threading.Tasks;
-using CSharpExporter.AspNetCore.ServiceCommunciation.Models;
+using WCKDRZR.CSharpExporter.ServiceCommunciation.Models;
 
-namespace CSharpExporter.AspNetCore.ServiceCommunciation
+namespace WCKDRZR.CSharpExporter.ServiceCommunciation
 {
     public class ServiceResponse<T>
     {
-        public T? Data { get; set; }
-        public ActionResultError? Error { get; set; }
+        public T Data { get; set; }
+        public ActionResultError Error { get; set; }
 
-        public ServiceResponse(ServiceHttpMethod method, string url, dynamic body, Type? serializer = null)
+        public ServiceResponse(ServiceHttpMethod method, string url, dynamic body, Type serializer = null)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace CSharpExporter.AspNetCore.ServiceCommunciation
             }
         }
 
-        private void Success(HttpResponseMessage httpResponse, Type? serializer, string url)
+        private void Success(HttpResponseMessage httpResponse, Type serializer, string url)
         {
             try
             {
@@ -61,11 +61,11 @@ namespace CSharpExporter.AspNetCore.ServiceCommunciation
                 }
                 else
                 {
-                    MethodInfo? deserializeMethod = serializer.GetMethod("Deserialize");
+                    MethodInfo deserializeMethod = serializer.GetMethod("Deserialize");
                     if (deserializeMethod != null)
                     {
-                        MethodInfo? deserializeMethodGeneric = deserializeMethod.MakeGenericMethod(typeof(T));
-                        Data = (T?)deserializeMethodGeneric.Invoke(serializer, new[] { httpResponse.Content.ReadAsStringAsync().Result });
+                        MethodInfo deserializeMethodGeneric = deserializeMethod.MakeGenericMethod(typeof(T));
+                        Data = (T)deserializeMethodGeneric.Invoke(serializer, new[] { httpResponse.Content.ReadAsStringAsync().Result });
                     }
                     else
                     {

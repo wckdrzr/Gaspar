@@ -1,4 +1,4 @@
-﻿namespace CSharpExporter.AspNetCore.ServiceCommunciation.Models
+﻿namespace WCKDRZR.CSharpExporter.ServiceCommunciation.Models
 {
     public enum ServiceHttpMethod
     {

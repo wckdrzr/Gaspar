@@ -6,7 +6,7 @@
     <Authors>Ben Robinson</Authors>
     <Description>Consumes your C# domain models, types and controllers and exports them for other services and languages to consume</Description>
     <PackageId>WckdRzr.CSharpExporter</PackageId>
-    <Version>0.1.9</Version>
+    <Version>0.1.13</Version>
 
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -24,7 +24,6 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="17.2.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
-    <ProjectReference Include="..\CSharpExporter.AspNetCore\CSharpExporter.AspNetCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,7 +45,7 @@
       </_PackageFiles>
     </ItemGroup>
     <ItemGroup>
-      <_PackageFiles Include="..\CSharpExporter.AspNetCore\bin\$(Configuration)\*\CSharpExporter.AspNetCore.dll">
+      <_PackageFiles Include="bin\$(Configuration)\*\CSharpExporter.dll">
         <PackagePath>lib\</PackagePath>
         <Visible>false</Visible>
         <BuildAction>Content</BuildAction>
