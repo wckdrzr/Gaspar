@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using WCKDRZR.CSharpExporter.Extensions;
 
 namespace WCKDRZR.CSharpExporter.Models
 {
@@ -49,7 +50,7 @@ namespace WCKDRZR.CSharpExporter.Models
                     while (UsedControllerNames.Contains(newName))
                     {
                         newName = controller.OutputClassName +
-                            (index >= 0 ? config.ServiceName[..1].ToUpper() + config.ServiceName[1..] : "") +
+                            (index >= 0 ? config.ServiceName.ToProper() : "") +
                             (index > 0 ? index : "");
                         index++;
                     }

@@ -15,7 +15,7 @@ namespace WCKDRZR.CSharpExporter.Core
 	{
 		public static void Export(string configFile)
 		{
-            Configuration config = ParseConfigurationFile(configFile);
+            Configuration config = ConfigReader.Read(configFile);
             Converter converter = new Converter(config);
             CSharpFiles files = new();
 
@@ -50,49 +50,6 @@ namespace WCKDRZR.CSharpExporter.Core
                     File.WriteAllText(output.Location, converter.BuildControllersFile(output, files));
                 }
             }
-        }
-
-        private static Configuration ParseConfigurationFile(string configFile)
-        {
-            if (configFile == null)
-            {
-                throw new Exception("Please provide a config file as the first argument");
-            }
-
-            if (!File.Exists(configFile))
-            {
-                throw new Exception($"The config file '{configFile}' was not found");
-            }
-
-            Configuration config = new();
-            try
-            {
-                config = JsonSerializer.Deserialize<Configuration>(File.ReadAllText(configFile));
-                config.ConfigFilePath = configFile;
-            }
-            catch (Exception e)
-            {
-                throw new Exception($"Failed to read the config file\n{e.Message}");
-            }
-
-            if (!config.HasModels && !config.HasControllers)
-            {
-                throw new Exception("Please specify IncludeModels and/or IncludeControllers in the config, otherwise there is nothing to generate");
-            }
-            if (config.HasModels && (config.Models.Output == null || config.Models.Output.Count == 0))
-            {
-                throw new Exception("Please specify at least one Output in the Models config, otherwise there is no where to but the generated models");
-            }
-            if (config.HasControllers && (config.Controllers.Output == null || config.Controllers.Output.Count == 0))
-            {
-                throw new Exception("Please specify at least one Output in the Controllers config, otherwise there is no where to but the generated controllers");
-            }
-            if (config.HasControllers && config.Controllers.ServiceName == null)
-            {
-                throw new Exception("Please specify a ServiceName for the conrtollers");
-            }
-
-            return config;
         }
 
         private static CSharpFile ParseModels(string path, Configuration config)

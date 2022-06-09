@@ -119,7 +119,7 @@ namespace WCKDRZR.CSharpExporter.Converters
                 lines.Add("");
             }
 
-            lines.Add($"export namespace {Config.Controllers.ServiceName[..1].ToUpper()}{Config.Controllers.ServiceName[1..].ToLower()}Service {{");
+            lines.Add($"export namespace {Config.Controllers.ServiceName.ToProper()}Service {{");
             lines.Add("");
             currentIndent++;
 
@@ -172,7 +172,7 @@ namespace WCKDRZR.CSharpExporter.Converters
                 }
                 else
                 {
-                    string url = $"/{Config.Controllers.Gateway}/{Config.Controllers.ServiceName}/{action.Route.Replace("{", "${")}";
+                    string url = $"{outputConfig.UrlPrefix}/{action.Route.Replace("{", "${")}";
                     url += action.Parameters.QueryString("$");
 
                     string bodyParam = "";

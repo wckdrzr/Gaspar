@@ -34,7 +34,7 @@ namespace WCKDRZR.CSharpExporter.Converters
             { "object", "any" },
             { "byte[]", "string" }
         };
-        public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(Config.CustomTypeTranslations).ToDictionary(k => k.Key, v => v.Value);
+        public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(Config.CustomTypeTranslations ?? new()).ToDictionary(k => k.Key, v => v.Value);
         public string ConvertType(string type) => TypeTranslations.ContainsKey(type) ? TypeTranslations[type] : type;
 
         public string arrayRegex = /*language=regex*/ @"^(.+)\[\]$";

@@ -36,7 +36,7 @@ namespace WCKDRZR.CSharpExporter.Converters
                 lines.Add($"using {ns};");
             }
             lines.Add("");
-            lines.Add($"namespace CSharpExporter.ServiceCommunciation.{Config.Controllers.ServiceName[..1].ToUpper()}{Config.Controllers.ServiceName[1..].ToLower()}Service");
+            lines.Add($"namespace CSharpExporter.ServiceCommunciation.{Config.Controllers.ServiceName.ToProper()}Service");
             lines.Add($"{{");
             currentIndent++;
             return lines;
@@ -79,16 +79,19 @@ namespace WCKDRZR.CSharpExporter.Converters
                 }
                 else
                 {
-                    string httpMethod = action.HttpMethod[..1].ToUpper() + action.HttpMethod[1..].ToLower();
+                    string httpMethod = action.HttpMethod.ToProper();
 
-                    string url = $"http{(Config.Controllers.SecureService ? "s" : "")}://{Config.Controllers.ServiceName}:{Config.Controllers.ServicePort}/{action.Route}";
+                    string url = $"{outputConfig.UrlPrefix}/{action.Route}";
                     url += action.Parameters.QueryString();
+
+                    string urlHandler = "";
+                    if (!string.IsNullOrEmpty(outputConfig.UrlHandlerFunction)) { urlHandler = $".{outputConfig.UrlHandlerFunction}()"; }
 
                     //!! if return type is bool (int/any primative); should be nullable
 
                     lines.Add($"        public static ServiceResponse<{action.ReturnType}> {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return new(ServiceHttpMethod.{httpMethod}, $\"{url}\", {(action.BodyType != null ? "body" : "null")});");
+                    lines.Add($"            return new(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")});");
                     lines.Add($"        }}");
                 }
             }

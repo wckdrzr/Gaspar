@@ -78,12 +78,12 @@ namespace WCKDRZR.CSharpExporter.Converters
 
                 lines.Add($"        {{");
                 lines.Add($"            \"DownstreamPathTemplate\": \"/{action.Route}\",");
-                lines.Add($"            \"DownstreamScheme\": \"http{(Config.Controllers.SecureService ? "s" : "")}\",");
+                lines.Add($"            \"DownstreamScheme\": \"{Config.Controllers.ServiceHost}\",");
                 lines.Add($"            \"DownstreamHostAndPorts\": [{{");
                 lines.Add($"                \"Host\": \"{service}\",");
                 lines.Add($"                \"Port\": {Config.Controllers.ServicePort}");
                 lines.Add($"            }}],");
-                lines.Add($"            \"UpstreamPathTemplate\": \"/{service}/{action.Route}\",");
+                lines.Add($"            \"UpstreamPathTemplate\": \"{outputConfig.UrlPrefix}/{action.Route}\",");
                 lines.Add($"            \"UpstreamHttpMethod\": [ \"{action.HttpMethod}\" ]{(outputConfig.NoAuth ? "" : ",")}");
                 if (!outputConfig.NoAuth)
                 {

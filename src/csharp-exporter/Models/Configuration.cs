@@ -46,10 +46,9 @@ namespace WCKDRZR.CSharpExporter.Models
 
     public class ControllerTypeConfiguration : ConfigurationType
     {
-        public string Gateway { get; set; }
         public string ServiceName { get; set; }
+        public string ServiceHost { get; set; }
         public int ServicePort { get; set; }
-        public bool SecureService { get; set; }
     }
 
 
@@ -57,6 +56,7 @@ namespace WCKDRZR.CSharpExporter.Models
     {
         public OutputType Type { get; set; }
         public string Location { get; set; }
+        public string UrlPrefix { get; set; }
 
         //For Angular
         public string HelperFile { get; set; }
@@ -65,6 +65,7 @@ namespace WCKDRZR.CSharpExporter.Models
         public AngularServiceErrorMessage DefaultErrorMessage { get; set; }
 
         //For CSharp
+        public string UrlHandlerFunction { get; set; }
         public List<string> ModelNamespaces { get; set; }
 
         //For Ocelot
