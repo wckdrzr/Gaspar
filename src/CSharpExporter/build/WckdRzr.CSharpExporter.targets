@@ -6,7 +6,7 @@
 
   <UsingTask AssemblyFile="$(CSharpExporterTaskAssembly)" TaskName="WCKDRZR.CSharpExporter.MSBuild.OnBuild" />
 
-  <Target Name="CSharpExporter" AfterTargets="AfterBuild">
+  <Target Name="CSharpExporter" BeforeTargets="BeforeCompile" Condition="'$(RunCSharpExporter)' != 'False'">
     <WCKDRZR.CSharpExporter.MSBuild.OnBuild ConfigFile="$(MSBuildProjectDirectory)\csharp-exporter.config.json" />
   </Target>
 </Project>

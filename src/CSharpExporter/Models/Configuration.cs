@@ -56,19 +56,21 @@ namespace WCKDRZR.CSharpExporter.Models
     {
         public OutputType Type { get; set; }
         public string Location { get; set; }
+
+        //For Controllers
         public string UrlPrefix { get; set; }
 
-        //For Angular
+        //For Angular Controllers
         public string HelperFile { get; set; }
         public string ModelPath { get; set; }
         public string ErrorHandlerPath { get; set; }
         public AngularServiceErrorMessage DefaultErrorMessage { get; set; }
 
-        //For CSharp
+        //For CSharp Controllers
         public string UrlHandlerFunction { get; set; }
         public List<string> ModelNamespaces { get; set; }
 
-        //For Ocelot
+        //For Ocelot Controllers
         public bool NoAuth { get; set; }
         public bool ExcludeScopes { get; set; }
     }
