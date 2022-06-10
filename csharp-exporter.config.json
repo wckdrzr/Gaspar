@@ -1,13 +1,13 @@
 {
 	"Controllers": {
 		"Include": [
-			"/Users/ben/WCKDRZR/data-watchdog/services/Information/**/*.cs"
+			"/Users/ben/WCKDRZR/product/services/serviceName/**/*.cs"
 		],
 		"Exclude": [],
 		"Output": [
 			{
 				"Type": "Angular",
-				"Location": "/Users/ben/WCKDRZR/data-watchdog/services/Frontend/src/app/interfaces/services/information.ts",
+				"Location": "/Users/ben/WCKDRZR/product/services/serviceName/src/app/interfaces/services/serviceName.ts",
 				"HelperFile": "service-helper.ts",
 				"ModelPath": "../common",
 				"ErrorHandlerPath": "./service-error-handler",
@@ -15,8 +15,8 @@
 			}
 		],
 		"Gateway": "api",
-		"ServiceName": "information",
-		"ServicePort": 28648
+		"ServiceName": "your_service",
+		"ServicePort": 12345
 	},
 	"OnlyWhenAttributed": "FrontEnd",
 	"CustomTypeTranslations": {}
