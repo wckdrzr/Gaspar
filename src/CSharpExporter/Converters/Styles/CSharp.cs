@@ -32,6 +32,7 @@ namespace WCKDRZR.CSharpExporter.Converters
             List<string> lines = new();
             lines.Add($"using System;");
             lines.Add($"using System.Collections.Generic;");
+            lines.Add($"using System.Threading.Tasks;");
             lines.Add($"using WCKDRZR.CSharpExporter.Models;");
             foreach (string ns in outputConfig.ModelNamespaces)
             {
@@ -77,7 +78,13 @@ namespace WCKDRZR.CSharpExporter.Converters
                 if (action.BadMethodReason != null)
                 {
                     lines.Add($"        [System.Obsolete(\"{action.BadMethodReason}\", true)]");
-                    lines.Add($"        public static void {action.ActionName}({string.Join(", ", parameters)}) {{ }}");
+                    lines.Add($"        public static void {action.ActionName}({string.Join(", ", parameters)})");
+                    lines.Add($"        {{");
+                    lines.Add($"        }}");
+                    lines.Add($"        [System.Obsolete(\"{action.BadMethodReason}\", true)]");
+                    lines.Add($"        public static void {action.ActionName}Async({string.Join(", ", parameters)})");
+                    lines.Add($"        {{");
+                    lines.Add($"        }}");
                 }
                 else
                 {
@@ -96,7 +103,11 @@ namespace WCKDRZR.CSharpExporter.Converters
 
                     lines.Add($"        public static ServiceResponse<{action.ReturnType}> {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return new(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}{customSerializer});");
+                    lines.Add($"            return ServiceClient.Fetch<{action.ReturnType}>(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}{customSerializer});");
+                    lines.Add($"        }}");
+                    lines.Add($"        public static async Task<ServiceResponse<{action.ReturnType}>> {action.ActionName}Async({string.Join(", ", parameters)})");
+                    lines.Add($"        {{");
+                    lines.Add($"            return await ServiceClient.FetchAsync<{action.ReturnType}>(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}{customSerializer});");
                     lines.Add($"        }}");
                 }
             }

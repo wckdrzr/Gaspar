@@ -7,32 +7,34 @@ using WCKDRZR.CSharpExporter.Models;
 
 namespace WCKDRZR.CSharpExporter
 {
-    public class ServiceResponse<T>
+    public static class ServiceClient
     {
-        public T Data { get; set; }
-        public ActionResultError Error { get; set; }
+        public static ServiceResponse<T> Fetch<T>(ServiceHttpMethod method, string url, dynamic body, Type serializer = null)
+        {
+            return FetchAsync<T>(method, url, body, serializer).Result;
+        }
 
-        public ServiceResponse(ServiceHttpMethod method, string url, dynamic body, Type serializer = null)
+        public static async Task<ServiceResponse<T>> FetchAsync<T>(ServiceHttpMethod method, string url, dynamic body, Type serializer = null)
         {
             try
             {
-                HttpResponseMessage httpResponse = Load(method, url, body).Result;
+                HttpResponseMessage httpResponse = await Load(method, url, body);
                 if (httpResponse.IsSuccessStatusCode)
                 {
-                    Success(httpResponse, serializer, url);
+                    return Success<T>(httpResponse, serializer, url);
                 }
                 else
                 {
-                    ServerError(httpResponse, url);
+                    return ServerError<T>(httpResponse, url);
                 }
             }
             catch (Exception e)
             {
-                LoadException(e, url);
+                return LoadException<T>(e, url);
             }
         }
 
-        private async Task<HttpResponseMessage> Load(ServiceHttpMethod method, string url, dynamic body)
+        private static async Task<HttpResponseMessage> Load(ServiceHttpMethod method, string url, dynamic body)
         {
             HttpClient httpClient = new();
 
@@ -51,13 +53,17 @@ namespace WCKDRZR.CSharpExporter
             }
         }
 
-        private void Success(HttpResponseMessage httpResponse, Type serializer, string url)
+        private static ServiceResponse<T> Success<T>(HttpResponseMessage httpResponse, Type serializer, string url)
         {
             try
             {
                 if (serializer == null)
                 {
-                    Data = httpResponse.Content.ReadFromJsonAsync<T>().Result;
+                    return new ServiceResponse<T>
+                    {
+                        Data = httpResponse.Content.ReadFromJsonAsync<T>().Result,
+                        Error = null
+                    };
                 }
                 else
                 {
@@ -65,44 +71,49 @@ namespace WCKDRZR.CSharpExporter
                     if (deserializeMethod != null)
                     {
                         MethodInfo deserializeMethodGeneric = deserializeMethod.MakeGenericMethod(typeof(T));
-                        Data = (T)deserializeMethodGeneric.Invoke(serializer, new[] { httpResponse.Content.ReadAsStringAsync().Result });
+                        return new ServiceResponse<T>
+                        {
+                            Data = (T)deserializeMethodGeneric.Invoke(serializer, new[] { httpResponse.Content.ReadAsStringAsync().Result }),
+                            Error = null
+                        };
                     }
                     else
                     {
                         throw new Exception($"Custom serializer ({serializer.Name}) has no 'Deserialize' method");
                     }
                 }
-                Error = null;
             }
             catch (Exception e)
             {
-                Data = default(T);
-                Error = new() { Title = $"Unable to deserialize sucessful response from {url}", Detail = e.Message, Status = 0 };
                 //LoggingV2.Log($"Unable to deserialize sucessful response from {url}", LogLevel.Error);
                 //LoggingV2.Log($"{e.Message}", LogLevel.Info);
+
+                return Error<T>($"Unable to deserialize sucessful response from {url}", e.Message, 0);
             }
         }
 
-        private void ServerError(HttpResponseMessage httpResponse, string url)
+        private static ServiceResponse<T> ServerError<T>(HttpResponseMessage httpResponse, string url)
         {
-            Data = default(T);
+            ServiceResponse<T> response = new ServiceResponse<T> { Data = default(T) };
             try
             {
-                Error = httpResponse.Content.ReadFromJsonAsync<ActionResultError>().Result;
+                response.Error = httpResponse.Content.ReadFromJsonAsync<ActionResultError>().Result;
             }
             catch
             {
-                Error = new() { Title = $"Service call to {url} failed to connect", Detail = httpResponse.ReasonPhrase, Status = (int)httpResponse.StatusCode };
+                response = Error<T>($"Service call to {url} failed to connect", httpResponse.ReasonPhrase, (int)httpResponse.StatusCode);
             }
 
             //LoggingV2.Log($"Service call to {url} failed with status code {(int)httpResponse.StatusCode} - {httpResponse.StatusCode}", LogLevel.Error);
-            if (Error != null && !string.IsNullOrEmpty(Error.Detail))
+            if (response.Error != null && !string.IsNullOrEmpty(response.Error.Detail))
             {
                 //LoggingV2.Log($"{Error.Detail}", LogLevel.Info);
             }
+
+            return response;
         }
 
-        private void LoadException(Exception exception, string url)
+        private static ServiceResponse<T> LoadException<T>(Exception exception, string url)
         {
             string message = exception.Message;
             if (exception.InnerException is TimeoutException)
@@ -110,11 +121,19 @@ namespace WCKDRZR.CSharpExporter
                 message = "Connection timed out";
             }
 
-            Data = default(T);
-            Error = new() { Title = $"Service call to {url} failed to connect", Detail = message, Status = 0 };
-
             //LoggingV2.Log($"Service call to {url} failed to connect", LogLevel.Error);
             //LoggingV2.Log($"{message}", LogLevel.Info);
+
+            return Error<T>($"Service call to {url} failed to connect", message, 0);
+        }
+
+        private static ServiceResponse<T> Error<T>(string title, string detail, int status)
+        {
+            return new()
+            {
+                Data = default(T),
+                Error = new() { Title = title, Detail = detail, Status = status }
+            };
         }
     }
 }
