@@ -59,7 +59,7 @@ namespace WCKDRZR.CSharpExporter.Converters
                     List<Model> modelsForType = file.ModelsForType(outputConfig.Type);
                     List<EnumModel> enumsForType = file.EnumsForType(outputConfig.Type);
 
-                    if (modelsForType.Count > 0 && enumsForType.Count > 0)
+                    if (modelsForType.Count > 0 || enumsForType.Count > 0)
                     {
                         lines.Add(converter.Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1));
 

@@ -6,7 +6,7 @@
     <Authors>Ben Robinson</Authors>
     <Description>Consumes your C# domain models, types and controllers and exports them for other services and languages to consume</Description>
     <PackageId>WckdRzr.CSharpExporter</PackageId>
-    <Version>0.1.19</Version>
+    <Version>0.1.21</Version>
 
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
