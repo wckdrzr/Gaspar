@@ -21,7 +21,7 @@ namespace WCKDRZR.CSharpExporter.Core
             CSharpFiles files = new();
 
             List<string> modelFiles = config.HasModels ? FileHelper.GetFiles(config.Models) : new();
-            List<string> controllerFiles = config.HasModels ? FileHelper.GetFiles(config.Controllers) : new();
+            List<string> controllerFiles = config.HasControllers ? FileHelper.GetFiles(config.Controllers) : new();
             if (config.HasModels && modelFiles.Count == 0)
             {
                 throw new Exception("Cannot find any model files to use");
