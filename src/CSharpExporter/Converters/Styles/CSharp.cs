@@ -30,6 +30,7 @@ namespace WCKDRZR.CSharpExporter.Converters
         public List<string> ControllerHeader(ConfigurationTypeOutput outputConfig, List<string> customTypes)
         {
             List<string> lines = new();
+            lines.Add($"using System;");
             lines.Add($"using System.Collections.Generic;");
             lines.Add($"using WCKDRZR.CSharpExporter.Models;");
             foreach (string ns in outputConfig.ModelNamespaces)
