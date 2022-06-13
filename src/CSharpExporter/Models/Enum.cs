@@ -6,5 +6,7 @@ namespace WCKDRZR.CSharpExporter.Models
     {
         public string Identifier { get; set; }
         public Dictionary<string, object> Values { get; set; }
+
+        public OutputType ExportFor { get; set; }
     }
 }

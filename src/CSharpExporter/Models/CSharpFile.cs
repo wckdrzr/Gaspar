@@ -118,6 +118,10 @@ namespace WCKDRZR.CSharpExporter.Models
         public bool HasModels => Models.Count > 0 || Enums.Count > 0;
         public bool HasControllers => Controllers.Count > 0;
 
+        public List<Model> ModelsForType(OutputType type) => Models.Where(a => a.ExportFor.HasFlag(type)).ToList();
+        public List<EnumModel> EnumsForType(OutputType type) => Enums.Where(a => a.ExportFor.HasFlag(type)).ToList();
+        public List<Controller> ControllersWithActionsForType(OutputType type) => Controllers.Where(c => c.ActionsForType(type).Count() > 0).ToList();
+
         public void Concat(CSharpFile file)
         {
             Models.Concat(file.Models);

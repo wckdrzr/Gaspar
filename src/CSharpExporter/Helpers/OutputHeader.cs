@@ -9,14 +9,14 @@ namespace WCKDRZR.CSharpExporter.Helpers
 {
     internal static class OutputHeader
 	{
-        public static List<string> Models(IConverter converter, string outputPath)
+        public static List<string> Models(IConverter converter, ConfigurationTypeOutput outputConfig, string outputPath)
         {
-            return Header(converter, converter.Config.Models, "models and enums", outputPath);
+            return Header(converter, converter.Config.Models, outputConfig, "models and enums", outputPath);
         }
 
-        public static List<string> Controllers(IConverter converter, string outputPath)
+        public static List<string> Controllers(IConverter converter, ConfigurationTypeOutput outputConfig, string outputPath)
         {
-            return Header(converter, converter.Config.Controllers, "controllers", outputPath);
+            return Header(converter, converter.Config.Controllers, outputConfig, "controllers", outputPath);
         }
 
         public static List<string> ControllerHelper(IConverter converter)
@@ -39,7 +39,7 @@ namespace WCKDRZR.CSharpExporter.Helpers
             return lines;
         }
 
-        private static List<string> Header(IConverter converter, ConfigurationType configFiles, string fileType, string outputPath)
+        private static List<string> Header(IConverter converter, ConfigurationType configFiles, ConfigurationTypeOutput outputConfig, string fileType, string outputPath)
         {
             List<string> lines = new();
 
@@ -49,10 +49,7 @@ namespace WCKDRZR.CSharpExporter.Helpers
             {
                 lines.Add(converter.Comment($"**     {FileHelper.RelativePath(outputPath, path)}"));
             }
-            if (converter.Config.UseAttribute)
-            {
-                lines.Add(converter.Comment($"**     only if they are attributed: [{converter.Config.OnlyWhenAttributed}]"));
-            }
+            lines.Add(converter.Comment($"**     only if attributed: [ExportFor] with CSharpExportType.{outputConfig.Type} or containing group"));
             lines.Add(converter.Comment("**"));
             lines.Add(converter.Comment($"** full configuration in: {FileHelper.RelativePath(outputPath, converter.Config.ConfigFilePath)}"));
             lines.Add(converter.Comment("**", 1));

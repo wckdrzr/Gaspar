@@ -3,15 +3,17 @@ using System.Linq;
 using System.Text.Json;
 using WCKDRZR.CSharpExporter.Extensions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis;
 
 namespace WCKDRZR.CSharpExporter.Models
 {
     internal class Controller
     {
         public string ControllerName { get; set; }
-        public List<ControllerAction> Actions { get; set; }
-
         public string OutputClassName { get; set; }
+
+        public List<ControllerAction> Actions { get; set; }
+        public List<ControllerAction> ActionsForType(OutputType type) => Actions.Where(a => a.ExportFor.HasFlag(type)).ToList();
 
         public Controller(ClassDeclarationSyntax controllerNode)
         {
@@ -42,7 +44,13 @@ namespace WCKDRZR.CSharpExporter.Models
         public string CustomSerializer { get; set; }
 
         public string BadMethodReason { get; set; }
-        
+
+        public OutputType ExportFor { get; set; }
+
+        public ControllerAction(MethodDeclarationSyntax node, OutputType exportFor) : this(node.Identifier.ToString())
+        {
+            ExportFor = exportFor;
+        }
         public ControllerAction(string name)
         {
             ActionName = name;

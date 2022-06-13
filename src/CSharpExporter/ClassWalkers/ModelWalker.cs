@@ -21,48 +21,40 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            if (!Config.UseAttribute || node.AttributeLists.ContainsAttribute(Config.OnlyWhenAttributed))
-            {
-                var model = CreateModel(node);
+            var model = CreateModel(node);
 
-                Models.Add(model);
-            }
+            Models.Add(model);
         }
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
-            if (!Config.UseAttribute || node.AttributeLists.ContainsAttribute(Config.OnlyWhenAttributed))
-            {
-                var model = CreateModel(node);
+            var model = CreateModel(node);
 
-                Models.Add(model);
-            }
+            Models.Add(model);
         }
 
         public override void VisitRecordDeclaration(RecordDeclarationSyntax node)
         {
-            if (!Config.UseAttribute || node.AttributeLists.ContainsAttribute(Config.OnlyWhenAttributed))
+            var model = new Model()
             {
-                var model = new Model()
-                {
-                    ModelName = $"{node.Identifier.ToString()}{node.TypeParameterList?.ToString()}",
-                    Fields = node.ParameterList?.Parameters
-                                .Where(field => field.Modifiers.IsAccessible())
-                                .Where(property => !property.AttributeLists.JsonIgnore())
-                                .Select((field) => new Property
-                                {
-                                    Identifier = field.Identifier.ToString(),
-                                    Type = field.Type.ToString(),
-                                }).ToList(),
-                    Properties = node.Members.OfType<PropertyDeclarationSyntax>()
-                                .Where(property => property.Modifiers.IsAccessible())
-                                .Where(property => !property.AttributeLists.JsonIgnore())
-                                .Select(p => (Property)p).ToList(),
-                    BaseClasses = new List<string>(),
-                };
+                ModelName = $"{node.Identifier.ToString()}{node.TypeParameterList?.ToString()}",
+                Fields = node.ParameterList?.Parameters
+                            .Where(field => field.Modifiers.IsAccessible())
+                            .Where(property => !property.AttributeLists.JsonIgnore())
+                            .Select((field) => new Property
+                            {
+                                Identifier = field.Identifier.ToString(),
+                                Type = field.Type.ToString(),
+                            }).ToList(),
+                Properties = node.Members.OfType<PropertyDeclarationSyntax>()
+                            .Where(property => property.Modifiers.IsAccessible())
+                            .Where(property => !property.AttributeLists.JsonIgnore())
+                            .Select(p => (Property)p).ToList(),
+                BaseClasses = new List<string>(),
+                ExportFor = node.GetExportType()
+            };
 
-                Models.Add(model);
-            }
+            Models.Add(model);
         }
 
         private static Model CreateModel(TypeDeclarationSyntax node)
@@ -84,6 +76,7 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
                                 ? node.Members.OfType<FieldDeclarationSyntax>()
                                     .Where(property => !property.AttributeLists.JsonIgnore()).ConvertEnumerations()
                                 : null,
+                ExportFor = node.GetExportType()
             };
         }
     }

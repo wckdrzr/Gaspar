@@ -168,7 +168,7 @@ namespace WCKDRZR.CSharpExporter.Converters
             throw new NotImplementedException();
         }
 
-        public List<string> ConvertController(Controller controller, ConfigurationTypeOutput outputConfig, bool lastController)
+        public List<string> ConvertController(List<ControllerAction> actions, string outputClassName, ConfigurationTypeOutput outputConfig, bool lastController)
         {
             throw new NotImplementedException();
         }

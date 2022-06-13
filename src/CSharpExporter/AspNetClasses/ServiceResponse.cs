@@ -3,9 +3,9 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Threading.Tasks;
-using WCKDRZR.CSharpExporter.ServiceCommunciation.Models;
+using WCKDRZR.CSharpExporter.Models;
 
-namespace WCKDRZR.CSharpExporter.ServiceCommunciation
+namespace WCKDRZR.CSharpExporter
 {
     public class ServiceResponse<T>
     {

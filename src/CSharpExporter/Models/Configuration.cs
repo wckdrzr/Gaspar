@@ -1,27 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace WCKDRZR.CSharpExporter.Models
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    internal enum OutputType
-    {
-        Angular,
-        CSharp,
-        Ocelot,
-        TypeScript
-    }
-
-
     internal class Configuration
     {
         public string ConfigFilePath { get; set; }
 
         public ModelTypeConfiguration Models { get; set; }
         public ControllerTypeConfiguration Controllers { get; set; }
-
-        public string OnlyWhenAttributed { get; set; }
-        public bool UseAttribute => !string.IsNullOrEmpty(OnlyWhenAttributed);
 
         public Dictionary<string, string> CustomTypeTranslations { get; set; }
 

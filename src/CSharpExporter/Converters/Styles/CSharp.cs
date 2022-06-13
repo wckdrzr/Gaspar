@@ -49,14 +49,14 @@ namespace WCKDRZR.CSharpExporter.Converters
             return new() { "}" };
         }
 
-        public List<string> ConvertController(Controller controller, ConfigurationTypeOutput outputConfig, bool lastController)
+        public List<string> ConvertController(List<ControllerAction> actions, string outputClassName, ConfigurationTypeOutput outputConfig, bool lastController)
         {
             List<string> lines = new();
 
-            lines.Add($"    public static class {controller.OutputClassName}Service");
+            lines.Add($"    public static class {outputClassName}Service");
             lines.Add($"    {{");
 
-            foreach (ControllerAction action in controller.Actions)
+            foreach (ControllerAction action in actions)
             {
                 List<string> parameters = new();
                 foreach (Parameter parameter in action.Parameters)

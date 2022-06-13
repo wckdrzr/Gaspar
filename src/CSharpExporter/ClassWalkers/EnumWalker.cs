@@ -20,23 +20,21 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
-            if (!Config.UseAttribute || node.AttributeLists.ContainsAttribute(Config.OnlyWhenAttributed))
+            var values = new Dictionary<string, object>();
+
+            foreach (var member in node.Members)
             {
-                var values = new Dictionary<string, object>();
-
-                foreach (var member in node.Members)
-                {
-                    values[member.Identifier.ToString()] = member.EqualsValue != null
-                        ? member.EqualsValue.Value.ToString()
-                        : null;
-                }
-
-                this.Enums.Add(new EnumModel()
-                {
-                    Identifier = node.Identifier.ToString(),
-                    Values = values
-                });
+                values[member.Identifier.ToString()] = member.EqualsValue != null
+                    ? member.EqualsValue.Value.ToString()
+                    : null;
             }
+
+            this.Enums.Add(new EnumModel()
+            {
+                Identifier = node.Identifier.ToString(),
+                Values = values,
+                ExportFor = node.GetExportType()
+            });
         }
     }
 }

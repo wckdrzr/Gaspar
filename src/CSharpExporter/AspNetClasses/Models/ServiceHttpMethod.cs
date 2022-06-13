@@ -1,4 +1,4 @@
-﻿namespace WCKDRZR.CSharpExporter.ServiceCommunciation.Models
+﻿namespace WCKDRZR.CSharpExporter.Models
 {
     public enum ServiceHttpMethod
     {

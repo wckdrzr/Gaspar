@@ -132,16 +132,16 @@ namespace WCKDRZR.CSharpExporter.Converters
             return new() { "}" };
         }
 
-        public List<string> ConvertController(Controller controller, ConfigurationTypeOutput outputConfig, bool lastController)
+        public List<string> ConvertController(List<ControllerAction> actions, string outputClassName, ConfigurationTypeOutput outputConfig, bool lastController)
         {
             List<string> lines = new();
 
             lines.Add($"    @Injectable({{ providedIn: 'root' }})");
-            lines.Add($"    export class {controller.OutputClassName}Controller {{");
+            lines.Add($"    export class {outputClassName}Controller {{");
             lines.Add($"        constructor(private http: HttpClient, private errorHelper: ServiceErrorHelper) {{");
             lines.Add($"        }}");
 
-            foreach (ControllerAction action in controller.Actions)
+            foreach (ControllerAction action in actions)
             {
                 string actionName = TypeScriptConverter.ConvertIdentifier(action.ActionName);
 

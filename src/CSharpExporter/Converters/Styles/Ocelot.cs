@@ -47,12 +47,12 @@ namespace WCKDRZR.CSharpExporter.Converters
             return lines;
         }
 
-        public List<string> ConvertController(Controller controller, ConfigurationTypeOutput outputConfig, bool lastController)
+        public List<string> ConvertController(List<ControllerAction> actions, string outputClassName, ConfigurationTypeOutput outputConfig, bool lastController)
         {
             List<string> lines = new();
 
             List<ControllerAction> uniqueOcelotActions = new();
-            foreach (ControllerAction action in controller.Actions)
+            foreach (ControllerAction action in actions)
             {
                 ControllerAction newAction = new(action.ActionName);
                 newAction.HttpMethod = action.HttpMethod;
@@ -69,7 +69,7 @@ namespace WCKDRZR.CSharpExporter.Converters
             int actionIterator = 0;
             foreach (ControllerAction action in uniqueOcelotActions)
             {
-                bool lastAction = actionIterator == controller.Actions.Count - 1;
+                bool lastAction = actionIterator == actions.Count - 1;
 
                 string service = Config.Controllers.ServiceName;
                 string scopes = $"\"{service}.admin\"";
