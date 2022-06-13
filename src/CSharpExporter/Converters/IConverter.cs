@@ -104,7 +104,7 @@ namespace WCKDRZR.CSharpExporter.Converters
             lines.AddRange(OutputHeader.Controllers(converter, outputConfig, outputConfig.Location));
 
             files.DeDuplicateControllerNames(_config.Controllers);
-            lines.AddRange(converter.ControllerHeader(outputConfig, files.CustomTypes()));
+            lines.AddRange(converter.ControllerHeader(outputConfig, files.CustomTypes(outputConfig.Type)));
 
             int actionCount = 0;
             int fileIterator = 0;

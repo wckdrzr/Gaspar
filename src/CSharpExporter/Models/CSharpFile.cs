@@ -60,7 +60,7 @@ namespace WCKDRZR.CSharpExporter.Models
             }
         }
 
-        public List<string> CustomTypes()
+        public List<string> CustomTypes(OutputType forOutputType)
         {
             List<string> types = new();
 
@@ -68,14 +68,14 @@ namespace WCKDRZR.CSharpExporter.Models
             {
                 foreach (Controller controller in file.Controllers)
                 {
-                    foreach (ControllerAction action in controller.Actions)
+                    foreach (ControllerAction action in controller.ActionsForType(forOutputType))
                     {
                         foreach (Parameter parameter in action.Parameters)
                         {
                             AddUniqueCustomType(ref types, parameter.Type);
                         }
-                        AddUniqueCustomType(ref types, action.ReturnType);
                         AddUniqueCustomType(ref types, action.ReturnTypeOverride);
+                        if (action.ReturnTypeOverride == null) { AddUniqueCustomType(ref types, action.ReturnType); }
                         AddUniqueCustomType(ref types, action.BodyType);
                     }
                 }
