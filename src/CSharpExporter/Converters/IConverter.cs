@@ -108,26 +108,21 @@ namespace WCKDRZR.CSharpExporter.Converters
 
             int actionCount = 0;
             int fileIterator = 0;
-            foreach (CSharpFile file in files)
+            List<CSharpFile> filesToIterate = files.ControllersWithActionsForType(outputConfig.Type);
+            foreach (CSharpFile file in filesToIterate)
             {
-                if (file.HasControllers)
+                List<Controller> controllersForType = file.ControllersWithActionsForType(outputConfig.Type);
+                lines.Add(converter.Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1));
+
+                int controllerIterator = 0;
+                foreach (Controller controller in controllersForType)
                 {
-                    List<Controller> controllersForType = file.ControllersWithActionsForType(outputConfig.Type);
-                    if (controllersForType.Count > 0)
-                    {
-                        lines.Add(converter.Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1));
+                    List<ControllerAction> actionsForType = controller.ActionsForType(outputConfig.Type);
+                    actionCount += actionsForType.Count;
 
-                        int controllerIterator = 0;
-                        foreach (Controller controller in controllersForType)
-                        {
-                            List<ControllerAction> actionsForType = controller.ActionsForType(outputConfig.Type);
-                            actionCount += actionsForType.Count;
-
-                            bool lastController = fileIterator == files.Count - 1 && controllerIterator == file.Controllers.Count - 1;
-                            lines.AddRange(converter.ConvertController(actionsForType, controller.OutputClassName, outputConfig, lastController));
-                            controllerIterator++;
-                        }
-                    }
+                    bool lastController = fileIterator == filesToIterate.Count - 1 && controllerIterator == controllersForType.Count - 1;
+                    lines.AddRange(converter.ConvertController(actionsForType, controller.OutputClassName, outputConfig, lastController));
+                    controllerIterator++;
                 }
 
                 fileIterator++;

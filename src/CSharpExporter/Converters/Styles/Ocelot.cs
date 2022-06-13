@@ -69,7 +69,7 @@ namespace WCKDRZR.CSharpExporter.Converters
             int actionIterator = 0;
             foreach (ControllerAction action in uniqueOcelotActions)
             {
-                bool lastAction = actionIterator == actions.Count - 1;
+                bool lastAction = actionIterator == uniqueOcelotActions.Count - 1;
 
                 string service = Config.Controllers.ServiceName;
                 string scopes = $"\"{service}.admin\"";

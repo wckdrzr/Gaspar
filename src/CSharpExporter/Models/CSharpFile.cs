@@ -38,6 +38,8 @@ namespace WCKDRZR.CSharpExporter.Models
 
         public int Count => Files.Count();
 
+        public List<CSharpFile> ControllersWithActionsForType(OutputType type) => Files.Where(f => f.HasControllers && f.ControllersWithActionsForType(type).Count > 0).ToList();
+
         public void DeDuplicateControllerNames(ControllerTypeConfiguration config)
         {
             List<string> UsedControllerNames = new();
