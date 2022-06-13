@@ -45,12 +45,15 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
             if (node.Parent is ClassDeclarationSyntax)
             {
                 ClassDeclarationSyntax nodeClass = (ClassDeclarationSyntax)node.Parent;
-                OutputType nodeOutputType = nodeClass.GetExportType();
+
+                OutputType nodeClassOutputType = nodeClass.GetExportType();
+                string nodeClassReturnTypeOverrider = nodeClass.AttributeLists.AttributeValue("ReturnTypeOverride");
+                string nodeClassCustomSerializer = nodeClass.AttributeLists.AttributeValue("Serializer");
 
                 if (nodeClass.IsController())
                 {
                     Controller controller = new Controller(nodeClass);
-                    ControllerAction action = new(node, node.GetExportType(nodeOutputType));
+                    ControllerAction action = new(node, node.GetExportType(nodeClassOutputType));
 
                     AttributeSyntax httpAttribute = node.AttributeLists.GetAttribute("Http", true);
                     AttributeSyntax routeAttribute = node.AttributeLists.GetAttribute("Route");
@@ -79,13 +82,13 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
                             action.ReturnType = returnGenericName.TypeArgumentList.Arguments[0];
                         }
                     }
-                    action.ReturnTypeOverride = node.AttributeLists.AttributeValue("ReturnTypeOverride");
+                    action.ReturnTypeOverride = node.AttributeLists.AttributeValue("ReturnTypeOverride") ?? nodeClassReturnTypeOverrider;
                     if (action.ReturnTypeOverride == null && action.ReturnType == null)
                     {
                         action.BadMethodReason = "Action should return ActionResult<T>";
                     }
 
-                    action.CustomSerializer = node.AttributeLists.AttributeValue("Serializer");
+                    action.CustomSerializer = node.AttributeLists.AttributeValue("Serializer") ?? nodeClassCustomSerializer;
 
                     List<string> routeParameters = Regex.Matches(action.Route, "{(.*?)}").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
                     foreach (ParameterSyntax parameter in node.ParameterList.Parameters)
