@@ -8,6 +8,7 @@ using WCKDRZR.CSharpExporter.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 
 namespace WCKDRZR.CSharpExporter.Core
 {
@@ -19,9 +20,20 @@ namespace WCKDRZR.CSharpExporter.Core
             Converter converter = new Converter(config);
             CSharpFiles files = new();
 
+            List<string> modelFiles = config.HasModels ? FileHelper.GetFiles(config.Models) : new();
+            List<string> controllerFiles = config.HasModels ? FileHelper.GetFiles(config.Controllers) : new();
+            if (config.HasModels && modelFiles.Count == 0)
+            {
+                throw new Exception("Cannot find any model files to use");
+            }
+            if (config.HasControllers && controllerFiles.Count == 0)
+            {
+                throw new Exception("Cannot find any controller files to use");
+            }
+
             if (config.HasModels)
             {
-                foreach (string fileName in FileHelper.GetFiles(config.Models))
+                foreach (string fileName in modelFiles)
                 {
                     files.Add(ParseModels(fileName, config));
                 }
@@ -34,7 +46,7 @@ namespace WCKDRZR.CSharpExporter.Core
 
             if (config.HasControllers)
             {
-                foreach (string fileName in FileHelper.GetFiles(config.Controllers))
+                foreach (string fileName in controllerFiles)
                 {
                     files.Add(ParseControllers(fileName, config));
                 }
