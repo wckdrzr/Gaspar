@@ -13,6 +13,15 @@ namespace WCKDRZR.CSharpExporter
         public string[] ScopesOveride { get; set; } //not figured this out yet; but needs to be an option like this...
     }
 
+    public class ExportOptionsAttribute : Attribute
+    {
+        public string ReturnTypeOverride { get; set; }
+
+        public string Serializer { get; set; }
+
+        public string[] ScopesOveride { get; set; } //not figured this out yet; but needs to be an option like this...
+    }
+
     [Flags]
     public enum CSharpExportType
     {
