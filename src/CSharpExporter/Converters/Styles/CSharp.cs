@@ -31,7 +31,7 @@ namespace WCKDRZR.CSharpExporter.Converters
         {
             List<string> lines = new();
             lines.Add($"using System.Collections.Generic;");
-            lines.Add($"using WCKDRZR.CSharpExporter.ServiceCommunciation.Models;");
+            lines.Add($"using WCKDRZR.CSharpExporter.Models;");
             foreach (string ns in outputConfig.ModelNamespaces)
             {
                 lines.Add($"using {ns};");
