@@ -8,13 +8,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.CSharpExporter.ClassWalkers
 {
-    //Rules:
-    //Must be class derived from Controller
-    //Action must return ActionResult<T>
-    //Action parameters must be [FromBody] or in the route ({xx})
-
-    //optionally specify onlyWhenAttributed
-
     internal class ControllerWalker : CSharpSyntaxWalker
     {
         public readonly List<Controller> Controllers = new();
@@ -50,7 +43,7 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
                 string nodeClassReturnTypeOverrider = nodeClass.AttributeLists.AttributeValue("ReturnTypeOverride");
                 string nodeClassCustomSerializer = nodeClass.AttributeLists.AttributeValue("Serializer");
 
-                if (nodeClass.IsController())
+                if (nodeClass.IsController() && node.IsPublic())
                 {
                     Controller controller = new Controller(nodeClass);
                     ControllerAction action = new(node, node.GetExportType(nodeClassOutputType));

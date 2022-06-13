@@ -21,24 +21,28 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            var model = CreateModel(node);
-
-            Models.Add(model);
+            if (node.IsPublic())
+            {
+                Models.Add(CreateModel(node));
+            }
         }
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
-            var model = CreateModel(node);
-
-            Models.Add(model);
+            if (node.IsPublic())
+            {
+                Models.Add(CreateModel(node));
+            }
         }
 
         public override void VisitRecordDeclaration(RecordDeclarationSyntax node)
         {
-            var model = new Model()
+            if (node.IsPublic())
             {
-                ModelName = $"{node.Identifier.ToString()}{node.TypeParameterList?.ToString()}",
-                Fields = node.ParameterList?.Parameters
+                Models.Add(new()
+                {
+                    ModelName = $"{node.Identifier.ToString()}{node.TypeParameterList?.ToString()}",
+                    Fields = node.ParameterList?.Parameters
                             .Where(field => field.Modifiers.IsAccessible())
                             .Where(property => !property.AttributeLists.JsonIgnore())
                             .Select((field) => new Property
@@ -46,15 +50,14 @@ namespace WCKDRZR.CSharpExporter.ClassWalkers
                                 Identifier = field.Identifier.ToString(),
                                 Type = field.Type.ToString(),
                             }).ToList(),
-                Properties = node.Members.OfType<PropertyDeclarationSyntax>()
+                    Properties = node.Members.OfType<PropertyDeclarationSyntax>()
                             .Where(property => property.Modifiers.IsAccessible())
                             .Where(property => !property.AttributeLists.JsonIgnore())
                             .Select(p => (Property)p).ToList(),
-                BaseClasses = new List<string>(),
-                ExportFor = node.GetExportType()
-            };
-
-            Models.Add(model);
+                    BaseClasses = new List<string>(),
+                    ExportFor = node.GetExportType()
+                });
+            }
         }
 
         private static Model CreateModel(TypeDeclarationSyntax node)
