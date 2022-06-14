@@ -78,9 +78,9 @@ namespace WCKDRZR.Gaspar.Converters
                 if (action.BadMethodReason != null)
                 {
                     lines.Add($"        [System.Obsolete(\"{action.BadMethodReason}\", true)]");
-                    lines.Add($"        public static void {action.ActionName}()\n{{\n}}");
+                    lines.Add($"        public static void {action.ActionName}()\n        {{\n        }}");
                     lines.Add($"        [System.Obsolete(\"{action.BadMethodReason}\", true)]");
-                    lines.Add($"        public static void {action.ActionName}Async()\n{{\n}}");
+                    lines.Add($"        public static void {action.ActionName}Async()\n        {{\n        }}");
                 }
                 else
                 {

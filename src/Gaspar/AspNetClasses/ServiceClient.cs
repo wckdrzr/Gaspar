@@ -136,18 +136,19 @@ namespace WCKDRZR.Gaspar
                     if (logMethod != null)
                     {
                         logMethod.Invoke(logReceiver, new[] { message });
+                        return;
                     }
                     else
                     {
-                        Console.WriteLine("Cannot use your LoggingReceiver; no GasparError method found.  Communicaiton error below.");
+                        Console.WriteLine($"Cannot use your LoggingReceiver ({logReceiver.Name}): no GasparError method found.  Communicaiton error below.");
                     }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error trying to use your LoggingReceiver; {e.Message}.  Communicaiton error below.");
+                Console.WriteLine($"Error trying to use your LoggingReceiver ({logReceiver.Name}): {e.Message}  Communicaiton error below.");
             }
-            Console.WriteLine("Gaspar:" + message);
+            Console.WriteLine("Gaspar: " + message);
         }
     }
 }
