@@ -40,15 +40,15 @@ namespace WCKDRZR.CSharpExporter.Core
                 throw new Exception($"Failed to read the config file\n{e.Message}");
             }
 
-            if (!config.HasModels && !config.HasControllers)
+            if (config.Models == null && config.Controllers == null)
             {
-                throw new Exception("Please specify IncludeModels and/or IncludeControllers in the config, otherwise there is nothing to generate");
+                throw new Exception("Please specify Models and/or Controllers in the config, otherwise there is nothing to generate");
             }
-            if (config.HasModels && (config.Models.Output == null || config.Models.Output.Count == 0))
+            if (config.Models != null && (config.Models.Output == null || config.Models.Output.Count == 0))
             {
                 throw new Exception("Please specify at least one Output in the Models config, otherwise there is no where to but the generated models");
             }
-            if (config.HasControllers && (config.Controllers.Output == null || config.Controllers.Output.Count == 0))
+            if (config.Controllers != null && (config.Controllers.Output == null || config.Controllers.Output.Count == 0))
             {
                 throw new Exception("Please specify at least one Output in the Controllers config, otherwise there is no where to but the generated controllers");
             }
@@ -58,7 +58,7 @@ namespace WCKDRZR.CSharpExporter.Core
 
         private static Configuration ReplaceVariablesInConfig(this Configuration config)
         {
-            if (config.HasControllers)
+            if (config.Controllers != null)
             {
                 foreach (ConfigurationTypeOutput outputConfig in config.Controllers.Output)
                 {

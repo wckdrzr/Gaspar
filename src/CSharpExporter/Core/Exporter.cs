@@ -20,18 +20,18 @@ namespace WCKDRZR.CSharpExporter.Core
             Converter converter = new Converter(config);
             CSharpFiles files = new();
 
-            List<string> modelFiles = config.HasModels ? FileHelper.GetFiles(config.Models) : new();
-            List<string> controllerFiles = config.HasControllers ? FileHelper.GetFiles(config.Controllers) : new();
-            if (config.HasModels && modelFiles.Count == 0)
+            List<string> modelFiles = config.Models != null ? FileHelper.GetFiles(config.Models) : new();
+            List<string> controllerFiles = config.Controllers != null ? FileHelper.GetFiles(config.Controllers) : new();
+            if (config.Models != null && modelFiles.Count == 0)
             {
                 throw new Exception("Cannot find any model files to use");
             }
-            if (config.HasControllers && controllerFiles.Count == 0)
+            if (config.Controllers != null && controllerFiles.Count == 0)
             {
                 throw new Exception("Cannot find any controller files to use");
             }
 
-            if (config.HasModels)
+            if (config.Models != null)
             {
                 foreach (string fileName in modelFiles)
                 {
@@ -40,11 +40,18 @@ namespace WCKDRZR.CSharpExporter.Core
 
                 foreach (ConfigurationTypeOutput output in config.Models.Output)
                 {
-                    File.WriteAllText(output.Location, converter.BuildModelsFile(output, files));
+                    if (Directory.Exists(Path.GetDirectoryName(output.Location)))
+                    {
+                        File.WriteAllText(output.Location, converter.BuildModelsFile(output, files));
+                    }
+                    else if (!config.IgnoreMissingOutputLocations)
+                    {
+                        throw new Exception("Cannot find model output folder " + Path.GetDirectoryName(output.Location));
+                    }
                 }
             }
 
-            if (config.HasControllers)
+            if (config.Controllers != null)
             {
                 foreach (string fileName in controllerFiles)
                 {
@@ -53,13 +60,20 @@ namespace WCKDRZR.CSharpExporter.Core
 
                 foreach (ConfigurationTypeOutput output in config.Controllers.Output)
                 {
-                    if (output.HelperFile != null)
+                    if (Directory.Exists(Path.GetDirectoryName(output.Location)))
                     {
-                        string helperFilePath = Path.GetDirectoryName(output.Location) + '/' + output.HelperFile;
-                        File.WriteAllText(helperFilePath, converter.BuildControllerHelperFile(output));
-                    }
+                        if (output.HelperFile != null)
+                        {
+                            string helperFilePath = Path.GetDirectoryName(output.Location) + '/' + output.HelperFile;
+                            File.WriteAllText(helperFilePath, converter.BuildControllerHelperFile(output));
+                        }
 
-                    File.WriteAllText(output.Location, converter.BuildControllersFile(output, files));
+                        File.WriteAllText(output.Location, converter.BuildControllersFile(output, files));
+                    }
+                    else if (!config.IgnoreMissingOutputLocations)
+                    {
+                        throw new Exception("Cannot find controller output folder " + Path.GetDirectoryName(output.Location));
+                    }
                 }
             }
         }

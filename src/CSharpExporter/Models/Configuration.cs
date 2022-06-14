@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace WCKDRZR.CSharpExporter.Models
 {
@@ -11,8 +12,12 @@ namespace WCKDRZR.CSharpExporter.Models
 
         public Dictionary<string, string> CustomTypeTranslations { get; set; }
 
-        public bool HasModels => Models != null && Models.Include != null && Models.Include.Count > 0;
-        public bool HasControllers => Controllers != null && Controllers.Include != null && Controllers.Include.Count > 0;
+        public bool IgnoreMissingOutputLocations { get; set; }
+
+        public Configuration()
+        {
+            IgnoreMissingOutputLocations = false;
+        }
     }
 
 
@@ -21,13 +26,23 @@ namespace WCKDRZR.CSharpExporter.Models
         public List<string> Include { get; set; }
         public List<string> Exclude { get; set; }
         public List<ConfigurationTypeOutput> Output { get; set; }
+
+        public ConfigurationType()
+        {
+            Include = new() { "./**/*.cs" };
+        }
     }
 
     internal class ModelTypeConfiguration : ConfigurationType
     {
-        public bool CamelCaseEnums { get; set; }
         public bool NumericEnums { get; set; }
         public bool StringLiteralTypesInsteadOfEnums { get; set; }
+
+        public ModelTypeConfiguration()
+        {
+            NumericEnums = false;
+            StringLiteralTypesInsteadOfEnums = false;
+        }
     }
 
     internal class ControllerTypeConfiguration : ConfigurationType
@@ -59,6 +74,12 @@ namespace WCKDRZR.CSharpExporter.Models
         //For Ocelot Controllers
         public bool NoAuth { get; set; }
         public bool ExcludeScopes { get; set; }
+
+        public ConfigurationTypeOutput()
+        {
+            NoAuth = false;
+            ExcludeScopes = false;
+        }
     }
 
     internal class ConfigurationTypeOutputAngular { }
