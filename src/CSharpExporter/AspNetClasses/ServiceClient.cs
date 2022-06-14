@@ -9,28 +9,23 @@ namespace WCKDRZR.CSharpExporter
 {
     public static class ServiceClient
     {
-        public static ServiceResponse<T> Fetch<T>(ServiceHttpMethod method, string url, dynamic body, Type serializer = null)
-        {
-            return FetchAsync<T>(method, url, body, serializer).Result;
-        }
-
-        public static async Task<ServiceResponse<T>> FetchAsync<T>(ServiceHttpMethod method, string url, dynamic body, Type serializer = null)
+        public static async Task<ServiceResponse<T>> FetchAsync<T>(ServiceHttpMethod method, string url, dynamic body, Type logReceiver, Type serializer)
         {
             try
             {
                 HttpResponseMessage httpResponse = await Load(method, url, body);
                 if (httpResponse.IsSuccessStatusCode)
                 {
-                    return Success<T>(httpResponse, serializer, url);
+                    return Success<T>(httpResponse, serializer, url, logReceiver);
                 }
                 else
                 {
-                    return ServerError<T>(httpResponse, url);
+                    return ServerError<T>(httpResponse, url, logReceiver);
                 }
             }
             catch (Exception e)
             {
-                return LoadException<T>(e, url);
+                return LoadException<T>(e, url, logReceiver);
             }
         }
 
@@ -53,7 +48,7 @@ namespace WCKDRZR.CSharpExporter
             }
         }
 
-        private static ServiceResponse<T> Success<T>(HttpResponseMessage httpResponse, Type serializer, string url)
+        private static ServiceResponse<T> Success<T>(HttpResponseMessage httpResponse, Type serializer, string url, Type logReceiver)
         {
             try
             {
@@ -85,14 +80,13 @@ namespace WCKDRZR.CSharpExporter
             }
             catch (Exception e)
             {
-                //LoggingV2.Log($"Unable to deserialize sucessful response from {url}", LogLevel.Error);
-                //LoggingV2.Log($"{e.Message}", LogLevel.Info);
+                Log($"Unable to deserialize sucessful response from {url}\n{e.Message}", logReceiver);
 
                 return Error<T>($"Unable to deserialize sucessful response from {url}", e.Message, 0);
             }
         }
 
-        private static ServiceResponse<T> ServerError<T>(HttpResponseMessage httpResponse, string url)
+        private static ServiceResponse<T> ServerError<T>(HttpResponseMessage httpResponse, string url, Type logReceiver)
         {
             ServiceResponse<T> response = new ServiceResponse<T> { Data = default(T) };
             try
@@ -104,16 +98,13 @@ namespace WCKDRZR.CSharpExporter
                 response = Error<T>($"Service call to {url} failed to connect", httpResponse.ReasonPhrase, (int)httpResponse.StatusCode);
             }
 
-            //LoggingV2.Log($"Service call to {url} failed with status code {(int)httpResponse.StatusCode} - {httpResponse.StatusCode}", LogLevel.Error);
-            if (response.Error != null && !string.IsNullOrEmpty(response.Error.Detail))
-            {
-                //LoggingV2.Log($"{Error.Detail}", LogLevel.Info);
-            }
+            Log($"Service call to {url} failed with status code {(int)httpResponse.StatusCode} - {httpResponse.StatusCode}" +
+                $"{(response.Error != null && !string.IsNullOrEmpty(response.Error.Detail) ? $"\n{response.Error.Detail}" : "")}", logReceiver);
 
             return response;
         }
 
-        private static ServiceResponse<T> LoadException<T>(Exception exception, string url)
+        private static ServiceResponse<T> LoadException<T>(Exception exception, string url, Type logReceiver)
         {
             string message = exception.Message;
             if (exception.InnerException is TimeoutException)
@@ -121,8 +112,7 @@ namespace WCKDRZR.CSharpExporter
                 message = "Connection timed out";
             }
 
-            //LoggingV2.Log($"Service call to {url} failed to connect", LogLevel.Error);
-            //LoggingV2.Log($"{message}", LogLevel.Info);
+            Log($"Service call to {url} failed to connect\n{message}", logReceiver);
 
             return Error<T>($"Service call to {url} failed to connect", message, 0);
         }
@@ -134,6 +124,30 @@ namespace WCKDRZR.CSharpExporter
                 Data = default(T),
                 Error = new() { Title = title, Detail = detail, Status = status }
             };
+        }
+
+        private static void Log(string message, Type logReceiver)
+        {
+            try
+            {
+                if (logReceiver != null)
+                {
+                    MethodInfo logMethod = logReceiver.GetMethod("CSharpExporterError");
+                    if (logMethod != null)
+                    {
+                        logMethod.Invoke(logReceiver, new[] { message });
+                    }
+                    else
+                    {
+                        Console.WriteLine("Cannot use your LoggingReceiver; no CSharpExporterError method found.  Communicaiton error below.");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error trying to use your LoggingReceiver; {e.Message}.  Communicaiton error below.");
+            }
+            Console.WriteLine("CSharpExporter:" + message);
         }
     }
 }

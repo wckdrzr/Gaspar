@@ -69,6 +69,7 @@ namespace WCKDRZR.CSharpExporter.Models
 
         //For CSharp Controllers
         public string UrlHandlerFunction { get; set; }
+        public string LoggingReceiver { get; set; }
         public List<string> ModelNamespaces { get; set; }
 
         //For Ocelot Controllers

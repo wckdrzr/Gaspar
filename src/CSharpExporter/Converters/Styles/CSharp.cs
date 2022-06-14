@@ -78,13 +78,9 @@ namespace WCKDRZR.CSharpExporter.Converters
                 if (action.BadMethodReason != null)
                 {
                     lines.Add($"        [System.Obsolete(\"{action.BadMethodReason}\", true)]");
-                    lines.Add($"        public static void {action.ActionName}({string.Join(", ", parameters)})");
-                    lines.Add($"        {{");
-                    lines.Add($"        }}");
+                    lines.Add($"        public static void {action.ActionName}()\n{{\n}}");
                     lines.Add($"        [System.Obsolete(\"{action.BadMethodReason}\", true)]");
-                    lines.Add($"        public static void {action.ActionName}Async({string.Join(", ", parameters)})");
-                    lines.Add($"        {{");
-                    lines.Add($"        }}");
+                    lines.Add($"        public static void {action.ActionName}Async()\n{{\n}}");
                 }
                 else
                 {
@@ -96,18 +92,18 @@ namespace WCKDRZR.CSharpExporter.Converters
                     string urlHandler = "";
                     if (!string.IsNullOrEmpty(outputConfig.UrlHandlerFunction)) { urlHandler = $".{outputConfig.UrlHandlerFunction}()"; }
 
-                    string customSerializer = "";
-                    if (action.CustomSerializer != null) { customSerializer = $", typeof({action.CustomSerializer})"; }
+                    string loggingReceiver = (outputConfig.LoggingReceiver == null) ? "null" : $"typeof({outputConfig.LoggingReceiver})";
+                    string customSerializer = (action.CustomSerializer == null) ? "null" : $"typeof({action.CustomSerializer})";
 
                     //!! if return type is bool (int/any primative); should be nullable
 
                     lines.Add($"        public static ServiceResponse<{action.ReturnType}> {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return ServiceClient.Fetch<{action.ReturnType}>(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}{customSerializer});");
+                    lines.Add($"            return ServiceClient.FetchAsync<{action.ReturnType}>(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}, {loggingReceiver}, {customSerializer}).Result;");
                     lines.Add($"        }}");
                     lines.Add($"        public static async Task<ServiceResponse<{action.ReturnType}>> {action.ActionName}Async({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return await ServiceClient.FetchAsync<{action.ReturnType}>(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}{customSerializer});");
+                    lines.Add($"            return await ServiceClient.FetchAsync<{action.ReturnType}>(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}, {loggingReceiver}, {customSerializer});");
                     lines.Add($"        }}");
                 }
             }
