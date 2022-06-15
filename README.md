@@ -57,7 +57,11 @@ The attribute has one required parameter `GasparType types`. This is the type of
 
 - `[ExportFor(GasparType.All | ~Gaspar.Ocelot)]` to export to all types, except Ocelot.
 
+<<<<<<< HEAD
 ### Notes:
+=======
+#### Notes:
+>>>>>>> 505ecba58171b7260f6d466a227e7f5a8e47b7bc
 
 - Feel free to use `&` or `|` to join types; they will have the same effect.
 
@@ -67,13 +71,21 @@ The attribute has one required parameter `GasparType types`. This is the type of
 
 - Exports will only work for `public` objects.
 
+<<<<<<< HEAD
 ### Export Everything
+=======
+#### Export Everything
+>>>>>>> 505ecba58171b7260f6d466a227e7f5a8e47b7bc
 
  If you want to export everything without adding the `[ExportFor]` decorator, you can add `"IgnoreAnotations": true` to the root of the config file.
 
 Gaspar will still only export `public` objects for configured types.
 
+<<<<<<< HEAD
 ### Optional Parameters
+=======
+#### Optional Parameters
+>>>>>>> 505ecba58171b7260f6d466a227e7f5a8e47b7bc
 
 **Serializer**    `string`    For C# Service Communcations, if the JSON returned by the decorated action won't deserialize through the Microsoft serializer, add your custom serialize class here, e.g.
 
@@ -127,7 +139,11 @@ When using the exported service communication endpoints, you will receive a `Ser
 
 The demo config provided only includes the basics to make Gaspar work; here is a full list of the options available (feel free to have a look in the `Models/Configuration.cs` file):
 
+<<<<<<< HEAD
 ### At the root level:
+=======
+#### At the root level:
+>>>>>>> 505ecba58171b7260f6d466a227e7f5a8e47b7bc
 
 You must supply either Models or Controllers, but you don't need both; all other parameters are optional.
 
@@ -141,7 +157,11 @@ You must supply either Models or Controllers, but you don't need both; all other
 
 **IgnoreAnnotations**    `bool: default false`    Set this to true to export all objects irrespective if they have `[ExportFor]` or not.
 
+<<<<<<< HEAD
 ### ConfigurationType
+=======
+#### ConfigurationType
+>>>>>>> 505ecba58171b7260f6d466a227e7f5a8e47b7bc
 
 **Include**    `Array of strings: default ["./**/*.cs"]`    List of file locations containing the models or controllers you wish to translate.  Optional, if not provided will use all .cs files in the project.
 
@@ -163,7 +183,11 @@ For Controllers:
 
 - **ServicePort**    `int`    Optional.  Used by Ocelot Export, and can be used in paths.
 
+<<<<<<< HEAD
 ### ConfigurationTypeOutput
+=======
+#### ConfigurationTypeOutput
+>>>>>>> 505ecba58171b7260f6d466a227e7f5a8e47b7bc
 
 **Type**    `specific string`    Required.  Must be one of: `"CSharp"`, `"Angular"`, `"Ocelot"` or `"TypeScript"`
 
