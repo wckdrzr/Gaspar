@@ -94,7 +94,7 @@ namespace WCKDRZR.Gaspar.Converters
             foreach (string type in customTypes)
             {
                 string parsed = TypeScriptConverter.ParseType(type);
-                if (parsed != "string | null" && !parsedCustomTypes.Contains(parsed))
+                if (parsed != "string" && parsed != "string | null" && !parsedCustomTypes.Contains(parsed))
                 {
                     parsedCustomTypes.Add(parsed);
                 }
