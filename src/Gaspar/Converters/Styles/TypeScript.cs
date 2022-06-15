@@ -29,6 +29,7 @@ namespace WCKDRZR.Gaspar.Converters
             { "bool", "boolean" },
             { "DateTime", "string" },
             { "DateTimeOffset", "string" },
+            { "DataTable", "Object" },
             { "Guid", "string" },
             { "dynamic", "any" },
             { "object", "any" },
