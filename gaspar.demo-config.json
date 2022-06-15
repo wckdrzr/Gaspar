@@ -1,0 +1,38 @@
+{
+	"Models": {
+		"Output": [
+			{
+				"Type": "TypeScript",
+				"Location": "./api.d.ts"
+			}
+		],
+		"NumericEnums": true,
+		"StringLiteralTypesInsteadOfEnums": true
+	},
+	"Controllers": {
+		"Output": [
+			{
+				"Type": "Angular",
+				"Location": "./{ServiceName}.ts",
+				"UrlPrefix": "/api/{ServiceName}",
+				"HelperFile": "service-helper.ts",
+				"ModelPath": "./api.d"
+			},
+			{
+				"Type": "Ocelot",
+				"Location": "./ocelot.{ServiceName}.json",
+				"UrlPrefix": "/{ServiceName}"
+			},
+			{
+				"Type": "CSharp",
+				"Location": "./{ServiceName}.cs",
+				"UrlPrefix": "/api/{ServiceName}",
+				"ModelNamespaces": [
+				]
+			}
+		],
+		"ServiceName": "my_service",
+		"ServiceHost": "http",
+		"ServicePort": 12345
+	}
+}
