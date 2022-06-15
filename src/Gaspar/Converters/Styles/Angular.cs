@@ -161,7 +161,7 @@ namespace WCKDRZR.Gaspar.Converters
                 }
                 if (action.BodyType != null)
                 {
-                    parameters.Add($"body: {action.BodyType}");
+                    parameters.Add($"body: {TypeScriptConverter.ParseType(action.BodyType)}");
                 }
                 if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
                 {
