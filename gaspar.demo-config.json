@@ -15,7 +15,6 @@
 				"Type": "Angular",
 				"Location": "./{ServiceName}.ts",
 				"UrlPrefix": "/api/{ServiceName}",
-				"HelperFile": "service-helper.ts",
 				"ModelPath": "./api.d"
 			},
 			{
