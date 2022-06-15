@@ -151,6 +151,10 @@ namespace WCKDRZR.Gaspar.Converters
                     string newParam = $"{parameter.Identifier}: {TypeScriptConverter.ParseType(parameter.Type.ToString())}";
                     if (parameter.DefaultValue != null)
                     {
+                        if (parameter.DefaultValue == "null" && !newParam.Contains("null"))
+                        {
+                            newParam += " | null";
+                        }
                         newParam += $" = {parameter.DefaultValue.Replace("\"", "'")}";
                     }
                     parameters.Add(newParam);
