@@ -248,7 +248,7 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 bool optional = propType.EndsWith("?");
                 type = ConvertType(optional ? propType[0..^1] : propType);
-                if (type == "string")
+                if (type == "string" && !isArray)
                 {
                     type = "string | null";
                 }
