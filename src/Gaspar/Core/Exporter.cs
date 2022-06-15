@@ -18,7 +18,7 @@ namespace WCKDRZR.Gaspar.Core
 		{
             Configuration config = ConfigReader.Read(configFile);
             Converter converter = new Converter(config);
-            CSharpFiles files = new();
+            CSharpFiles files;
 
             List<string> modelFiles = config.Models != null ? FileHelper.GetFiles(config.Models) : new();
             List<string> controllerFiles = config.Controllers != null ? FileHelper.GetFiles(config.Controllers) : new();
@@ -31,6 +31,7 @@ namespace WCKDRZR.Gaspar.Core
                 throw new Exception("Cannot find any controller files to use");
             }
 
+            files = new();
             if (config.Models != null)
             {
                 foreach (string fileName in modelFiles)
@@ -51,6 +52,7 @@ namespace WCKDRZR.Gaspar.Core
                 }
             }
 
+            files = new();
             if (config.Controllers != null)
             {
                 foreach (string fileName in controllerFiles)

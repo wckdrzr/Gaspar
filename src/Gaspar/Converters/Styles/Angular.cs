@@ -143,7 +143,7 @@ namespace WCKDRZR.Gaspar.Converters
 
             foreach (ControllerAction action in actions)
             {
-                string actionName = TypeScriptConverter.ConvertIdentifier(action.ActionName);
+                string actionName = TypeScriptConverter.ConvertIdentifier(action.OutputActionName);
 
                 List<string> parameters = new();
                 foreach (Parameter parameter in action.Parameters)

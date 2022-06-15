@@ -13,10 +13,12 @@ namespace WCKDRZR.Gaspar.Models
         public Dictionary<string, string> CustomTypeTranslations { get; set; }
 
         public bool IgnoreMissingOutputLocations { get; set; }
+        public bool IgnoreAnotations { get; set; }
 
         public Configuration()
         {
             IgnoreMissingOutputLocations = false;
+            IgnoreAnotations = false;
         }
     }
 

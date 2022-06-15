@@ -36,33 +36,55 @@ namespace WCKDRZR.Gaspar.Models
             return Files.GetEnumerator();
         }
 
+        public List<CSharpFile> ToList()
+        {
+            return Files;
+        }
+
         public int Count => Files.Count();
 
-        public List<CSharpFile> ControllersWithActionsForType(OutputType type) => Files.Where(f => f.HasControllers && f.ControllersWithActionsForType(type).Count > 0).ToList();
+        public List<CSharpFile> FilesWithControllersWithActionsForType(OutputType type) => Files.Where(f => f.HasControllers && f.ControllersWithActionsForType(type).Count > 0).ToList();
 
-        public void DeDuplicateControllerNames(ControllerTypeConfiguration config)
+        public void DeDuplicateControllerAndActionNames(OutputType forOutputType, bool allTypes, string serviceName)
         {
             List<string> UsedControllerNames = new();
-            foreach (CSharpFile file in Files)
+            foreach (CSharpFile file in allTypes ? Files : FilesWithControllersWithActionsForType(forOutputType))
             {
-                foreach (Controller controller in file.Controllers)
+                foreach (Controller controller in allTypes ? file.Controllers : file.ControllersWithActionsForType(forOutputType))
                 {
-                    int index = -1;
-                    string newName = controller.OutputClassName;
-                    while (UsedControllerNames.Contains(newName))
+                    int controllerIndex = -1;
+                    string newControllerName = controller.ControllerName;
+                    while (UsedControllerNames.Contains(newControllerName))
                     {
-                        newName = controller.OutputClassName +
-                            (index >= 0 ? config.ServiceName.ToProper() : "") +
-                            (index > 0 ? index : "");
-                        index++;
+                        newControllerName = controller.ControllerName +
+                            (controllerIndex >= 0 ? serviceName.ToProper() : "") +
+                            (controllerIndex > 0 ? controllerIndex : "");
+                        controllerIndex++;
                     }
-                    controller.OutputClassName = newName;
-                    UsedControllerNames.Add(newName);
+                    controller.OutputClassName = newControllerName;
+                    UsedControllerNames.Add(newControllerName);
+
+
+                    List<string> UsedActionNames = new();
+                    foreach (ControllerAction action in allTypes ? controller.Actions : controller.ActionsForType(forOutputType))
+                    {
+                        int actionIndex = -1;
+                        string newActionName = action.ActionName;
+                        while (UsedActionNames.Contains(newActionName))
+                        {
+                            newActionName = action.ActionName +
+                                (actionIndex >= 0 ? action.Parameters.FunctionNameExtension() : "") +
+                                (actionIndex > 0 ? actionIndex : "");
+                            actionIndex++;
+                        }
+                        action.OutputActionName = newActionName;
+                        UsedActionNames.Add(newActionName);
+                    }
                 }
             }
         }
 
-        public List<string> CustomTypes(OutputType forOutputType)
+        public List<string> CustomTypes(OutputType forOutputType, bool allTypes)
         {
             List<string> types = new();
 
@@ -70,7 +92,7 @@ namespace WCKDRZR.Gaspar.Models
             {
                 foreach (Controller controller in file.Controllers)
                 {
-                    foreach (ControllerAction action in controller.ActionsForType(forOutputType))
+                    foreach (ControllerAction action in allTypes ? controller.Actions : controller.ActionsForType(forOutputType))
                     {
                         foreach (Parameter parameter in action.Parameters)
                         {

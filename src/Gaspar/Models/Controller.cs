@@ -31,8 +31,10 @@ namespace WCKDRZR.Gaspar.Models
 
     internal class ControllerAction
     {
-        public string HttpMethod { get; set; }
         public string ActionName { get; set; }
+        public string OutputActionName { get; set; }
+
+        public string HttpMethod { get; set; }
         public string Route { get; set; }
 
         public TypeSyntax ReturnType { get; set; }
@@ -56,6 +58,8 @@ namespace WCKDRZR.Gaspar.Models
             ActionName = name;
             ReturnType = null;
             Parameters = new();
+
+            OutputActionName = ActionName;
         }
     }
 

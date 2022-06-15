@@ -26,6 +26,7 @@ namespace WCKDRZR.Gaspar.Converters
     internal class Converter
     {
         private Configuration _config;
+        private bool _allTypes => _config.IgnoreAnotations;
 
         public Converter(Configuration config)
 		{
@@ -56,8 +57,8 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 if (file.HasModels)
                 {
-                    List<Model> modelsForType = file.ModelsForType(outputConfig.Type);
-                    List<EnumModel> enumsForType = file.EnumsForType(outputConfig.Type);
+                    List<Model> modelsForType = _allTypes ? file.Models : file.ModelsForType(outputConfig.Type);
+                    List<EnumModel> enumsForType = _allTypes ? file.Enums : file.EnumsForType(outputConfig.Type);
 
                     if (modelsForType.Count > 0 || enumsForType.Count > 0)
                     {
@@ -103,21 +104,21 @@ namespace WCKDRZR.Gaspar.Converters
 
             lines.AddRange(OutputHeader.Controllers(converter, outputConfig, outputConfig.Location));
 
-            files.DeDuplicateControllerNames(_config.Controllers);
-            lines.AddRange(converter.ControllerHeader(outputConfig, files.CustomTypes(outputConfig.Type)));
+            files.DeDuplicateControllerAndActionNames(outputConfig.Type, _allTypes, _config.Controllers.ServiceName);
+            lines.AddRange(converter.ControllerHeader(outputConfig, files.CustomTypes(outputConfig.Type, _allTypes)));
 
             int actionCount = 0;
             int fileIterator = 0;
-            List<CSharpFile> filesToIterate = files.ControllersWithActionsForType(outputConfig.Type);
+            List<CSharpFile> filesToIterate = _allTypes ? files.ToList() : files.FilesWithControllersWithActionsForType(outputConfig.Type);
             foreach (CSharpFile file in filesToIterate)
             {
-                List<Controller> controllersForType = file.ControllersWithActionsForType(outputConfig.Type);
+                List<Controller> controllersForType = _allTypes ? file.Controllers : file.ControllersWithActionsForType(outputConfig.Type);
                 lines.Add(converter.Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1));
 
                 int controllerIterator = 0;
                 foreach (Controller controller in controllersForType)
                 {
-                    List<ControllerAction> actionsForType = controller.ActionsForType(outputConfig.Type);
+                    List<ControllerAction> actionsForType = _allTypes ? controller.Actions : controller.ActionsForType(outputConfig.Type);
                     actionCount += actionsForType.Count;
 
                     bool lastController = fileIterator == filesToIterate.Count - 1 && controllerIterator == controllersForType.Count - 1;

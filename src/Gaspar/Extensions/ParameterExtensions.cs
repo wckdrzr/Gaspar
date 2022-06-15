@@ -19,11 +19,13 @@ namespace WCKDRZR.Gaspar.Extensions
             foreach (Parameter parameter in queryStringParameters)
             {
                 string coalesce = "";
-                if (parameter.Type.ToString().ToLower() == "string")
+                string typeName = parameter.Type.ToString().ToLower();
+
+                if (typeName == "string")
                 {
                     coalesce = " ?? \"\"";
                 }
-                else if (parameter.IsNullable)
+                else if (parameter.IsNullable && typeName != "datetime?") //datetime is odd on a query string; if "null" just allow
                 {
                     coalesce = " ?? " + (parameter.Type.ToString().ToLower() == "bool?" ? "false" : "0");
                 }
@@ -36,6 +38,21 @@ namespace WCKDRZR.Gaspar.Extensions
             }
 
             return qs;
+        }
+
+        public static string FunctionNameExtension(this List<Parameter> parameters)
+        {
+            string name = "With";
+
+            int i = 0;
+            foreach (Parameter parameter in parameters)
+            {
+                name += parameter.Identifier.ToProper();
+                name += i < parameters.Count - 1 ? "And" : "";
+                i++;
+            }
+
+            return name;
         }
     }
 }
