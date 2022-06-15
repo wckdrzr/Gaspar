@@ -26,7 +26,7 @@ namespace WCKDRZR.Gaspar.Converters
     internal class Converter
     {
         private Configuration _config;
-        private bool _allTypes => _config.IgnoreAnotations;
+        private bool _allTypes => _config.IgnoreAnnotations;
 
         public Converter(Configuration config)
 		{
