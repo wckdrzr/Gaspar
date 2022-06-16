@@ -46,9 +46,17 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add($"import {{ ServiceErrorHandler }} from \"{outputConfig.ErrorHandlerPath}\";");
             }
             lines.Add("");
-            lines.Add("export interface IServiceResponse<T> {");
-            lines.Add("    data?: T,");
-            lines.Add("    error?: ActionResultError,");
+            lines.Add("export class ServiceResponse<T> {");
+            lines.Add("    data: T | null;");
+            lines.Add("    error: ActionResultError | null;");
+            lines.Add("    success: boolean;");
+            lines.Add("    hasError: boolean;");
+            lines.Add("    constructor(data: T | null, error: ActionResultError | null) {");
+            lines.Add("        this.data = data;");
+            lines.Add("        this.error = error;");
+            lines.Add("        this.success = error == null;");
+            lines.Add("        this.hasError = error != null;");
+            lines.Add("    }");
             lines.Add("}");
             lines.Add("export interface ActionResultError {");
             lines.Add("    detail: string,");
@@ -71,14 +79,14 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("    constructor(private errorHandler: ServiceErrorHandler) {");
                 lines.Add("    }");
             }
-            lines.Add("    handler(error: ActionResultError, showError: ServiceErrorMessage) {");
+            lines.Add("    handler<T>(error: ActionResultError, showError: ServiceErrorMessage) {");
             if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
             {
                 lines.Add("        if (showError != ServiceErrorMessage.None) {");
                 lines.Add("            this.errorHandler.showError(showError == ServiceErrorMessage.ServerResponse && error?.detail ? error.detail : null);");
                 lines.Add("        }");
             }
-            lines.Add("        return of({ error: error || {} });");
+            lines.Add("        return of(new ServiceResponse<T>(null, error));");
             lines.Add("    }");
             lines.Add("}");
             lines.Add("");
@@ -115,7 +123,7 @@ namespace WCKDRZR.Gaspar.Converters
 
                 lines.Add("import { Injectable } from \"@angular/core\";");
                 lines.Add("import { Observable } from \"rxjs\";");
-                lines.Add($"import {{ IServiceResponse, ServiceErrorHelper, ServiceErrorMessage }} from \"{helperFilePath}\"");
+                lines.Add($"import {{ ServiceResponse, ServiceErrorHelper, ServiceErrorMessage }} from \"{helperFilePath}\"");
                 lines.Add("");
             }
 
@@ -190,12 +198,12 @@ namespace WCKDRZR.Gaspar.Converters
                         bodyParam = ", { body: body }";
                     }
 
-                    string returnType = action.ReturnTypeOverride ?? action.ReturnType.ToString();
+                    string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType.ToString());
 
-                    lines.Add($"        {actionName}({string.Join(", ", parameters)}): Observable<IServiceResponse<{TypeScriptConverter.ParseType(returnType)}>> {{");
-                    lines.Add($"            return this.http.{httpMethod}<{TypeScriptConverter.ParseType(returnType)}>(`{url}`{bodyParam}).pipe(");
-                    lines.Add($"                map(data => ({{ data }})),");
-                    lines.Add($"                catchError(error => this.errorHelper.handler(error, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")}))");
+                    lines.Add($"        {actionName}({string.Join(", ", parameters)}): Observable<ServiceResponse<{returnType}>> {{");
+                    lines.Add($"            return this.http.{httpMethod}<{returnType}>(`{url}`{bodyParam}).pipe(");
+                    lines.Add($"                map(data => new ServiceResponse(data, null)),");
+                    lines.Add($"                catchError(error => this.errorHelper.handler<{returnType}>(error, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")}))");
                     lines.Add($"            );");
                     lines.Add($"        }}");
                 }

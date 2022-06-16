@@ -7,7 +7,7 @@ namespace WCKDRZR.Gaspar
         static void Main(string[] args)
         {
             string configFile = args.Length > 0 ? args[0] : null;
-            //configFile = "../../gaspar.demo-config.json"; //test file
+            //configFile = "../../../../../gaspar.demo-config.json"; //test file
 
             Exporter.Export(configFile);
         }

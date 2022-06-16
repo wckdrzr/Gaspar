@@ -131,7 +131,7 @@ ServiceResponse has the following convenience methods that you can use:
 
 - **HasError**    `bool`    True if there was an error
 
-- **Problem**    `ObjectResult`    Same as using ControllerBase.Problem(), but this is pre-populated with the Error details.
+- **Problem**    `ObjectResult`    (C# only)    Same as using ControllerBase.Problem(), but this is pre-populated with the Error details.
 
 ### Usage Examples
 
@@ -196,13 +196,13 @@ namespace MyProject
     {
         int requestId = 1;
         MyObj requestObj = new();
-        
+
         //MyController becomes MyService; MyAction method name is intact
         ServiceResponse<bool?> response = MyService.MyAction(requestId, requestObj);
-        
+
         //or call async:
         ServiceResponse<bool?> response = await MyService.MyActionAsync(requestId, requestObj);
-        
+
         if (response.Data != null)
         {
             // use the data    
