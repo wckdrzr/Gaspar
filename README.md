@@ -123,6 +123,82 @@ When using the exported service communication endpoints, you will receive a `Ser
 
 **Error** is an `ActionResultError` object that contains all the data returned when using an ActionResult (e.g. `NotFound()` or `Problem()`).  If the error isn't from the Action (e.g. an error in the serializer or the endpoint wasn't reachable) the ActionResultError will be populated appropriately.
 
+### Usage Examples
+
+Lets take this controller action, exported for all environments:
+
+```csharp
+using Microsoft.AspNetCore.Mvc;
+using WCKDRZR.Gaspar;
+
+namespace WCKDRZR.DataWatchdog.DNA.API.Controllers
+{
+    [ApiController]
+    [ExportFor(GasparType.All)]
+    public class MyController : ControllerBase
+    {
+        [HttpPost("[controller]/[action]/{id}")]
+        public ActionResult<bool> MyAction([FromBody] MyObj obj, int id)
+        {
+            // action code...
+            return true;
+        }
+    }
+}
+```
+
+#### To use in Angular
+
+```typescript
+import { Service } from 'src/app/interfaces/services'; //Service will be prefixed with ServiceName from config
+
+export class MyAngularPage {
+
+    constructor(private service: Service.MyController) {
+
+        requestId = 1;
+        requestObj = {};
+
+        this.service.myAction(requestId, requestObj).subscribe(response => {
+            if (response.data) {
+                //use the data
+            } else {
+                // handle response.error if appropriate
+            }
+        });
+
+        //if you have a custom error handler definded in config, you could also:
+        //with: import { ServiceErrorMessage } from 'src/app/interfaces/service-helper';
+        //this.service.myAction(requestId, requestObj, ServiceErrorMessage.ServerResponse).sub...
+    }
+}
+```
+
+#### To use in C#
+
+```csharp
+using WCKDRZR.Gaspar.Models;
+using WCKDRZR.Gaspar.ServiceCommunciation.Service; //Service will be prefixed with ServiceName from config
+
+int requestId = 1;
+MyObj requestObj = new();
+
+//MyController becomes MyService; MyAction method name is intact
+ServiceResponse<bool?> response = MyService.MyAction(requestId, requestObj);
+
+//or call async:
+ServiceResponse<bool?> response = await MyService.MyActionAsync(requestId, requestObj);
+
+if (response.Data != null)
+{
+    // use the data    
+}
+else
+{
+    // handle response.Error if appropriate
+}
+```
+
 ## Configuration
 
 The demo config provided only includes the basics to make Gaspar work; here is a full list of the options available (feel free to have a look in the `Models/Configuration.cs` file):
@@ -177,27 +253,31 @@ For CSharp controllers (all optional):
 
 - **UrlHandlerFunction**    `string`    If you would like to run your url through a function to ensure it is correct, you can provide the function name here.  Your code will need to provide a static string extension method; as follows:
   
-      internal static class StringExtensions
+  ```csharp
+  internal static class StringExtensions
+  {
+      public static string MyUrlHelper(this string s)
       {
-          public static string MyUrlHelper(this string s)
-          {
-              //manipulate s...
-              return s;
-          }
+          //manipulate s...
+          return s;
       }
+  }
+  ```
   
   In the above example, you will add `"UrlHandlerFunction": "MyUrlHelper"` to the config.
   *make sure to include the namespace to your function in the config (see below)*
 
 - **LoggingReceiver**    `string`    When using your exported service communication endpoint, if there's an error receiving the response or deserializing it, the error will be logged to the console (using `Console.WriteLine`).  If you would like the error to be absorbed by your own logging system you can provide a static logging class name here, for example:
   
-      internal static class MyLogger
+  ```csharp
+  internal static class MyLogger
+  {
+      public static void GasparError(string message)
       {
-          public static void GasparError(string message)
-          {
-              //handle error
-          }
+          //handle error
       }
+  }
+  ```
   
   In the above example, you will add `"LoggingReceiver": "MyLogger"` to the config.  Alternatively you can add a `GasparError()` method (as above) to your existing logging class (provided it's a static class).
   
@@ -215,16 +295,18 @@ For Angular controllers (all optional):
 
 - **ErrorHandlerPath**    `string`    If an error is received from the requested endpoint, it will be absorbed (although it will always be seen in the browser console).  The response will include the error details if you want to handle it from the calling class, but if you always want to show a message to the user (e.g. using a SnackBar), you can provide an error handler, as below:
   
-      import { Injectable } from "@angular/core";
-      
-      @Injectable({ providedIn: 'root' })
-      export class ServiceErrorHandler {
-      {
-          showError(message: string | null): void {
-              message = message ?? "An unknown error has occurred";
-              //handle error
-          }
+  ```typescript
+  import { Injectable } from "@angular/core";
+  
+  @Injectable({ providedIn: 'root' })
+  export class ServiceErrorHandler {
+  {
+      showError(message: string | null): void {
+          message = message ?? "An unknown error has occurred";
+          //handle error
       }
+  }
+  ```
   
   The class and function names must be as above.  In the config provide the path to the above file (without extension) e.g. `"ErrorHandlerPath": "./service-error-handler"`
 
@@ -245,7 +327,5 @@ For Ocelot controllers (all optional):
 ## Issues and Contributions
 
 Please raise any issues or pull requests in GitHub. We will try and incorporate any changes as promptly as possible. 
-
-
 
 © [Wckd Rzr](https://github.com/wckdrzr)
