@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using WCKDRZR.Gaspar.Core;
-using Microsoft.Build.Framework;
+﻿using WCKDRZR.Gaspar.Core;
 using Microsoft.Build.Utilities;
 
 namespace WCKDRZR.Gaspar.MSBuild

@@ -1,13 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
-using WCKDRZR.Gaspar.ClassWalkers;
-using WCKDRZR.Gaspar.Converters;
-using WCKDRZR.Gaspar.Helpers;
 using WCKDRZR.Gaspar.Models;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using WCKDRZR.Gaspar.Extensions;
 
 namespace WCKDRZR.Gaspar.Core
