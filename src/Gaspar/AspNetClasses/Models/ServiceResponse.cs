@@ -2,12 +2,13 @@
 
 namespace WCKDRZR.Gaspar.Models
 {
-    [ApiController]
-    public class ServiceResponse<T> : ControllerBase
+    public class ServiceResponse<T>
     {
         public T Data { get; set; }
         public ActionResultError Error { get; set; }
 
-        public ObjectResult Problem() => Error == null ? null : Problem(Error.Detail, Error.Instance, Error.Status, Error.Title, Error.Type);
+        public bool Success => Error == null;
+        public bool HasError => Error != null;
+        public ObjectResult Problem => Error == null ? null : new ObjectResult(Error) { StatusCode = Error.Status };
     }
 }

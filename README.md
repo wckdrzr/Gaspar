@@ -123,6 +123,16 @@ When using the exported service communication endpoints, you will receive a `Ser
 
 **Error** is an `ActionResultError` object that contains all the data returned when using an ActionResult (e.g. `NotFound()` or `Problem()`).  If the error isn't from the Action (e.g. an error in the serializer or the endpoint wasn't reachable) the ActionResultError will be populated appropriately.
 
+### Convenience methods
+
+ServiceResponse has the following convenience methods that you can use:
+
+- **Success**    `bool`    True if there was no error
+
+- **HasError**    `bool`    True if there was an error
+
+- **Problem**    `ObjectResult`    Same as using ControllerBase.Problem(), but this is pre-populated with the Error details.
+
 ### Usage Examples
 
 Lets take this controller action, exported for all environments:
@@ -180,22 +190,30 @@ export class MyAngularPage {
 using WCKDRZR.Gaspar.Models;
 using WCKDRZR.Gaspar.ServiceCommunciation.Service; //Service will be prefixed with ServiceName from config
 
-int requestId = 1;
-MyObj requestObj = new();
-
-//MyController becomes MyService; MyAction method name is intact
-ServiceResponse<bool?> response = MyService.MyAction(requestId, requestObj);
-
-//or call async:
-ServiceResponse<bool?> response = await MyService.MyActionAsync(requestId, requestObj);
-
-if (response.Data != null)
+namespace MyProject
 {
-    // use the data    
-}
-else
-{
-    // handle response.Error if appropriate
+    class MyClass
+    {
+        int requestId = 1;
+        MyObj requestObj = new();
+        
+        //MyController becomes MyService; MyAction method name is intact
+        ServiceResponse<bool?> response = MyService.MyAction(requestId, requestObj);
+        
+        //or call async:
+        ServiceResponse<bool?> response = await MyService.MyActionAsync(requestId, requestObj);
+        
+        if (response.Data != null)
+        {
+            // use the data    
+        }
+        else
+        {
+            // handle response.Error if appropriate
+            // Optionally, if in a controller action:
+            // return response.Problem();
+        }
+    }
 }
 ```
 

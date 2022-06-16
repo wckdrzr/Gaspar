@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -6,14 +6,13 @@
     <Authors>Ben Robinson</Authors>
     <Description>Consumes your C# domain models, types and controllers and exports them for other services and languages to consume</Description>
     <PackageId>WckdRzr.Gaspar</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.1.3</Version>
 
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/wckdrzr/Gaspar</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
 
-    <IsPackable>True</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <BuildOutputTargetFolder>tools</BuildOutputTargetFolder>
     <NoPackageAnalysis>true</NoPackageAnalysis>
@@ -25,6 +24,7 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="17.2.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
