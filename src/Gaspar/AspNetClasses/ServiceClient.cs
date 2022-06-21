@@ -9,7 +9,7 @@ namespace WCKDRZR.Gaspar
 {
     public static class ServiceClient
     {
-        public static async Task<ServiceResponse<T>> FetchAsync<T>(ServiceHttpMethod method, string url, dynamic body, Type logReceiver, Type serializer)
+        public static async Task<ServiceResponse<T>> FetchAsync<T>(HttpMethod method, string url, dynamic body, Type logReceiver, Type serializer)
         {
             try
             {
@@ -29,23 +29,15 @@ namespace WCKDRZR.Gaspar
             }
         }
 
-        private static async Task<HttpResponseMessage> Load(ServiceHttpMethod method, string url, dynamic body)
+        private static async Task<HttpResponseMessage> Load(HttpMethod method, string url, dynamic body)
         {
             HttpClient httpClient = new();
-
-            switch (method)
+            return await httpClient.SendAsync(new HttpRequestMessage
             {
-                case ServiceHttpMethod.Get:
-                    return await httpClient.GetAsync(url);
-                case ServiceHttpMethod.Post:
-                    return await httpClient.PostAsync(url, JsonContent.Create(body));
-                case ServiceHttpMethod.Put:
-                    return await httpClient.PutAsync(url, JsonContent.Create(body));
-                case ServiceHttpMethod.Delete:
-                    return await httpClient.DeleteAsync(url, JsonContent.Create(body));
-                default:
-                    throw new NotImplementedException();
-            }
+                Method = method,
+                RequestUri = new Uri(url),
+                Content = body == null ? null : JsonContent.Create(body)
+            });
         }
 
         private static ServiceResponse<T> Success<T>(HttpResponseMessage httpResponse, Type serializer, string url, Type logReceiver)
@@ -74,15 +66,15 @@ namespace WCKDRZR.Gaspar
                     }
                     else
                     {
-                        throw new Exception($"Custom serializer ({serializer.Name}) has no 'Deserialize' method");
+                        throw new Exception($"Gaspar: Custom serializer ({serializer.Name}) has no 'Deserialize' method");
                     }
                 }
             }
             catch (Exception e)
             {
-                Log($"Unable to deserialize sucessful response from {url}\n{e.Message}", logReceiver);
+                Log($"Gaspar: Unable to deserialize sucessful response from {url}\n{e.Message}", logReceiver);
 
-                return Error<T>($"Unable to deserialize sucessful response from {url}", e.Message, 0);
+                return Error<T>($"Gaspar: Unable to deserialize sucessful response from {url}", e.Message, 0);
             }
         }
 
@@ -95,10 +87,10 @@ namespace WCKDRZR.Gaspar
             }
             catch
             {
-                response = Error<T>($"Service call to {url} failed to connect", httpResponse.ReasonPhrase, (int)httpResponse.StatusCode);
+                response = Error<T>($"Gaspar: Service call to {url} failed to connect", httpResponse.ReasonPhrase, (int)httpResponse.StatusCode);
             }
 
-            Log($"Service call to {url} failed with status code {(int)httpResponse.StatusCode} - {httpResponse.StatusCode}" +
+            Log($"Gaspar: Service call to {url} failed with status code {(int)httpResponse.StatusCode} - {httpResponse.StatusCode}" +
                 $"{(response.Error != null && !string.IsNullOrEmpty(response.Error.Detail) ? $"\n{response.Error.Detail}" : "")}", logReceiver);
 
             return response;
@@ -112,9 +104,9 @@ namespace WCKDRZR.Gaspar
                 message = "Connection timed out";
             }
 
-            Log($"Service call to {url} failed to connect\n{message}", logReceiver);
+            Log($"Gaspar: Service call to {url} failed to connect\n{message}", logReceiver);
 
-            return Error<T>($"Service call to {url} failed to connect", message, 0);
+            return Error<T>($"Gaspar: Service call to {url} failed to connect", message, 0);
         }
 
         private static ServiceResponse<T> Error<T>(string title, string detail, int status)
@@ -140,13 +132,13 @@ namespace WCKDRZR.Gaspar
                     }
                     else
                     {
-                        Console.WriteLine($"Cannot use your LoggingReceiver ({logReceiver.Name}): no GasparError method found.  Communicaiton error below.");
+                        Console.WriteLine($"Gaspar: Cannot use your LoggingReceiver ({logReceiver.Name}): no GasparError method found.  Communicaiton error below.");
                     }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error trying to use your LoggingReceiver ({logReceiver.Name}): {e.Message}  Communicaiton error below.");
+                Console.WriteLine($"Gaspar: Error trying to use your LoggingReceiver ({logReceiver.Name}): {e.Message}  Communicaiton error below.");
             }
             Console.WriteLine("Gaspar: " + message);
         }

@@ -31,6 +31,7 @@ namespace WCKDRZR.Gaspar.Converters
         {
             List<string> lines = new();
             lines.Add($"using System;");
+            lines.Add($"using System.Net.Http;");
             lines.Add($"using System.Collections.Generic;");
             lines.Add($"using System.Threading.Tasks;");
             lines.Add($"using WCKDRZR.Gaspar.Models;");
@@ -103,11 +104,11 @@ namespace WCKDRZR.Gaspar.Converters
 
                     lines.Add($"        public static ServiceResponse<{returnTypeString}> {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return ServiceClient.FetchAsync<{returnTypeString}>(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}, {loggingReceiver}, {customSerializer}).Result;");
+                    lines.Add($"            return ServiceClient.FetchAsync<{returnTypeString}>(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}, {loggingReceiver}, {customSerializer}).Result;");
                     lines.Add($"        }}");
                     lines.Add($"        public static async Task<ServiceResponse<{returnTypeString}>> {action.ActionName}Async({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return await ServiceClient.FetchAsync<{returnTypeString}>(ServiceHttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}, {loggingReceiver}, {customSerializer});");
+                    lines.Add($"            return await ServiceClient.FetchAsync<{returnTypeString}>(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}, {loggingReceiver}, {customSerializer});");
                     lines.Add($"        }}");
                 }
             }
