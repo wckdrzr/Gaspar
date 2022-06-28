@@ -9,11 +9,11 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 |                         | C# Models and Types | C# Controllers |
 | ----------------------- |:-------------------:|:--------------:|
 | Export to TypeScript    | ✅                   |                |
-| Export to Angular       | ✅ <sup>1</sup>      | ✅              |
+| Export to Angular       | ✅ *                 | ✅              |
 | Export to Ocelot Config |                     | ✅              |
 | Export to C#            |                     | ✅              |
 
-*<sup>1</sup> Same as TypeScript export*
+**Same as TypeScript export*
 
 Other translations can easily be added
 
