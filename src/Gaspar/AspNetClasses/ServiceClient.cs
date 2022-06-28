@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using WCKDRZR.Gaspar.Models;
 
 namespace WCKDRZR.Gaspar
@@ -48,7 +49,7 @@ namespace WCKDRZR.Gaspar
                 {
                     return new ServiceResponse<T>
                     {
-                        Data = httpResponse.Content.ReadFromJsonAsync<T>().Result,
+                        Data = JsonConvert.DeserializeObject<T>(httpResponse.Content.ReadAsStringAsync().Result),
                         Error = null
                     };
                 }
