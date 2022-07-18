@@ -1,4 +1,5 @@
 ﻿using System;
+using WCKDRZR.Gaspar.Models;
 
 namespace WCKDRZR.Gaspar
 {
@@ -32,5 +33,6 @@ namespace WCKDRZR.Gaspar
         CSharp = 1 << 3,
         Ocelot = 1 << 4,
         TypeScript = 1 << 5,
+        Proto = 1 << 6,
     }
 }

@@ -21,6 +21,26 @@ namespace WCKDRZR.Gaspar.Converters
         List<string> ConvertController(List<ControllerAction> Actions, string outputClassName, ConfigurationTypeOutput outputConfig, bool lastController);
 
         string Comment(string comment, int followingBlankLines = 0);
+
+        public virtual List<string> ConvertModels(List<Model> models)
+        {
+            List<string> lines = new List<string>();
+            foreach (Model model in models)
+            {
+                lines.AddRange(this.ConvertModel(model));
+            }
+            return lines;
+        }
+
+        public virtual List<string> ConvertEnums(List<EnumModel> enumModels)
+        {
+            List<string> lines = new List<string>();
+            foreach (EnumModel enumModel in enumModels)
+            {
+                lines.AddRange(this.ConvertEnum(enumModel));
+            }
+            return lines;
+        }
     }
 
     internal class Converter
@@ -41,6 +61,7 @@ namespace WCKDRZR.Gaspar.Converters
                 case OutputType.CSharp: return new CSharpConverter(_config);
                 case OutputType.Ocelot: return new OcelotConverter(_config);
                 case OutputType.TypeScript: return new TypeScriptConverter(_config);
+                case OutputType.Proto: return new ProtoConverter(_config);
                 default: throw new NotImplementedException();
             }
         }
@@ -66,14 +87,8 @@ namespace WCKDRZR.Gaspar.Converters
 
                         modelCount += modelsForType.Count + enumsForType.Count;
 
-                        foreach (Model model in modelsForType)
-                        {
-                            lines.AddRange(converter.ConvertModel(model));
-                        }
-                        foreach (EnumModel @enum in enumsForType)
-                        {
-                            lines.AddRange(converter.ConvertEnum(@enum));
-                        }
+                        lines.AddRange(converter.ConvertModels(modelsForType));
+                        lines.AddRange(converter.ConvertEnums(enumsForType));
                     }
                 }
             }

@@ -8,7 +8,10 @@ namespace WCKDRZR.Gaspar.Helpers
 	{
         public static List<string> Models(IConverter converter, ConfigurationTypeOutput outputConfig, string outputPath)
         {
-            return Header(converter, converter.Config.Models, outputConfig, "models and enums", outputPath);
+            List<string> lines = new();
+            lines.AddRange(Header(converter, converter.Config.Models, outputConfig, "models and enums", outputPath));
+            lines.Add("syntax = \"proto3\";\n");
+            return lines;
         }
 
         public static List<string> Controllers(IConverter converter, ConfigurationTypeOutput outputConfig, string outputPath)

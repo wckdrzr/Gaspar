@@ -10,8 +10,9 @@ namespace WCKDRZR.Gaspar.Models
         public List<Property> Properties { get; set; }
         public List<string> BaseClasses { get; set; }
         public Dictionary<string, object> Enumerations { get; set; }
-
+        public bool IsInterface => Type == "interface";
         public OutputType ExportFor { get; set; }
+        public string Type { get; set; }
     }
 
     internal class Property

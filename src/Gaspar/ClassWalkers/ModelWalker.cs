@@ -79,6 +79,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                 ? node.Members.OfType<FieldDeclarationSyntax>()
                                     .Where(property => !property.AttributeLists.JsonIgnore()).ConvertEnumerations()
                                 : null,
+                Type = node.Keyword.Text,
                 ExportFor = node.GetExportType()
             };
         }
