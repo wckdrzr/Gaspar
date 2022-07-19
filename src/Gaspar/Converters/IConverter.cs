@@ -12,6 +12,7 @@ namespace WCKDRZR.Gaspar.Converters
     {
         Configuration Config { get; set; }
 
+        List<string> ModelHeader(ConfigurationTypeOutput outputConfig);
         List<string> ConvertModel(Model model);
         List<string> ConvertEnum(EnumModel enumModel);
 

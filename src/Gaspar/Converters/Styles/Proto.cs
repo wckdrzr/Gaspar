@@ -48,6 +48,18 @@ namespace WCKDRZR.Gaspar.Converters
             return $"//{comment}{new String('\n', followingBlankLines)}";
         }
 
+        public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
+        {
+            List<string> lines = new();
+            lines.Add("syntax = \"proto3\";");
+            if(!string.IsNullOrEmpty(outputConfig.PackageNamespace))
+            {
+                lines.Add($"package {outputConfig.PackageNamespace};");
+            }
+            lines.Add("");
+            return lines;
+        }
+
         public List<string> ConvertModels(List<Model> models)
         {
             // lines to return for building the .proto file

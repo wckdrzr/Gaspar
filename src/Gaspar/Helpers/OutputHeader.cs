@@ -10,7 +10,7 @@ namespace WCKDRZR.Gaspar.Helpers
         {
             List<string> lines = new();
             lines.AddRange(Header(converter, converter.Config.Models, outputConfig, "models and enums", outputPath));
-            lines.Add("syntax = \"proto3\";\n");
+            lines.AddRange(converter.ModelHeader(outputConfig));
             return lines;
         }
 
@@ -53,7 +53,6 @@ namespace WCKDRZR.Gaspar.Helpers
             lines.Add(converter.Comment("**"));
             lines.Add(converter.Comment($"** full configuration in: {FileHelper.RelativePath(outputPath, converter.Config.ConfigFilePath)}"));
             lines.Add(converter.Comment("**", 1));
-
             return lines;
         }
     }

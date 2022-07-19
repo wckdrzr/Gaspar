@@ -257,5 +257,9 @@ namespace WCKDRZR.Gaspar.Converters
             return isArray ? $"{type}[]" : type;
         }
 
+        public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
+        {
+            return new();
+        }
     }
 }

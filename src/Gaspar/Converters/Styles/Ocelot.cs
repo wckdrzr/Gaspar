@@ -110,6 +110,11 @@ namespace WCKDRZR.Gaspar.Converters
         {
             throw new NotImplementedException();
         }
+
+        public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

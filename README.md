@@ -12,6 +12,7 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 | Export to Angular       | ✅ *                 | ✅              |
 | Export to Ocelot Config |                     | ✅              |
 | Export to C#            |                     | ✅              |
+| Export to Proto         | ✅                   |                |
 
 **Same as TypeScript export*
 
@@ -21,7 +22,7 @@ Other translations can easily be added
 
 Gaspar is written using .NET 5 and is available on NuGet.
 
-To install, search "WckdRzr.Gaspar" in your NuGet package manager, or visit the NuGet page: https://www.nuget.org/packages/WckdRzr.Gaspar/
+To install, search "WckdRzr.Gaspar" in your NuGet package manager, or visit the NuGet page: <https://www.nuget.org/packages/WckdRzr.Gaspar/>
 
 ## How to use
 
@@ -33,7 +34,7 @@ After including the NuGet package, follow these steps:
 
 3. Build.
    If you didn't change the demo config, four files will be added to the root of your project:
-   
+
    - `api.d.ts` - the TypeScript Models.
    - `My_service.cs` - The C# Service Communication interface.
    - `my_service.ts` - The Angular Service Communication interface.
@@ -57,7 +58,7 @@ The attribute has one required parameter `GasparType types`. This is the type of
 
 - `[ExportFor(GasparType.All | ~Gaspar.Ocelot)]` to export to all types, except Ocelot.
 
-### Notes:
+### Notes
 
 - Feel free to use `&` or `|` to join types; they will have the same effect.
 
@@ -184,7 +185,7 @@ export class MyAngularPage {
 }
 ```
 
-#### To use in C#
+#### To use in C #
 
 ```csharp
 using WCKDRZR.Gaspar.Models;
@@ -221,7 +222,7 @@ namespace MyProject
 
 The demo config provided only includes the basics to make Gaspar work; here is a full list of the options available (feel free to have a look in the `Models/Configuration.cs` file):
 
-### At the root level:
+### At the root level
 
 You must supply either Models or Controllers, but you don't need both; all other parameters are optional.
 
@@ -305,6 +306,15 @@ For CSharp controllers (all optional):
 
 - **ModelNamespaces**    `Array of strings`    List of namespaces to include at the top of your exported Service Communication class.  This would inculde the namespaces to custom types in the export, or your serializer and logging tools
 
+- **PackageNamespace**    `string`    Namespace to be used when generating .proto file outputs. For example, the PackageNamespace value of 'com.wckdzr' produces the following header for .proto files:
+
+```.proto
+syntax = "proto3";
+package com.wckdrzr;
+
+// ... proto definitions
+```
+
 For Angular controllers (all optional):
 
 - **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests.  This is the name of the file that should be exported.  If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
@@ -344,6 +354,6 @@ For Ocelot controllers (all optional):
 
 ## Issues and Contributions
 
-Please raise any issues or pull requests in GitHub. We will try and incorporate any changes as promptly as possible. 
+Please raise any issues or pull requests in GitHub. We will try and incorporate any changes as promptly as possible.
 
 © [Wckd Rzr](https://github.com/wckdrzr)

@@ -214,5 +214,10 @@ namespace WCKDRZR.Gaspar.Converters
 
             return lines;
         }
+
+        public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
+        {
+            return new();
+        }
     }
 }
