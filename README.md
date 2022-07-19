@@ -185,7 +185,7 @@ export class MyAngularPage {
 }
 ```
 
-#### To use in C #
+#### To use in C#
 
 ```csharp
 using WCKDRZR.Gaspar.Models;
