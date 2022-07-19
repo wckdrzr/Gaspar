@@ -8,7 +8,10 @@ namespace WCKDRZR.Gaspar.Helpers
 	{
         public static List<string> Models(IConverter converter, ConfigurationTypeOutput outputConfig, string outputPath)
         {
-            return Header(converter, converter.Config.Models, outputConfig, "models and enums", outputPath);
+            List<string> lines = new();
+            lines.AddRange(Header(converter, converter.Config.Models, outputConfig, "models and enums", outputPath));
+            lines.AddRange(converter.ModelHeader(outputConfig));
+            return lines;
         }
 
         public static List<string> Controllers(IConverter converter, ConfigurationTypeOutput outputConfig, string outputPath)
@@ -50,7 +53,6 @@ namespace WCKDRZR.Gaspar.Helpers
             lines.Add(converter.Comment("**"));
             lines.Add(converter.Comment($"** full configuration in: {FileHelper.RelativePath(outputPath, converter.Config.ConfigFilePath)}"));
             lines.Add(converter.Comment("**", 1));
-
             return lines;
         }
     }

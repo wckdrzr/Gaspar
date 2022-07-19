@@ -29,7 +29,10 @@ namespace WCKDRZR.Gaspar.Models
         Ocelot = 1 << 2,
 
         [OutputTypeGroup(GasparType.All | GasparType.FrontEnd | GasparType.TypeScript)]
-        TypeScript = 1 << 3
+        TypeScript = 1 << 3,
+
+        [OutputTypeGroup(GasparType.All | GasparType.Proto)]
+        Proto = 1 << 4
     }
 
     internal static class OutputTypeConverter

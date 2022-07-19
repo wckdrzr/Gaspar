@@ -78,6 +78,9 @@ namespace WCKDRZR.Gaspar.Models
         public bool NoAuth { get; set; }
         public bool ExcludeScopes { get; set; }
 
+        //For Proto Models
+        public string PackageNamespace { get; set; }
+
         public ConfigurationTypeOutput()
         {
             NoAuth = false;
