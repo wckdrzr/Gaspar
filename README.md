@@ -62,7 +62,7 @@ The attribute has one required parameter `GasparType types`. This is the type of
 
 - Feel free to use `&` or `|` to join types; they will have the same effect.
 
-- The bitwize NOT operator `~` will remove the type; particularly useful as above, or when you want to override the parent attribute on the controller class
+- The bitwize NOT operator `~` will remove the type; particularly useful as above, or when you want to override the parent attribute on the controller class.
 
 - Exports will only work if they are configured to output in `gaspar.config.json`
 
