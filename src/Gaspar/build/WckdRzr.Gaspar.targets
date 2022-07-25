@@ -6,7 +6,7 @@
 
   <UsingTask AssemblyFile="$(GasparTaskAssembly)" TaskName="WCKDRZR.Gaspar.MSBuild.OnBuild" />
 
-  <Target Name="Gaspar" BeforeTargets="BeforeCompile" Condition="'$(RunGaspar)' != 'False'">
+  <Target Name="Gaspar" BeforeTargets="Protobuf_BeforeCompile;BeforeCompile" Condition="'$(RunGaspar)' != 'False'">
     <WCKDRZR.Gaspar.MSBuild.OnBuild ConfigFile="$(MSBuildProjectDirectory)\gaspar.config.json" />
   </Target>
 </Project>
