@@ -43,7 +43,7 @@ namespace WCKDRZR.Gaspar.Core
                 {
                     if (Directory.Exists(Path.GetDirectoryName(output.Location)))
                     {
-                        File.WriteAllText(output.Location, converter.BuildModelsFile(output, files));
+                        WriteFile(output.Location, converter.BuildModelsFile(output, files));
                     }
                     else if (!config.IgnoreMissingOutputLocations)
                     {
@@ -67,10 +67,10 @@ namespace WCKDRZR.Gaspar.Core
                         if (output.HelperFile != null)
                         {
                             string helperFilePath = Path.GetDirectoryName(output.Location) + '/' + output.HelperFile;
-                            File.WriteAllText(helperFilePath, converter.BuildControllerHelperFile(output));
+                            WriteFile(helperFilePath, converter.BuildControllerHelperFile(output));
                         }
 
-                        File.WriteAllText(output.Location, converter.BuildControllersFile(output, files));
+                        WriteFile(output.Location, converter.BuildControllersFile(output, files));
                     }
                     else if (!config.IgnoreMissingOutputLocations)
                     {
@@ -118,6 +118,19 @@ namespace WCKDRZR.Gaspar.Core
             string source = System.IO.File.ReadAllText(path);
             SyntaxTree tree = CSharpSyntaxTree.ParseText(source);
             return (CompilationUnitSyntax)tree.GetRoot();
+        }
+
+        private static void WriteFile(string path, string content)
+        {
+            string existingFile = "";
+            if (File.Exists(path))
+            {
+                existingFile = File.ReadAllText(path);
+            }
+            if (existingFile != content)
+            {
+                File.WriteAllText(path, content);
+            }
         }
     }
 }
