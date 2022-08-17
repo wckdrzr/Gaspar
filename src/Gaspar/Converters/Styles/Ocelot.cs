@@ -115,6 +115,11 @@ namespace WCKDRZR.Gaspar.Converters
         {
             throw new NotImplementedException();
         }
+
+        public void PreProcess(CSharpFiles files)
+        {
+            return;
+        }
     }
 }
 

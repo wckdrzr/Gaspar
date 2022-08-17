@@ -9,6 +9,8 @@ using WCKDRZR.Gaspar.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
+using Microsoft.VisualBasic;
+using WCKDRZR.Gaspar.Helpers;
 
 namespace WCKDRZR.Gaspar.Converters
 {
@@ -65,33 +67,9 @@ namespace WCKDRZR.Gaspar.Converters
             // lines to return for building the .proto file
             List<string> lines = new List<string>();
 
-            // pull out the interfaces to construct them separately
-            List<Model> interfaces = models.Where(m => m.IsInterface).ToList();
-
-            // create a map of classes implemented for each interface
-
-            // build lines for the non-interface models first
-            foreach (Model model in models.Except(interfaces).ToList())
+            foreach(Model model in models)
             {
                 lines.AddRange(this.ConvertModel(model));
-
-                // populate our interfaceImplementation map
-                if(model.BaseClasses.Count > 0)
-                {
-                    foreach(string baseClass in model.BaseClasses)
-                    {
-                        if (!InterfaceImplementations.ContainsKey(baseClass))
-                        {
-                            InterfaceImplementations.Add(baseClass, new HashSet<string>());
-                        }
-                        InterfaceImplementations[baseClass].Add(model.ModelName);
-                    }
-                }
-            }
-
-            foreach(Model interfaceModel in interfaces)
-            {
-                lines.AddRange(this.ConvertModel(interfaceModel));
             }
             return lines;
         }
@@ -227,6 +205,30 @@ namespace WCKDRZR.Gaspar.Converters
                 return $"map<{key}, {value}>";
             }
             return ConvertType(propType); ;
+        }
+
+        public void PreProcess(CSharpFiles files)
+        {
+            foreach (CSharpFile file in files)
+            {
+                if (file.HasModels)
+                {
+                    // extract implementations of each interface to be used later
+                    List<Model> interfaces = file.Models.Where(m => m.IsInterface).ToList();
+                    foreach (Model model in file.Models.Except(interfaces))
+                    {
+                        // populate our interfaceImplementation map
+                        foreach (string baseClass in model.BaseClasses)
+                        {
+                            if (!InterfaceImplementations.ContainsKey(baseClass))
+                            {
+                                InterfaceImplementations.Add(baseClass, new HashSet<string>());
+                            }
+                            InterfaceImplementations[baseClass].Add(model.ModelName);
+                        }
+                    }
+                }
+            }
         }
     }
 }
