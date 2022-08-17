@@ -261,5 +261,10 @@ namespace WCKDRZR.Gaspar.Converters
         {
             return new();
         }
+
+        public void PreProcess(CSharpFiles files)
+        {
+            return;
+        }
     }
 }

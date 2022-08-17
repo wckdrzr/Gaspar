@@ -23,6 +23,8 @@ namespace WCKDRZR.Gaspar.Converters
 
         string Comment(string comment, int followingBlankLines = 0);
 
+        void PreProcess(CSharpFiles files);
+
         public virtual List<string> ConvertModels(List<Model> models)
         {
             List<string> lines = new List<string>();
@@ -70,6 +72,7 @@ namespace WCKDRZR.Gaspar.Converters
         public string BuildModelsFile(ConfigurationTypeOutput outputConfig, CSharpFiles files)
         {
             IConverter converter = GetConverter(outputConfig);
+            converter.PreProcess(files);
             List<string> lines = new();
 
             lines.AddRange(OutputHeader.Models(converter, outputConfig, outputConfig.Location));
