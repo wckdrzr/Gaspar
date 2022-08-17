@@ -54,6 +54,11 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     { 
                         action.HttpMethod = httpAttribute.Name.ToString()[4..].ToUpper();
                     }
+                    if (action.HttpMethod == null)
+                    {
+                        action.BadMethodReason = "HTTP Method not spcified";
+                    }
+
                     if (routeAttribute != null || httpAttribute?.ArgumentList?.Arguments[0] != null)
                     {
                         AttributeArgumentSyntax argument = routeAttribute?.ArgumentList?.Arguments[0] ?? httpAttribute.ArgumentList.Arguments[0];

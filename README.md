@@ -100,7 +100,7 @@ This might be useful to temporarily disable the feature, or if you need to use t
 
 ## Well Written Controller Actions
 
-Gaspar will export all you controller actions, but they must be written in a way that Gaspar can understand.  This will improve your overall code quality, not just meet arbitrary rules.  If Gaspar can't understand the action, it may export a skeleton method marked 'depreciated' or 'obsolete' with a friendly error message.
+Gaspar will export all your controller actions, but they must be written in a way that Gaspar can understand.  This will improve your overall code quality, not just meet arbitrary rules.  If Gaspar can't understand the action, it may export a skeleton method marked 'depreciated' or 'obsolete' with a friendly error message.
 
 Improve your actions as follows:
 
@@ -306,15 +306,6 @@ For CSharp controllers (all optional):
 
 - **ModelNamespaces**    `Array of strings`    List of namespaces to include at the top of your exported Service Communication class.  This would inculde the namespaces to custom types in the export, or your serializer and logging tools
 
-- **PackageNamespace**    `string`    Namespace to be used when generating .proto file outputs. For example, the PackageNamespace value of 'com.wckdzr' produces the following header for .proto files:
-
-```.proto
-syntax = "proto3";
-package com.wckdrzr;
-
-// ... proto definitions
-```
-
 For Angular controllers (all optional):
 
 - **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests.  This is the name of the file that should be exported.  If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
@@ -351,6 +342,17 @@ For Ocelot controllers (all optional):
 - **NoAuth**    `bool`    If true, the "AuthenticationOptions" section of the Ocelot config will not be outputted.
 
 - **ExcludeScopes**    `bool`    If true, the "AllowedScopes" section of the Ocelot config will not be outputted.
+  
+
+For Proto Models (required)
+
+- **PackageNamespace**    `string`    Namespace to be used when generating .proto file outputs. For example, the PackageNamespace value of 'com.wckdzr' produces the following header for .proto files:
+  
+  ```protobuf
+  syntax = "proto3";
+  package com.wckdrzr;
+  // ... proto definitions
+  ```
 
 ## Issues and Contributions
 
