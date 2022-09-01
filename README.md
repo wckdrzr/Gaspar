@@ -34,7 +34,7 @@ After including the NuGet package, follow these steps:
 
 3. Build.
    If you didn't change the demo config, four files will be added to the root of your project:
-
+   
    - `api.d.ts` - the TypeScript Models.
    - `My_service.cs` - The C# Service Communication interface.
    - `my_service.ts` - The Angular Service Communication interface.
@@ -342,7 +342,6 @@ For Ocelot controllers (all optional):
 - **NoAuth**    `bool`    If true, the "AuthenticationOptions" section of the Ocelot config will not be outputted.
 
 - **ExcludeScopes**    `bool`    If true, the "AllowedScopes" section of the Ocelot config will not be outputted.
-  
 
 For Proto Models (required)
 
@@ -353,6 +352,18 @@ For Proto Models (required)
   package com.wckdrzr;
   // ... proto definitions
   ```
+
+## Extension Methods
+
+Provided for convenience when using Gaspar tagged data:
+
+```csharp
+bool ExportsFor(this MemberInfo member, GasparType type)
+```
+
+If you have a MemberInfo object, this method will let you know if its is tagged with a given GasparType.  For example `myclass.ExportsFor(GasparType.FrontEnd)` will return true if the myclass has the `[ExportsFor(GasparType.FrontEnd)]` attribute
+
+
 
 ## Issues and Contributions
 
