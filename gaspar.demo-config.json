@@ -1,5 +1,8 @@
 {
 	"Models": {
+		"Include": [
+			"/Users/me/my-app/**/*.cs"
+		],
 		"Output": [
 			{
 				"Type": "TypeScript",
@@ -10,6 +13,9 @@
 		"StringLiteralTypesInsteadOfEnums": true
 	},
 	"Controllers": {
+		"Include": [
+			"/Users/me/my-app/**/*.cs"
+		],
 		"Output": [
 			{
 				"Type": "Angular",
