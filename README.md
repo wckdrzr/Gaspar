@@ -361,7 +361,7 @@ Provided for convenience when using Gaspar tagged data:
 bool ExportsFor(this MemberInfo member, GasparType type)
 ```
 
-If you have a MemberInfo object, this method will let you know if its is tagged with a given GasparType.  For example `myclass.ExportsFor(GasparType.FrontEnd)` will return true if the myclass has the `[ExportsFor(GasparType.FrontEnd)]` attribute
+If you have a MemberInfo object, this method will let you know if it (or it's parent class) is tagged with a given GasparType.  For example `myclass.ExportsFor(GasparType.FrontEnd)` will return true if the myclass has the `[ExportsFor(GasparType.FrontEnd)]` attribute
 
 
 

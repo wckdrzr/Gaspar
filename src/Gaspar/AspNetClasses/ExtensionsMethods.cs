@@ -20,6 +20,13 @@ namespace WCKDRZR.Gaspar
                     }
                 }
             }
+
+            //Check parent
+            if (member.DeclaringType != null)
+            {
+                return member.DeclaringType.ExportsFor(type);
+            }
+
             return false;
         }
     }
