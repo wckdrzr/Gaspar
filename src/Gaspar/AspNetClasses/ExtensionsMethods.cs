@@ -6,9 +6,9 @@ namespace WCKDRZR.Gaspar
 {
     public static class GasparExtensions
     {
-        public static bool ExportsFor(this MemberInfo menber, GasparType type)
+        public static bool ExportsFor(this MemberInfo member, GasparType type)
         {
-            CustomAttributeData customAttribute = menber.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(Gaspar.ExportForAttribute));
+            CustomAttributeData customAttribute = member.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(Gaspar.ExportForAttribute));
             if (customAttribute != null)
             {
                 bool isGasparExport = customAttribute.AttributeType == typeof(Gaspar.ExportForAttribute);
