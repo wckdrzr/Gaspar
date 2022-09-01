@@ -40,8 +40,10 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                 ClassDeclarationSyntax nodeClass = (ClassDeclarationSyntax)node.Parent;
 
                 OutputType nodeClassOutputType = nodeClass.GetExportType();
-                string nodeClassReturnTypeOverrider = nodeClass.AttributeLists.AttributeValue("ReturnTypeOverride");
-                string nodeClassCustomSerializer = nodeClass.AttributeLists.AttributeValue("Serializer");
+
+                ExportOptionsAttribute options = new ExportOptionsAttribute();
+                string nodeClassReturnTypeOverrider = nodeClass.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride));
+                string nodeClassCustomSerializer = nodeClass.AttributeLists.StringAttributeValue(nameof(options.Serializer));
 
                 if (nodeClass.IsController() && node.IsPublic())
                 {
@@ -80,13 +82,13 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                             action.ReturnType = returnGenericName.TypeArgumentList.Arguments[0];
                         }
                     }
-                    action.ReturnTypeOverride = node.AttributeLists.AttributeValue("ReturnTypeOverride") ?? nodeClassReturnTypeOverrider;
+                    action.ReturnTypeOverride = node.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride)) ?? nodeClassReturnTypeOverrider;
                     if (action.ReturnTypeOverride == null && action.ReturnType == null)
                     {
                         action.BadMethodReason = "Action should return ActionResult<T>";
                     }
 
-                    action.CustomSerializer = node.AttributeLists.AttributeValue("Serializer") ?? nodeClassCustomSerializer;
+                    action.CustomSerializer = node.AttributeLists.StringAttributeValue(nameof(options.Serializer)) ?? nodeClassCustomSerializer;
 
                     List<string> routeParameters = Regex.Matches(action.Route, "{(.*?)}").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
                     foreach (ParameterSyntax parameter in node.ParameterList.Parameters)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using WCKDRZR.Gaspar.Extensions;
 
@@ -37,11 +38,21 @@ namespace WCKDRZR.Gaspar.Models
 
     internal static class OutputTypeConverter
     {
+        public static OutputType GetExportType(this ParameterSyntax node, OutputType parentTypes = 0)
+        {
+            return node.AttributeLists.GetExportType();
+        }
+
         public static OutputType GetExportType(this MemberDeclarationSyntax node, OutputType parentTypes = 0)
+        {
+            return node.AttributeLists.GetExportType();
+        }
+
+        public static OutputType GetExportType(this SyntaxList<AttributeListSyntax> attributes, OutputType parentTypes = 0)
         {
             OutputType exportForTypes = parentTypes;
 
-            string exportForArgument = node.AttributeLists.GetAttribute("ExportFor")?.ArgumentList.Arguments[0].ToString();
+            string exportForArgument = attributes.GetAttribute("ExportFor")?.ArgumentList.Arguments[0].ToString();
             if (exportForArgument != null)
             {
                 foreach (string type in Regex.Split(exportForArgument, "[|&]"))

@@ -19,21 +19,6 @@ namespace WCKDRZR.Gaspar.Models
     {
         public string Identifier { get; set; }
         public string Type { get; set; }
-
-        public static implicit operator Property(PropertyDeclarationSyntax propertySyntax)
-        {
-            Property p = new();
-            p.Identifier = propertySyntax.Identifier.ToString();
-            p.Type = propertySyntax.Type.ToString();
-            return p;
-        }
-
-        public static implicit operator Property(FieldDeclarationSyntax field)
-        {
-            Property p = new();
-            p.Identifier = field.Declaration.Variables.First().GetText().ToString();
-            p.Type = field.Declaration.Type.ToString();
-            return p;
-        }
+        public OutputType ExportFor { get; set; }
     }
 }

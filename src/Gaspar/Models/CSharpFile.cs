@@ -142,9 +142,22 @@ namespace WCKDRZR.Gaspar.Models
         public bool HasModels => Models.Count > 0 || Enums.Count > 0;
         public bool HasControllers => Controllers.Count > 0;
 
-        public List<Model> ModelsForType(OutputType type) => Models.Where(a => a.ExportFor.HasFlag(type)).ToList();
         public List<EnumModel> EnumsForType(OutputType type) => Enums.Where(a => a.ExportFor.HasFlag(type)).ToList();
         public List<Controller> ControllersWithActionsForType(OutputType type) => Controllers.Where(c => c.ActionsForType(type).Count() > 0).ToList();
+
+        public List<Model> ModelsForType(OutputType type)
+        {
+            List<Model> modelsOfType = Models.Where(a => a.ExportFor.HasFlag(type)).ToList();
+
+            List<Model> modelsWithType = Models.Except(modelsOfType).Where(a => a.Properties.Any(p => p.ExportFor.HasFlag(type)) || a.Fields.Any(p => p.ExportFor.HasFlag(type))).ToList();
+            for (int i = 0; i < modelsWithType.Count; i++)
+            {
+                modelsWithType[i].Properties = modelsWithType[i].Properties.Where(a => a.ExportFor.HasFlag(type)).ToList();
+                modelsWithType[i].Fields = modelsWithType[i].Fields.Where(a => a.ExportFor.HasFlag(type)).ToList();
+            }
+
+            return modelsOfType.Concat(modelsWithType).ToList();
+        }
 
         public void Concat(CSharpFile file)
         {

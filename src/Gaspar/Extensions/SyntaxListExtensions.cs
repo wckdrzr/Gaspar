@@ -23,6 +23,11 @@ namespace WCKDRZR.Gaspar.Extensions
                     attributeList.Attributes.Any(attribute =>
                         attribute.Name.ToString().Equals(attributeName)));
 
+        public static bool HasAttribute(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName, bool startsWith = false)
+        {
+            return propertyAttributeList.GetAttribute(attributeName, startsWith) != null;
+        }
+
         public static AttributeSyntax GetAttribute(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName, bool startsWith = false)
         {
             foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
@@ -39,7 +44,7 @@ namespace WCKDRZR.Gaspar.Extensions
             return null;
         }
 
-        public static string AttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
+        public static string StringAttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
         {
             foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
             {
@@ -65,6 +70,27 @@ namespace WCKDRZR.Gaspar.Extensions
                 }
             }
             return null;
+        }
+
+        public static bool BoolAttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
+        {
+            foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
+            {
+                foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
+                {
+                    if (attributeSyntax.ArgumentList != null)
+                    {
+                        foreach (AttributeArgumentSyntax argument in attributeSyntax.ArgumentList.Arguments)
+                        {
+                            if (argument.NameEquals?.Name?.ToString() == attributeName)
+                            {
+                                return argument.Expression.ToString().Trim() == "true";
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
     }

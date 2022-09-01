@@ -76,6 +76,12 @@ Gaspar will still only export `public` objects for configured types.
 
 ### Optional Parameters
 
+These parameters are avaliable on the `[ExportFor]` attribute.  Note, if you are adding ExportFor only to selected class properties or methods, but would add the same options to each, you can use the `[ExportOptions]` attribute instead; which has the same parameters available.  This also works the other way round (ExportFor on the class and options on selected methods)
+
+**NoInheritance**    `bool`    When present on C# models (and set to true), the inherited base classes will not be included in the export.
+
+You can also use the `[ExportWithoutInheritance]` attribute if more convenient.
+
 **Serializer**    `string`    For C# Service Communcations, if the JSON returned by the decorated action won't deserialize through the Microsoft serializer, add your custom serialize class here, e.g.
 
 - `[ExportFor(GasparType.CSharp, Serializer = nameof(MySerializer)]`
@@ -362,8 +368,6 @@ bool ExportsFor(this MemberInfo member, GasparType type)
 ```
 
 If you have a MemberInfo object, this method will let you know if it (or it's parent class) is tagged with a given GasparType.  For example `myclass.ExportsFor(GasparType.FrontEnd)` will return true if the myclass has the `[ExportsFor(GasparType.FrontEnd)]` attribute
-
-
 
 ## Issues and Contributions
 

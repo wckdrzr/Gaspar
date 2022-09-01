@@ -7,20 +7,31 @@ namespace WCKDRZR.Gaspar
     {
         public ExportForAttribute(GasparType types) { }
 
+        public bool NoInheritance { get; set; }
+
         public string ReturnTypeOverride { get; set; }
 
         public string Serializer { get; set; }
 
+        [Obsolete("Not yet implemented")]
         public string[] ScopesOveride { get; set; } //not figured this out yet; but needs to be an option like this...
     }
 
     public class ExportOptionsAttribute : Attribute
     {
+        public bool NoInheritance { get; set; }
+
         public string ReturnTypeOverride { get; set; }
 
         public string Serializer { get; set; }
 
+        [Obsolete("Not yet implemented")]
         public string[] ScopesOveride { get; set; } //not figured this out yet; but needs to be an option like this...
+    }
+
+    public class ExportWithoutInheritance : Attribute
+    {
+
     }
 
     [Flags]
