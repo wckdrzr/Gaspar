@@ -40,12 +40,12 @@ namespace WCKDRZR.Gaspar.Models
     {
         public static OutputType GetExportType(this ParameterSyntax node, OutputType parentTypes = 0)
         {
-            return node.AttributeLists.GetExportType();
+            return node.AttributeLists.GetExportType(parentTypes);
         }
 
         public static OutputType GetExportType(this MemberDeclarationSyntax node, OutputType parentTypes = 0)
         {
-            return node.AttributeLists.GetExportType();
+            return node.AttributeLists.GetExportType(parentTypes);
         }
 
         public static OutputType GetExportType(this SyntaxList<AttributeListSyntax> attributes, OutputType parentTypes = 0)
