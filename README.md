@@ -104,6 +104,8 @@ Gaspar will export files on build.  If you would like to disable this add the fo
 
 This might be useful to temporarily disable the feature, or if you need to use the built in C# features (i.e. in a dependent project) but don't want the export.
 
+You can also use this on the command line: `dotnet build /p:RunGaspar=False`
+
 ## Well Written Controller Actions
 
 Gaspar will export all your controller actions, but they must be written in a way that Gaspar can understand.  This will improve your overall code quality, not just meet arbitrary rules.  If Gaspar can't understand the action, it may export a skeleton method marked 'depreciated' or 'obsolete' with a friendly error message.
@@ -238,7 +240,7 @@ You must supply either Models or Controllers, but you don't need both; all other
 
 **CustomTypeTranslations**    `Array of string pairs: [{"X": "Y"}, {"A": "B"}]`    For TypeScript and Angular, you can override type names to objects TypeScript will understand.  e.g. `{ "IMyInterface": "Object" }`
 
-**IgnoreMissingOutputLocations**    `bool: default false`    If the file output location cannot be found, you will get a build error; add `"IgnoreMissingOutputLocations": true` to skip the error.  This is useful when you need to build in an environment where the output may not be available (e.g. docker)
+**IgnoreMissingOutputLocations**    `bool: default false`    If the file output location cannot be found, you will get a build error; add `"IgnoreMissingOutputLocations": true` to skip the error.  This is useful when you need to build in an environment where the output may not be available (e.g. docker); although it would usually be preferable to use `dotnet build /p:RunGaspar=False` in your scripts.
 
 **IgnoreAnnotations**    `bool: default false`    Set this to true to export all objects irrespective if they have `[ExportFor]` or not.
 
