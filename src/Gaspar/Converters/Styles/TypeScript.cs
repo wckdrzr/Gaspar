@@ -41,8 +41,9 @@ namespace WCKDRZR.Gaspar.Converters
         public string arrayRegex = /*language=regex*/ @"^(.+)\[\]$";
         public string simpleCollectionRegex = /*language=regex*/ @"^(?:I?List|IReadOnlyList|IEnumerable|ICollection|IReadOnlyCollection|HashSet)<([\w\d]+)>\??$";
         public string collectionRegex = /*language=regex*/ @"^(?:I?List|IReadOnlyList|IEnumerable|ICollection|IReadOnlyCollection|HashSet)<(.+)>\??$";
-        public string simpleDictionaryRegex = /*language=regex*/ @"^(?:I?Dictionary|SortedDictionary|IReadOnlyDictionary)<([\w\d]+)\s*,\s*([\w\d]+)>\??$";
-        public string dictionaryRegex = /*language=regex*/ @"^(?:I?Dictionary|SortedDictionary|IReadOnlyDictionary)<([\w\d]+)\s*,\s*(.+)>\??$";
+        public string simpleDictionaryRegex = /*language=regex*/ @"^(?:I?Dictionary|OrderedDictionary|SortedDictionary|IReadOnlyDictionary)<([\w\d]+)\s*,\s*([\w\d]+)>\??$";
+        public string dictionaryRegex = /*language=regex*/ @"^(?:I?Dictionary|OrderedDictionary|SortedDictionary|IReadOnlyDictionary)<([\w\d]+)\s*,\s*(.+)>\??$";
+        public string keyValuePairRegex = /*language=regex*/ @"^KeyValuePair<([\w\d]+)\s*,\s*(.+)>\??$";
 
 
         public TypeScriptConverter(Configuration config)
@@ -206,6 +207,12 @@ namespace WCKDRZR.Gaspar.Converters
             return $"Record<{ConvertType(dictionary.At(1))}, {ConvertType(propType)}>";
         }
 
+        public string ConvertKeyValue(string record)
+        {
+            MatchCollection keyValue = Regex.Matches(record, keyValuePairRegex);
+            return $"{{ key: {ConvertType(keyValue.At(1))}, value: {ConvertType(keyValue.At(2))} }}";
+        }
+
         public string ConvertIdentifier(string identifier) => JsonNamingPolicy.CamelCase.ConvertName(identifier);
 
         public string GetEnumStringValue(string value) => JsonNamingPolicy.CamelCase.ConvertName(value);
@@ -231,6 +238,7 @@ namespace WCKDRZR.Gaspar.Converters
 
             MatchCollection collection = Regex.Matches(propType, collectionRegex);
             MatchCollection dictionary = Regex.Matches(propType, dictionaryRegex);
+            MatchCollection keyvalue = Regex.Matches(propType, keyValuePairRegex);
 
             string type;
 
@@ -243,6 +251,10 @@ namespace WCKDRZR.Gaspar.Converters
             else if (dictionary.HasMatch())
             {
                 type = $"{ConvertRecord(propType)}";
+            }
+            else if (keyvalue.HasMatch())
+            {
+                type = $"{ConvertKeyValue(propType)}";
             }
             else
             {
