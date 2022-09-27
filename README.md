@@ -44,7 +44,7 @@ That's all; play with the config and see what you can do...
 
 ## [ExportFor(*type*)] Attribute
 
-In order for your models to be exported, you need to add the `[ExportFor(...)]` decorator to the classes and controller actions you want to export.  For controllers, you can add to the controller class.  Actions within a decorated controller can also be decorated to supplement the parent class attribute.
+In order for your models to be exported, you need to add the `[ExportFor(...)]` decorator to the classes, properties and controller actions you want to export.  For controllers, you can add to the controller class.  Properties and Actions within a decorated class can also be decorated to supplement the parent class attribute.
 
 The attribute has one required parameter `GasparType types`. This is the type of export you want, or a group of exports you want.  Use bitwise operators for multiple types, for example:
 
@@ -82,7 +82,7 @@ These parameters are avaliable on the `[ExportFor]` attribute.  Note, if you are
 
 You can also use the `[ExportWithoutInheritance]` attribute if more convenient.
 
-**Serializer**    `string`    For C# Service Communcations, if the JSON returned by the decorated action won't deserialize through the Microsoft serializer, add your custom serialize class here, e.g.
+**Serializer**    `string`    For C# Service Communcations, if the JSON returned by the decorated action won't deserialize through the Newtonsoft serializer, add your custom serialize class here, e.g.
 
 - `[ExportFor(GasparType.CSharp, Serializer = nameof(MySerializer)]`
 

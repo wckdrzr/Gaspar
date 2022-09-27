@@ -148,6 +148,11 @@ namespace WCKDRZR.Gaspar.Models
         public List<Model> ModelsForType(OutputType type)
         {
             List<Model> modelsOfType = Models.Where(a => a.ExportFor.HasFlag(type)).ToList();
+            for (int i = 0; i < modelsOfType.Count; i++)
+            {
+                modelsOfType[i].Properties = modelsOfType[i].Properties.Except(modelsOfType[i].Properties.Where(a => !a.ExportFor.HasFlag(type))).ToList();
+                modelsOfType[i].Fields = modelsOfType[i].Fields.Except(modelsOfType[i].Fields.Where(a => !a.ExportFor.HasFlag(type))).ToList();
+            }
 
             List<Model> modelsWithType = Models.Except(modelsOfType).Where(a => a.Properties.Any(p => p.ExportFor.HasFlag(type)) || a.Fields.Any(p => p.ExportFor.HasFlag(type))).ToList();
             for (int i = 0; i < modelsWithType.Count; i++)
