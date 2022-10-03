@@ -366,10 +366,18 @@ For Proto Models (required)
 Provided for convenience when using Gaspar tagged data:
 
 ```csharp
-bool ExportsFor(this MemberInfo member, GasparType type)
+bool ExportsFor(this TypeInfo member, GasparType type, bool includeParent = true, bool anyChildrenMatch = false)
+bool ExportsFor(this Type member, GasparType type, bool includeParent = true, bool anyChildrenMatch = false)
+bool ExportsFor(this MemberInfo member, GasparType type, bool includeParent = true, bool anyChildrenMatch = false)
 ```
 
-If you have a MemberInfo object, this method will let you know if it (or it's parent class) is tagged with a given GasparType.  For example `myclass.ExportsFor(GasparType.FrontEnd)` will return true if the myclass has the `[ExportsFor(GasparType.FrontEnd)]` attribute
+These methods will let you know if it the object (TypeInfo, System.Type or MemberInfo) is tagged with a given GasparType.
+
+For example `myclass.ExportsFor(GasparType.FrontEnd)` will return true if the myclass has the `[ExportsFor(GasparType.FrontEnd)]` attribute
+
+Set `includeParent` to false to only look at the passed object, and not it's parent
+
+Set `anyChildrenMatch` to true to return true if any of the child members have the ExportFor attribute.
 
 ## Issues and Contributions
 
