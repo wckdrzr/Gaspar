@@ -39,6 +39,7 @@ namespace WCKDRZR.Gaspar.Converters
         {
             List<string> lines = new();
 
+            lines.Add("import { HttpErrorResponse } from \"@angular/common/http\";");
             lines.Add("import { Injectable } from \"@angular/core\";");
             lines.Add("import { of } from \"rxjs\";");
             if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
@@ -80,10 +81,21 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("    }");
             }
             lines.Add("    handler<T>(error: ActionResultError, showError: ServiceErrorMessage) {");
+            lines.Add("        if (error == null) {");
+            lines.Add("            error = { status: 404, title: 'Not Found' } as ActionResultError;");
+            lines.Add("        }");
+            lines.Add("        if (error instanceof HttpErrorResponse) {");
+            lines.Add("            let httpError = error as HttpErrorResponse;");
+            lines.Add("            if (httpError.error) {");
+            lines.Add("                error = httpError.error;");
+            lines.Add("            } else {");
+            lines.Add("                error = { status: httpError.status, title: httpError.statusText, detail: httpError.message } as ActionResultError;");
+            lines.Add("            }");
+            lines.Add("        }");
             if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
             {
                 lines.Add("        if (showError != ServiceErrorMessage.None) {");
-                lines.Add("            this.errorHandler.showError(showError == ServiceErrorMessage.ServerResponse && error?.detail ? error.detail : null);");
+                lines.Add("            this.errorHandler.showError(showError == ServiceErrorMessage.ServerResponse && (error?.detail || error?.title) ? error.detail || error.title : null);");
                 lines.Add("        }");
             }
             lines.Add("        return of(new ServiceResponse<T>(null, error));");
