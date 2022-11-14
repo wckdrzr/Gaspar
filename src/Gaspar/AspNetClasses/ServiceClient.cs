@@ -47,9 +47,10 @@ namespace WCKDRZR.Gaspar
             {
                 if (serializer == null)
                 {
+                    string responseString = httpResponse.Content.ReadAsStringAsync().Result;
                     return new ServiceResponse<T>
                     {
-                        Data = JsonConvert.DeserializeObject<T>(httpResponse.Content.ReadAsStringAsync().Result),
+                        Data = typeof(T) == typeof(string) ? (T)(object)responseString : JsonConvert.DeserializeObject<T>(responseString),
                         Error = null
                     };
                 }
