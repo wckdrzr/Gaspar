@@ -180,11 +180,11 @@ namespace WCKDRZR.Gaspar.Converters
         public string ConvertProperty(Property property)
         {
             bool optional = property.Type.EndsWith("?");
-            string identifier = ConvertIdentifier(optional ? $"{property.Identifier.Split(' ')[0]}?" : property.Identifier.Split(" ")[0]);
+            string identifier = ConvertIdentifier(property.Identifier.Split(' ')[0]);
 
             string type = ParseType(property.Type);
 
-            return $"{identifier}: {type}";
+            return $"{identifier}: {type}" + (optional && !type.EndsWith(" | null") ? " | null" : "");
         }
 
         public string ConvertIndexType(string indexType)
