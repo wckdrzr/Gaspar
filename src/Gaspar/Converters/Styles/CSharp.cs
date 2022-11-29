@@ -92,19 +92,26 @@ namespace WCKDRZR.Gaspar.Converters
                     string loggingReceiver = (outputConfig.LoggingReceiver == null) ? "null" : $"typeof({outputConfig.LoggingReceiver})";
                     string customSerializer = (action.CustomSerializer == null) ? "null" : $"typeof({action.CustomSerializer})";
 
-                    string returnTypeString = action.ReturnType.ToString();
-                    if ((action.ReturnType is PredefinedTypeSyntax && action.ReturnType is not NullableTypeSyntax && returnTypeString != "string") || returnTypeString == "DateTime")
+                    string returnTypeString = "";
+                    string fetchMethodName = "FetchVoidAsync";
+                    if (action.ReturnType != null)
                     {
-                        returnTypeString += "?";
+                        returnTypeString = action.ReturnType.ToString();
+                        if ((action.ReturnType is PredefinedTypeSyntax && action.ReturnType is not NullableTypeSyntax && returnTypeString != "string") || returnTypeString == "DateTime")
+                        {
+                            returnTypeString += "?";
+                        }
+                        returnTypeString = $"<{returnTypeString}>";
+                        fetchMethodName = "FetchAsync";
                     }
 
-                    lines.Add($"        public static ServiceResponse<{returnTypeString}> {action.ActionName}({string.Join(", ", parameters)})");
+                    lines.Add($"        public static ServiceResponse{returnTypeString} {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return ServiceClient.FetchAsync<{returnTypeString}>(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, {loggingReceiver}, {customSerializer}).Result;");
+                    lines.Add($"            return ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, {loggingReceiver}, {customSerializer}).Result;");
                     lines.Add($"        }}");
-                    lines.Add($"        public static async Task<ServiceResponse<{returnTypeString}>> {action.ActionName}Async({string.Join(", ", parameters)})");
+                    lines.Add($"        public static async Task<ServiceResponse{returnTypeString}> {action.ActionName}Async({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return await ServiceClient.FetchAsync<{returnTypeString}>(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, {loggingReceiver}, {customSerializer});");
+                    lines.Add($"            return await ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, {loggingReceiver}, {customSerializer});");
                     lines.Add($"        }}");
                 }
             }

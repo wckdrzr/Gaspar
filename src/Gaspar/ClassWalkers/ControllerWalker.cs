@@ -83,11 +83,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                         }
                     }
                     action.ReturnTypeOverride = node.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride)) ?? nodeClassReturnTypeOverrider;
-                    if (action.ReturnTypeOverride == null && action.ReturnType == null)
-                    {
-                        action.BadMethodReason = "Action should return ActionResult<T>";
-                    }
-
+                    
                     action.CustomSerializer = node.AttributeLists.StringAttributeValue(nameof(options.Serializer)) ?? nodeClassCustomSerializer;
 
                     List<string> routeParameters = Regex.Matches(action.Route, "{(.*?)}").Cast<Match>().Select(m => m.Groups[1].Value).ToList();

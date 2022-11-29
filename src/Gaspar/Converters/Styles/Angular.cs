@@ -206,7 +206,7 @@ namespace WCKDRZR.Gaspar.Converters
                         bodyParam = $", {{ body: {action.BodyParameter?.Identifier ?? "null"} }}";
                     }
 
-                    string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType.ToString());
+                    string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null");
 
                     lines.Add($"        {actionName}({string.Join(", ", parameters)}): Observable<ServiceResponse<{returnType}>> {{");
                     lines.Add($"            return this.http.{httpMethod}<{returnType}>(`{url}`{bodyParam}).pipe(");
