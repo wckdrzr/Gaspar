@@ -20,6 +20,10 @@ namespace WCKDRZR.Gaspar.Extensions
                 if (idValue == "id" && tokens.Count > 6)
                 {
                     idValue = tokens[6].Value.ToString();
+                    if (idValue == "-" && tokens.Count > 7)
+                    {
+                        idValue += tokens[7].Value.ToString();
+                    }
                 }
 
                 values[variable.GetFirstToken().ToString()] = idValue;
