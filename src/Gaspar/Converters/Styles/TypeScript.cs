@@ -28,6 +28,8 @@ namespace WCKDRZR.Gaspar.Converters
             { "decimal", "number" },
             { "bool", "boolean" },
             { "DateTime", "string" },
+            { "DateOnly", "string" },
+            { "TimeOnly", "string" },
             { "DateTimeOffset", "string" },
             { "DataTable", "Object" },
             { "Guid", "string" },
