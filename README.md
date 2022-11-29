@@ -70,7 +70,7 @@ The attribute has one required parameter `GasparType types`. This is the type of
 
 ### Export Everything
 
- If you want to export everything without adding the `[ExportFor]` decorator, you can add `"IgnoreAnotations": true` to the root of the config file.
+ If you want to export everything without adding the `[ExportFor]` decorator, you can add `"IgnoreAnnotations": true` to the root of the config file.
 
 Gaspar will still only export `public` objects for configured types.
 
