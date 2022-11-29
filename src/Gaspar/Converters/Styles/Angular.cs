@@ -179,10 +179,6 @@ namespace WCKDRZR.Gaspar.Converters
                     }
                     parameters.Add(newParam);
                 }
-                if (action.BodyType != null)
-                {
-                    parameters.Add($"body: {TypeScriptConverter.ParseType(action.BodyType)}");
-                }
                 if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
                 {
                     parameters.Add($"showError = ServiceErrorMessage.{outputConfig.DefaultErrorMessage}");
@@ -203,11 +199,11 @@ namespace WCKDRZR.Gaspar.Converters
                     string httpMethod = action.HttpMethod.ToLower();
                     if (httpMethod == "post" || httpMethod == "put")
                     {
-                        bodyParam = $", {(action.BodyType != null ? "body" : "null")}";
+                        bodyParam = $", {action.BodyParameter?.Identifier ?? "null"}";
                     }
-                    if (httpMethod == "delete" && action.BodyType != null)
+                    if (httpMethod == "delete" && action.BodyParameter != null)
                     {
-                        bodyParam = ", { body: body }";
+                        bodyParam = $", {{ body: {action.BodyParameter?.Identifier ?? "null"} }}";
                     }
 
                     string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType.ToString());

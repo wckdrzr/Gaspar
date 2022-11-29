@@ -100,7 +100,6 @@ namespace WCKDRZR.Gaspar.Models
                         }
                         AddUniqueCustomType(ref types, action.ReturnTypeOverride);
                         if (action.ReturnTypeOverride == null) { AddUniqueCustomType(ref types, action.ReturnType); }
-                        AddUniqueCustomType(ref types, action.BodyType);
                     }
                 }
             }

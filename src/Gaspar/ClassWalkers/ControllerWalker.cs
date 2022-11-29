@@ -93,30 +93,28 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     List<string> routeParameters = Regex.Matches(action.Route, "{(.*?)}").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
                     foreach (ParameterSyntax parameter in node.ParameterList.Parameters)
                     {
+                        bool onQueryString = false;
                         if (parameter.AttributeLists.ContainsAttribute("FromBody"))
                         {
-                            action.BodyType = parameter.Type;
+                            action.BodyParameter = new(parameter, false);
                             if (action.HttpMethod == "GET")
                             {
                                 action.BadMethodReason = $"HttpGet has [FromBody] attribute; remove parameter or change from HttpGet";
                             }
                         }
-                        else
+                        else if (!routeParameters.Contains(parameter.Identifier.ToString()))
                         {
-                            bool onQueryString = false;
-                            if (!routeParameters.Contains(parameter.Identifier.ToString()))
+                            if (action.HttpMethod == "GET")
                             {
-                                if (action.HttpMethod == "GET")
-                                {
-                                    onQueryString = true;
-                                }
-                                else
-                                {
-                                    action.BadMethodReason = $"Parameter '{parameter.Identifier}' not declared in route; include in route or change to HttpGet";
-                                }
+                                onQueryString = true;
                             }
-                            action.Parameters.Add(new(parameter, onQueryString));
+                            else
+                            {
+                                action.BadMethodReason = $"Parameter '{parameter.Identifier}' not declared in route; include in route or change to HttpGet";
+                            }
                         }
+
+                        action.Parameters.Add(new(parameter, onQueryString));                        
                     }
                     List<string> missingParameters = routeParameters.Except(action.Parameters.Select(ap => ap.Identifier)).ToList();
                     if (missingParameters.Count > 0)

@@ -40,8 +40,8 @@ namespace WCKDRZR.Gaspar.Models
         public TypeSyntax ReturnType { get; set; }
         public string ReturnTypeOverride { get; set; }
 
-        public TypeSyntax BodyType { get; set; }
         public List<Parameter> Parameters { get; set; }
+        public Parameter BodyParameter { get; set; }
 
         public string CustomSerializer { get; set; }
 
@@ -58,6 +58,7 @@ namespace WCKDRZR.Gaspar.Models
             ActionName = name;
             ReturnType = null;
             Parameters = new();
+            BodyParameter = null;
 
             OutputActionName = ActionName;
         }

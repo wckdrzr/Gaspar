@@ -71,10 +71,6 @@ namespace WCKDRZR.Gaspar.Converters
                     }
                     parameters.Add(newParam);
                 }
-                if (action.BodyType != null)
-                {
-                    parameters.Add($"{action.BodyType} body");
-                }
 
                 if (action.BadMethodReason != null)
                 {
@@ -104,11 +100,11 @@ namespace WCKDRZR.Gaspar.Converters
 
                     lines.Add($"        public static ServiceResponse<{returnTypeString}> {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return ServiceClient.FetchAsync<{returnTypeString}>(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}, {loggingReceiver}, {customSerializer}).Result;");
+                    lines.Add($"            return ServiceClient.FetchAsync<{returnTypeString}>(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, {loggingReceiver}, {customSerializer}).Result;");
                     lines.Add($"        }}");
                     lines.Add($"        public static async Task<ServiceResponse<{returnTypeString}>> {action.ActionName}Async({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
-                    lines.Add($"            return await ServiceClient.FetchAsync<{returnTypeString}>(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {(action.BodyType != null ? "body" : "null")}, {loggingReceiver}, {customSerializer});");
+                    lines.Add($"            return await ServiceClient.FetchAsync<{returnTypeString}>(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, {loggingReceiver}, {customSerializer});");
                     lines.Add($"        }}");
                 }
             }
