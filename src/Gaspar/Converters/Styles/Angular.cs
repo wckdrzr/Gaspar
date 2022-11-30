@@ -25,9 +25,9 @@ namespace WCKDRZR.Gaspar.Converters
             return $"{new String(' ', currentIndent * 4)}//{comment}{new String('\n', followingBlankLines)}";
         }
 
-        public List<string> ConvertModel(Model model)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig)
         {
-            return TypeScriptConverter.ConvertModel(model);
+            return TypeScriptConverter.ConvertModel(model, outputConfig);
         }
 
         public List<string> ConvertEnum(EnumModel enumModel)
@@ -113,8 +113,8 @@ namespace WCKDRZR.Gaspar.Converters
             List<string> parsedCustomTypes = new();
             foreach (string type in customTypes)
             {
-                string parsed = TypeScriptConverter.ParseType(type);
-                if (parsed != "string" && parsed != "string | null" && !parsedCustomTypes.Contains(parsed))
+                string parsed = TypeScriptConverter.ParseType(type, outputConfig, allowAddNull: false);
+                if (parsed != "string" && !parsedCustomTypes.Contains(parsed))
                 {
                     parsedCustomTypes.Add(parsed);
                 }
@@ -168,7 +168,7 @@ namespace WCKDRZR.Gaspar.Converters
                 List<string> parameters = new();
                 foreach (Parameter parameter in action.Parameters)
                 {
-                    string newParam = $"{parameter.Identifier}: {TypeScriptConverter.ParseType(parameter.Type.ToString())}";
+                    string newParam = $"{parameter.Identifier}: {TypeScriptConverter.ParseType(parameter.Type.ToString(), outputConfig)}";
                     if (parameter.DefaultValue != null)
                     {
                         if (parameter.DefaultValue == "null" && !newParam.Contains("null"))
@@ -206,7 +206,7 @@ namespace WCKDRZR.Gaspar.Converters
                         bodyParam = $", {{ body: {action.BodyParameter?.Identifier ?? "null"} }}";
                     }
 
-                    string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null");
+                    string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);
 
                     lines.Add($"        {actionName}({string.Join(", ", parameters)}): Observable<ServiceResponse<{returnType}>> {{");
                     lines.Add($"            return this.http.{httpMethod}<{returnType}>(`{url}`{bodyParam}).pipe(");

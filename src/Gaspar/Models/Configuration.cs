@@ -78,6 +78,9 @@ namespace WCKDRZR.Gaspar.Models
         public bool NoAuth { get; set; }
         public bool ExcludeScopes { get; set; }
 
+        //For Typescript/Angular Models and Controllers
+        public bool AddInferredNullables { get; set; }
+
         //For Proto Models
         public string PackageNamespace { get; set; }
 
@@ -85,6 +88,7 @@ namespace WCKDRZR.Gaspar.Models
         {
             NoAuth = false;
             ExcludeScopes = false;
+            AddInferredNullables = false;
         }
     }
 

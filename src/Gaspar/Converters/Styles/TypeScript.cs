@@ -58,7 +58,7 @@ namespace WCKDRZR.Gaspar.Converters
             return $"//{comment}{new String('\n', followingBlankLines)}";
         }
 
-        public List<string> ConvertModel(Model model)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig)
         {
             List<string> lines = new();
 
@@ -95,12 +95,12 @@ namespace WCKDRZR.Gaspar.Converters
 
             if (indexSignature != null)
             {
-                lines.Add($"    {ConvertIndexType(indexSignature)};");
+                lines.Add($"    {ConvertIndexType(indexSignature, outputConfig)};");
             }
 
             foreach (Property member in model.Fields.Concat(model.Properties))
             {
-                lines.Add($"    {ConvertProperty(member)};");
+                lines.Add($"    {ConvertProperty(member, outputConfig)};");
             }
 
             lines.Add("}\n");
@@ -179,32 +179,30 @@ namespace WCKDRZR.Gaspar.Converters
 
 
 
-        public string ConvertProperty(Property property)
+        public string ConvertProperty(Property property, ConfigurationTypeOutput outputConfig)
         {
-            bool optional = property.Type.EndsWith("?");
             string identifier = ConvertIdentifier(property.Identifier.Split(' ')[0]);
+            string type = ParseType(property.Type, outputConfig);
 
-            string type = ParseType(property.Type);
-
-            return $"{identifier}: {type}" + (optional && !type.EndsWith(" | null") ? " | null" : "");
+            return $"{identifier}: {type}";
         }
 
-        public string ConvertIndexType(string indexType)
+        public string ConvertIndexType(string indexType, ConfigurationTypeOutput outputConfig)
         {
             MatchCollection dictionary = Regex.Matches(indexType, dictionaryRegex);
             MatchCollection simpleDictionary = Regex.Matches(indexType, simpleDictionaryRegex);
 
-            string propType = simpleDictionary.HasMatch() ? dictionary.At(2) : ParseType(dictionary.At(2));
+            string propType = simpleDictionary.HasMatch() ? dictionary.At(2) : ParseType(dictionary.At(2), outputConfig);
 
             return $"[key: {ConvertType(dictionary.At(1))}]: {ConvertType(propType)}";
         }
 
-        public string ConvertRecord(string record)
+        public string ConvertRecord(string record, ConfigurationTypeOutput outputConfig)
         {
             MatchCollection dictionary = Regex.Matches(record, dictionaryRegex);
             MatchCollection simpleDictionary = Regex.Matches(record, simpleDictionaryRegex);
 
-            string propType = simpleDictionary.HasMatch() ? dictionary.At(2) : ParseType(dictionary.At(2));
+            string propType = simpleDictionary.HasMatch() ? dictionary.At(2) : ParseType(dictionary.At(2), outputConfig);
 
             return $"Record<{ConvertType(dictionary.At(1))}, {ConvertType(propType)}>";
         }
@@ -219,11 +217,11 @@ namespace WCKDRZR.Gaspar.Converters
 
         public string GetEnumStringValue(string value) => JsonNamingPolicy.CamelCase.ConvertName(value);
 
-        public string ParseType(TypeSyntax propType)
+        public string ParseType(TypeSyntax propType, ConfigurationTypeOutput outputConfig)
         {
-            return ParseType(propType.ToString());
+            return ParseType(propType.ToString(), outputConfig);
         }
-        public string ParseType(string propType)
+        public string ParseType(string propType, ConfigurationTypeOutput outputConfig, bool allowAddNull = true)
         {
             if (TypeTranslations.ContainsKey(propType))
             {
@@ -247,12 +245,12 @@ namespace WCKDRZR.Gaspar.Converters
             if (collection.HasMatch())
             {
                 MatchCollection simpleCollection = Regex.Matches(propType, simpleCollectionRegex);
-                propType = simpleCollection.HasMatch() ? collection.At(1) : ParseType(collection.At(1));
+                propType = simpleCollection.HasMatch() ? collection.At(1) : ParseType(collection.At(1), outputConfig);
                 type = $"{ConvertType(propType)}[]";
             }
             else if (dictionary.HasMatch())
             {
-                type = $"{ConvertRecord(propType)}";
+                type = $"{ConvertRecord(propType, outputConfig)}";
             }
             else if (keyvalue.HasMatch())
             {
@@ -260,15 +258,21 @@ namespace WCKDRZR.Gaspar.Converters
             }
             else
             {
-                bool optional = propType.EndsWith("?");
-                type = ConvertType(optional ? propType[0..^1] : propType);
-                if (type == "string" && !isArray)
-                {
-                    type = "string | null";
-                }
+                type = ConvertType(propType.EndsWith("?") ? propType[0..^1] : propType);
             }
 
+            if (allowAddNull && IsOptional(propType, outputConfig))
+            {
+                type += " | null";
+            }
             return isArray ? $"{type}[]" : type;
+        }
+
+        private bool IsOptional(string propertyName, ConfigurationTypeOutput outputConfig)
+        {
+            List<string> explicitlyNulled = new() { "number", "boolean", "any" };
+            return propertyName.EndsWith("?")
+                || (outputConfig.AddInferredNullables && !explicitlyNulled.Contains(propertyName));
         }
 
         public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)

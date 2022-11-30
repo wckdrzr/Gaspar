@@ -314,6 +314,12 @@ For CSharp controllers (all optional):
 
 - **ModelNamespaces**    `Array of strings`    List of namespaces to include at the top of your exported Service Communication class.  This would inculde the namespaces to custom types in the export, or your serializer and logging tools
 
+For TypeScript and Angular models and controllers (all optional)
+
+- **AddInferredNullables**    `boolean`    Property types that are explicitly nullable (e.g. `int?`) will always be outputed with `null` types (e.g. `number | null`).  Set this property to true to add null types to C# types that could be null if unset.
+  
+  In short, if your C# project doesn't enable "nullable annotation context", set this to true.
+
 For Angular controllers (all optional):
 
 - **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests.  This is the name of the file that should be exported.  If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
@@ -328,9 +334,9 @@ For Angular controllers (all optional):
   @Injectable({ providedIn: 'root' })
   export class ServiceErrorHandler {
   {
-      showError(message: string | null): void {
-          message = message ?? "An unknown error has occurred";
-          //handle error
+      showError(message: string | null): void {
+          message = message ?? "An unknown error has occurred";
+          //show error to user
       }
   }
   ```

@@ -13,7 +13,7 @@ namespace WCKDRZR.Gaspar.Converters
         Configuration Config { get; set; }
 
         List<string> ModelHeader(ConfigurationTypeOutput outputConfig);
-        List<string> ConvertModel(Model model);
+        List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig);
         List<string> ConvertEnum(EnumModel enumModel);
 
         List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig);
@@ -25,12 +25,12 @@ namespace WCKDRZR.Gaspar.Converters
 
         void PreProcess(CSharpFiles files);
 
-        public virtual List<string> ConvertModels(List<Model> models)
+        public virtual List<string> ConvertModels(List<Model> models, ConfigurationTypeOutput outputConfig)
         {
             List<string> lines = new List<string>();
             foreach (Model model in models)
             {
-                lines.AddRange(this.ConvertModel(model));
+                lines.AddRange(this.ConvertModel(model, outputConfig));
             }
             return lines;
         }
@@ -91,7 +91,7 @@ namespace WCKDRZR.Gaspar.Converters
 
                         modelCount += modelsForType.Count + enumsForType.Count;
 
-                        lines.AddRange(converter.ConvertModels(modelsForType));
+                        lines.AddRange(converter.ConvertModels(modelsForType, outputConfig));
                         lines.AddRange(converter.ConvertEnums(enumsForType));
                     }
                 }

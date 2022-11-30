@@ -106,7 +106,7 @@ namespace WCKDRZR.Gaspar.Converters
             throw new NotImplementedException();
         }
 
-        public List<string> ConvertModel(Model model)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig)
         {
             throw new NotImplementedException();
         }
