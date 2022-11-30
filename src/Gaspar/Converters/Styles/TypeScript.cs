@@ -264,6 +264,10 @@ namespace WCKDRZR.Gaspar.Converters
             if (allowAddNull && IsOptional(propType, outputConfig))
             {
                 type += " | null";
+                if (outputConfig.NullablesAlsoUndefinded)
+                {
+                    type += " | undefined";
+                }
             }
             return isArray ? $"{type}[]" : type;
         }

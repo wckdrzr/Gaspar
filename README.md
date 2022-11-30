@@ -320,6 +320,8 @@ For TypeScript and Angular models and controllers (all optional)
   
   In short, if your C# project doesn't enable "nullable annotation context", set this to true.
 
+- **NullablesAlsoUndefinded**    `boolean`    If set to true, all nullable properties (those exported with `| null`) will additional have `| undefined` added to the type.
+
 For Angular controllers (all optional):
 
 - **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests.  This is the name of the file that should be exported.  If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
