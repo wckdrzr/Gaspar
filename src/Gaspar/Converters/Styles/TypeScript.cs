@@ -261,6 +261,10 @@ namespace WCKDRZR.Gaspar.Converters
                 type = ConvertType(propType.EndsWith("?") ? propType[0..^1] : propType);
             }
 
+            if (isArray)
+            {
+                type += "[]";
+            }
             if (allowAddNull && IsOptional(propType, outputConfig))
             {
                 type += " | null";
@@ -269,7 +273,7 @@ namespace WCKDRZR.Gaspar.Converters
                     type += " | undefined";
                 }
             }
-            return isArray ? $"{type}[]" : type;
+            return type;
         }
 
         private bool IsOptional(string propertyName, ConfigurationTypeOutput outputConfig)
