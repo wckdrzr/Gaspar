@@ -132,6 +132,8 @@ When using the exported service communication endpoints, you will receive a `Ser
 
 **Error** is an `ActionResultError` object that contains all the data returned when using an ActionResult (e.g. `NotFound()` or `Problem()`).  If the error isn't from the Action (e.g. an error in the serializer or the endpoint wasn't reachable) the ActionResultError will be populated appropriately.
 
+*if your action returns `void`, the return object will not include Data*
+
 ### Convenience methods
 
 ServiceResponse has the following convenience methods that you can use:
