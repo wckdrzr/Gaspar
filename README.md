@@ -116,9 +116,7 @@ Improve your actions as follows:
 
 - Actions should be decorated with an http method and route, e.g. `[HttpPost("[controller]/[action]")]`
 
-- 
-
-Other recommendations (not reuired, but good practice):
+Other recommendations (not required, but good practice):
 
 - Have you controller actions return `ActionResult<T>`. This will provide a strongly-typed interface in the service communication endpoints.
 
