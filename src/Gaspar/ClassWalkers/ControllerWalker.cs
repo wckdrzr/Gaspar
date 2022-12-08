@@ -104,14 +104,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                         }
                         else if (!routeParameters.Contains(parameter.Identifier.ToString()))
                         {
-                            if (action.HttpMethod == "GET")
-                            {
-                                onQueryString = true;
-                            }
-                            else
-                            {
-                                action.BadMethodReason = $"Parameter '{parameter.Identifier}' not declared in route; include in route or change to HttpGet";
-                            }
+                            onQueryString = true;
                         }
 
                         action.Parameters.Add(new(parameter, onQueryString));                        

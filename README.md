@@ -116,7 +116,7 @@ Improve your actions as follows:
 
 - Actions should be decorated with an http method and route, e.g. `[HttpPost("[controller]/[action]")]`
 
-- Action parameters will be added to the querystring (as you would expect), but only if the method is `HttpGet`.  If the action isn't `HttpGet` parameters must be either in the route (`[HttpPost("[controller]/{my_param}")]`) or an object decorated with `[FromBody]`
+- 
 
 Other recommendations (not reuired, but good practice):
 
