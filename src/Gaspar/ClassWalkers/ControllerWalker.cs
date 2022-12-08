@@ -74,13 +74,17 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                         action.Route = controller.ControllerName + "/" + action.ActionName;
                     }
 
-                    if (node.ReturnType is GenericNameSyntax)
+                    if (node.ReturnType is GenericNameSyntax && ((GenericNameSyntax)node.ReturnType).Identifier.ToString() == "ActionResult")
                     {
-                        GenericNameSyntax returnGenericName = (GenericNameSyntax)node.ReturnType;
-                        if (returnGenericName.Identifier.ToString() == "ActionResult")
-                        {
-                            action.ReturnType = returnGenericName.TypeArgumentList.Arguments[0];
-                        }
+                        action.ReturnType = ((GenericNameSyntax)node.ReturnType).TypeArgumentList.Arguments[0];
+                    }
+                    else if (node.ReturnType.ToString() == "IActionResult" || node.ReturnType.ToString() == "ActionResult")
+                    {
+                        action.ReturnType = SyntaxFactory.IdentifierName(SyntaxFactory.Identifier("string"));
+                    }
+                    else if (node.ReturnType.ToString() != "void")
+                    {
+                        action.ReturnType = node.ReturnType;
                     }
                     action.ReturnTypeOverride = node.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride)) ?? nodeClassReturnTypeOverrider;
                     

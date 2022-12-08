@@ -12,7 +12,7 @@ namespace WCKDRZR.Gaspar
     {
         public static async Task<ServiceResponse> FetchVoidAsync(HttpMethod method, string url, dynamic body, Type logReceiver, Type serializer)
         {
-            return await FetchAsync(method, url, body, logReceiver, serializer);
+            return await FetchAsync<VoidObject>(method, url, body, logReceiver, serializer);
         }
 
         public static async Task<ServiceResponse<T>> FetchAsync<T>(HttpMethod method, string url, dynamic body, Type logReceiver, Type serializer)

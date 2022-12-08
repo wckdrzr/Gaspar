@@ -15,4 +15,6 @@ namespace WCKDRZR.Gaspar.Models
     {
         public T Data { get; set; }
     }
+
+    public class VoidObject { }
 }

@@ -114,21 +114,23 @@ Improve your actions as follows:
 
 - Controller classes must be derived from `Controller` or `ControllerBase`
 
-- Actions must return `ActionResult<T>`.  This is required to provide a strongly-typed interface in the service communication endpoints.
-
 - Actions should be decorated with an http method and route, e.g. `[HttpPost("[controller]/[action]")]`
 
-- Async actions won't work as they will return `Task<ActionResult<T>>`.  This is a conscious decision as REST endpoint are synchronous by definition, so async doesn’t make sense.
-
-- Although it will work, we recommend that you don't return `Ok()` as it will mask type errors; just return the object of the correct type; or a problem ActionResult (e.g. `NotFound()`, `Problem()`, etc...)
-
 - Action parameters will be added to the querystring (as you would expect), but only if the method is `HttpGet`.  If the action isn't `HttpGet` parameters must be either in the route (`[HttpPost("[controller]/{my_param}")]`) or an object decorated with `[FromBody]`
+
+Other recommendations (not reuired, but good practice):
+
+- Have you controller actions return `ActionResult<T>`. This will provide a strongly-typed interface in the service communication endpoints.
+
+- Avoid returning `Ok()` from your actions as it will mask type errors; just return the object of the correct type; or a problem ActionResult (e.g. `NotFound()`, `Problem()`, etc...)
+
+- Async actions are not recommended as you'll receive a Task JSON object back.  REST endpoint are synchronous by definition, so async doesn’t make sense.
 
 ## Service Communication Response
 
 When using the exported service communication endpoints, you will receive a `ServiceResponse` object containing two objects: `Data` and `Error`; one of these will always be null or undefined, the other will be populated.
 
-**Data** is typed to the type specified in your ActionResult<>
+**Data** is typed to the return type of the action, (directly or in the ActionResult<>)
 
 **Error** is an `ActionResultError` object that contains all the data returned when using an ActionResult (e.g. `NotFound()` or `Problem()`).  If the error isn't from the Action (e.g. an error in the serializer or the endpoint wasn't reachable) the ActionResultError will be populated appropriately.
 
@@ -178,7 +180,7 @@ export class MyAngularPage {
         requestId = 1;
         requestObj = {};
 
-        this.service.myAction(requestId, requestObj).subscribe(response => {
+        this.service.myAction(requestObj, requestId).subscribe(response => {
             if (response.data) {
                 //use the data
             } else {
@@ -207,10 +209,10 @@ namespace MyProject
         MyObj requestObj = new();
 
         //MyController becomes MyService; MyAction method name is intact
-        ServiceResponse<bool?> response = MyService.MyAction(requestId, requestObj);
+        ServiceResponse<bool?> response = MyService.MyAction(requestObj, requestId);
 
         //or call async:
-        ServiceResponse<bool?> response = await MyService.MyActionAsync(requestId, requestObj);
+        ServiceResponse<bool?> response = await MyService.MyActionAsync(requestObj, requestId);
 
         if (response.Data != null)
         {
