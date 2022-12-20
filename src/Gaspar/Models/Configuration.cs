@@ -74,6 +74,9 @@ namespace WCKDRZR.Gaspar.Models
         public string LoggingReceiver { get; set; }
         public List<string> ModelNamespaces { get; set; }
 
+        //For Pyton Controllers
+        public Dictionary<string, string> Imports { get; set; }
+
         //For Ocelot Controllers
         public bool NoAuth { get; set; }
         public bool ExcludeScopes { get; set; }

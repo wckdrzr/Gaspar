@@ -45,5 +45,6 @@ namespace WCKDRZR.Gaspar
         Ocelot = 1 << 4,
         TypeScript = 1 << 5,
         Proto = 1 << 6,
+        Python = 1 << 7,
     }
 }

@@ -65,6 +65,7 @@ namespace WCKDRZR.Gaspar.Converters
                 case OutputType.Ocelot: return new OcelotConverter(_config);
                 case OutputType.TypeScript: return new TypeScriptConverter(_config);
                 case OutputType.Proto: return new ProtoConverter(_config);
+                case OutputType.Python: return new PythonConverter(_config);
                 default: throw new NotImplementedException();
             }
         }

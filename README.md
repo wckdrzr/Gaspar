@@ -11,6 +11,7 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 | Export to TypeScript    | ✅                   |                |
 | Export to Angular       | ✅ *                 | ✅              |
 | Export to Ocelot Config |                     | ✅              |
+| Python                  |                     | ✅              |
 | Export to C#            |                     | ✅              |
 | Export to Proto         | ✅                   |                |
 
@@ -228,6 +229,12 @@ namespace MyProject
 }
 ```
 
+#### To use in Python
+
+```python
+# example to follow
+```
+
 ## Configuration
 
 The demo config provided only includes the basics to make Gaspar work; here is a full list of the options available (feel free to have a look in the `Models/Configuration.cs` file):
@@ -355,6 +362,14 @@ For Angular controllers (all optional):
   
   All the endpoints created in the service communication export provide an additional `showError` parameter that allows you to override this default directly in the calling class.  It is likely that you will set this to `Generic`, and then for particular routes and pages you can override to `None` or `ServerResponse` as required.
 
+For Python controllers (all optional):
+
+- **Imports**    `Dictionary<string, string>`    List of imports to include at the top of your exported Service Communication class.  Will be written in the form
+  
+  ```python
+  import key from value
+  ```
+
 For Ocelot controllers (all optional):
 
 - **NoAuth**    `bool`    If true, the "AuthenticationOptions" section of the Ocelot config will not be outputted.
@@ -371,7 +386,7 @@ For Proto Models (required)
   // ... proto definitions
   ```
 
-## Extension Methods
+## C# Extension Methods
 
 Provided for convenience when using Gaspar tagged data:
 

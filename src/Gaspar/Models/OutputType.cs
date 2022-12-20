@@ -33,7 +33,10 @@ namespace WCKDRZR.Gaspar.Models
         TypeScript = 1 << 3,
 
         [OutputTypeGroup(GasparType.All | GasparType.Proto)]
-        Proto = 1 << 4
+        Proto = 1 << 4,
+
+        [OutputTypeGroup(GasparType.All | GasparType.Python)]
+        Python = 1 << 5,
     }
 
     internal static class OutputTypeConverter
