@@ -112,10 +112,12 @@ namespace WCKDRZR.Gaspar.Converters
             List<string> lines = new();
 
             lines.Add($"class {outputClassName}Service:");
+            lines.Add($"    def __init__(self):");
+            lines.Add($"        pass");
 
             foreach (ControllerAction action in actions)
             {
-                List<string> parameters = new();
+                List<string> parameters = new() { "self" };
                 foreach (Parameter parameter in action.Parameters)
                 {
                     parameters.Add($"{parameter.Identifier}");
@@ -131,7 +133,7 @@ namespace WCKDRZR.Gaspar.Converters
                 if (action.BadMethodReason != null)
                 {
                     lines.Add($"    @invalid(\"{action.BadMethodReason}\")");
-                    lines.Add($"    def {action.ActionName}({string.Join(", ", parameters)}) -> dict:");
+                    lines.Add($"    def {action.ActionName}(self, {string.Join(", ", parameters)}) -> dict:");
                     lines.Add($"        return");
                 }
                 else
