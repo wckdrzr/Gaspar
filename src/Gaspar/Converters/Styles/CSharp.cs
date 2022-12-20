@@ -84,7 +84,7 @@ namespace WCKDRZR.Gaspar.Converters
                     string httpMethod = action.HttpMethod.ToProper();
 
                     string url = $"{outputConfig.UrlPrefix}/{action.Route}";
-                    url += action.Parameters.QueryString();
+                    url += action.Parameters.QueryString(OutputType.CSharp);
 
                     string urlHandler = "";
                     if (!string.IsNullOrEmpty(outputConfig.UrlHandlerFunction)) { urlHandler = $".{outputConfig.UrlHandlerFunction}()"; }

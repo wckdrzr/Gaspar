@@ -193,7 +193,7 @@ namespace WCKDRZR.Gaspar.Converters
                 else
                 {
                     string url = $"{outputConfig.UrlPrefix}/{action.Route.Replace("{", "${")}";
-                    url += action.Parameters.QueryString("$");
+                    url += action.Parameters.QueryString(OutputType.Angular, "$");
 
                     string bodyParam = "";
                     string httpMethod = action.HttpMethod.ToLower();

@@ -137,11 +137,11 @@ namespace WCKDRZR.Gaspar.Converters
                 else
                 {
                     string url = $"{outputConfig.UrlPrefix}/{action.Route}";
-                    url += action.Parameters.QueryString();
+                    url += action.Parameters.QueryString(OutputType.Python);
 
                     lines.Add($"    def {action.ActionName}({string.Join(", ", parameters)}):");
                     lines.Add($"        response = requests.{httpMethod}(f'{url}'{bodyParam})");
-                    lines.Add($"        return gaspar_error_catch(response, '{url}')");
+                    lines.Add($"        return gaspar_error_catch(response, f'{url}')");
                 }
             }
             lines.Add("");

@@ -8,9 +8,23 @@ namespace WCKDRZR.Gaspar.Extensions
 {
     internal static class ParameterExtensions
     {
-        public static string QueryString(this List<Parameter> parameters, string variablePrefix = "")
+        public static string QueryString(this List<Parameter> parameters, OutputType outputType, string variablePrefix = "")
         {
             string qs = "";
+
+            string coalesceMark = "";
+            switch (outputType) {
+                case OutputType.Angular:
+                case OutputType.TypeScript:
+                    coalesceMark = "||";
+                    break;
+                case OutputType.CSharp:
+                    coalesceMark = "??";
+                    break;
+                case OutputType.Python:
+                    coalesceMark = "or";
+                    break;
+            }
 
             List<Parameter> queryStringParameters = parameters.Where(p => p.OnQueryString).ToList();
             if (queryStringParameters.Count > 0) { qs += "?"; }
@@ -21,13 +35,16 @@ namespace WCKDRZR.Gaspar.Extensions
                 string coalesce = "";
                 string typeName = parameter.Type.ToString().ToLower();
 
-                if (typeName == "string")
+                if (!string.IsNullOrEmpty(coalesceMark))
                 {
-                    coalesce = " ?? \"\"";
-                }
-                else if (parameter.IsNullable && typeName != "datetime?") //datetime is odd on a query string; if "null" just allow
-                {
-                    coalesce = " ?? " + (parameter.Type.ToString().ToLower() == "bool?" ? "false" : "0");
+                    if (typeName == "string")
+                    {
+                        coalesce = $" {coalesceMark} \"\"";
+                    }
+                    else if (parameter.IsNullable && typeName != "datetime?") //datetime is odd on a query string; if "null" just allow
+                    {
+                        coalesce = $" {coalesceMark} " + (parameter.Type.ToString().ToLower() == "bool?" ? "false" : "0");
+                    }
                 }
 
                 string parameterIdentifier = parameter.Identifier;
