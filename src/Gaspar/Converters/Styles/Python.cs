@@ -24,7 +24,18 @@ namespace WCKDRZR.Gaspar.Converters
 
         public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
         {
+            return new();
+        }
+
+        public List<string> ControllerHeader(ConfigurationTypeOutput outputConfig, List<string> customTypes)
+        {
             List<string> lines = new();
+
+            lines.Add($"import requests");
+            foreach (string key in outputConfig.Imports.Keys)
+            {
+                lines.Add($"from {key} import {outputConfig.Imports[key]};");
+            }
 
             lines.Add("import os");
             lines.Add("import functools");
@@ -86,18 +97,10 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("    else:");
             lines.Add("        raise TypeError(repr(type(reason)))");
 
-            return lines;
-        }
+            lines.Add("");
 
-        public List<string> ControllerHeader(ConfigurationTypeOutput outputConfig, List<string> customTypes)
-        {
-            List<string> lines = new();
-            lines.Add($"import requests");
-            foreach (string key in outputConfig.Imports.Keys)
-            {
-                lines.Add($"from {key} import {outputConfig.Imports[key]};");
-            }
-            lines.Add($"from {outputConfig.HelperFile[..outputConfig.HelperFile.LastIndexOf(".")]} import *");
+            lines.Add("headers = {\"Content-Type\":\"application/json\"}");
+
             lines.Add("");
             return lines;
         }
@@ -112,6 +115,7 @@ namespace WCKDRZR.Gaspar.Converters
             List<string> lines = new();
 
             lines.Add($"class {outputClassName}Service:");
+            lines.Add("");
             lines.Add($"    def __init__(self):");
             lines.Add($"        pass");
 
@@ -130,6 +134,8 @@ namespace WCKDRZR.Gaspar.Converters
                     bodyParam = $", data = {action.BodyParameter?.Identifier ?? "null"}";
                 }
 
+                bodyParam += ", headers = headers";
+
                 if (action.BadMethodReason != null)
                 {
                     lines.Add($"    @invalid(\"{action.BadMethodReason}\")");
@@ -140,8 +146,7 @@ namespace WCKDRZR.Gaspar.Converters
                 {
                     string url = $"{outputConfig.UrlPrefix}/{action.Route}";
                     url += action.Parameters.QueryString(OutputType.Python);
-
-                    lines.Add($"    def {action.ActionName}({string.Join(", ", parameters)}):");
+                    lines.Add($"    def {action.ActionName}(self, {string.Join(", ", parameters)}):");
                     lines.Add($"        response = requests.{httpMethod}(f'{url}'{bodyParam})");
                     lines.Add($"        return gaspar_error_catch(response, f'{url}')");
                 }
