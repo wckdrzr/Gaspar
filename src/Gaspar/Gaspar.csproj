@@ -19,9 +19,6 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Glob.cs" Version="5.1.766" />
     <PackageReference Include="Microsoft.Build.Framework" Version="17.2.0" />
