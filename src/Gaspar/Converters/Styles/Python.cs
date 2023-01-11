@@ -121,7 +121,7 @@ namespace WCKDRZR.Gaspar.Converters
 
             foreach (ControllerAction action in actions)
             {
-                List<string> parameters = new() { "self" };
+                List<string> parameters = new() {};
                 foreach (Parameter parameter in action.Parameters)
                 {
                     parameters.Add($"{parameter.Identifier}");
