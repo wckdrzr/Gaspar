@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -56,14 +58,40 @@ namespace WCKDRZR.Gaspar.Extensions
                         {
                             if (argument.NameEquals?.Name?.ToString() == attributeName)
                             {
-                                if (argument.Expression.ToString().StartsWith("\""))
+                                string expression = argument.Expression.ToString();
+                                if (expression.StartsWith("\""))
                                 {
-                                    return argument.Expression.ToString()[1..^1];
+                                    return expression[1..^1];
                                 }
-                                if (argument.Expression.ToString().StartsWith("nameof("))
+                                if (expression.StartsWith("nameof("))
                                 {
-                                    return argument.Expression.ToString()[7..^1];
+                                    return expression[7..^1];
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static string[] StringArrayAttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
+        {
+            foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
+            {
+                foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
+                {
+                    if (attributeSyntax.ArgumentList != null)
+                    {
+                        foreach (AttributeArgumentSyntax argument in attributeSyntax.ArgumentList.Arguments)
+                        {
+                            if (argument.NameEquals?.Name?.ToString() == attributeName)
+                            {
+                                string expression = argument.Expression.ToString();
+                                return Regex.Matches(expression, @"""(.*?[^\\])""")
+                                    .Cast<Match>()
+                                    .Select(m => m.Groups[1].Value)
+                                    .ToArray();
                             }
                         }
                     }

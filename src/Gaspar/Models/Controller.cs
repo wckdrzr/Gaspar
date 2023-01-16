@@ -45,6 +45,9 @@ namespace WCKDRZR.Gaspar.Models
 
         public string CustomSerializer { get; set; }
 
+        public string[] Scopes { get; set; }
+        public string[] AdditionalScopes { get; set; }
+
         public string BadMethodReason { get; set; }
 
         public OutputType ExportFor { get; set; }

@@ -3,6 +3,8 @@ using System.IO;
 using System.Text.Json;
 using WCKDRZR.Gaspar.Models;
 using WCKDRZR.Gaspar.Extensions;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace WCKDRZR.Gaspar.Core
 {
@@ -78,6 +80,27 @@ namespace WCKDRZR.Gaspar.Core
                             .Replace("{ServiceName}", serviceName ?? "", StringComparison.CurrentCultureIgnoreCase)
                             .Replace("{ServiceHost}", serviceHost ?? "", StringComparison.CurrentCultureIgnoreCase)
                             .Replace("{ServicePort}", servicePort ?? "", StringComparison.CurrentCultureIgnoreCase);
+                    }
+                    if (outputConfig.DefaultScopes != null)
+                    {
+                        outputConfig.DefaultScopes = outputConfig.DefaultScopes.Select(s => s
+                            .Replace("{ServiceName}", serviceName ?? "", StringComparison.CurrentCultureIgnoreCase)
+                            .Replace("{ServiceHost}", serviceHost ?? "", StringComparison.CurrentCultureIgnoreCase)
+                            .Replace("{ServicePort}", servicePort ?? "", StringComparison.CurrentCultureIgnoreCase)
+                        ).ToArray();
+                    }
+                    if (outputConfig.ScopesByHttpMethod != null)
+                    {
+                        Dictionary<string, string[]> renamedScopes = new();
+                        foreach (KeyValuePair<string, string[]> scope in outputConfig.ScopesByHttpMethod)
+                        {
+                            renamedScopes[scope.Key
+                                .Replace("{ServiceName}", serviceName ?? "", StringComparison.CurrentCultureIgnoreCase)
+                                .Replace("{ServiceHost}", serviceHost ?? "", StringComparison.CurrentCultureIgnoreCase)
+                                .Replace("{ServicePort}", servicePort ?? "", StringComparison.CurrentCultureIgnoreCase)
+                            ] = scope.Value;
+                        }
+                        outputConfig.ScopesByHttpMethod = renamedScopes;
                     }
                 }
             }

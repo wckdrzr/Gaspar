@@ -13,8 +13,9 @@ namespace WCKDRZR.Gaspar
 
         public string Serializer { get; set; }
 
-        [Obsolete("Not yet implemented")]
-        public string[] ScopesOveride { get; set; } //not figured this out yet; but needs to be an option like this...
+        public string[] Scopes { get; set; }
+
+        public string[] AdditionalScopes { get; set; }
     }
 
     public class ExportOptionsAttribute : Attribute
@@ -25,8 +26,9 @@ namespace WCKDRZR.Gaspar
 
         public string Serializer { get; set; }
 
-        [Obsolete("Not yet implemented")]
-        public string[] ScopesOveride { get; set; } //not figured this out yet; but needs to be an option like this...
+        public string[] Scopes { get; set; }
+
+        public string[] AdditionalScopes { get; set; }
     }
 
     public class ExportWithoutInheritance : Attribute

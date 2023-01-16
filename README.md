@@ -95,7 +95,9 @@ The class provided must implement a generic `Deserialize<T>` method that returns
 
 - `[ExportFor(GasparType.Angular, ReturnTypeOverride = "MyType"]`
 
-**ScopesOveride**    `Array of strings`    For Ocelot - to be implemented
+**Scopes**    `Array of strings`    For Ocelot - list of scopes to be used in "AllowedScopes" of the "AuthenticationOptions" section in the Ocelot config.  If set this will override scopes generated from the `DefaultScopes` and `ScopesByHttpMethod` configuration.
+
+ **AdditionalScopes**    `Array of strings`    For Ocelot - scopes to be added to "AllowedScopes" of the "AuthenticationOptions" section in the Ocelot config. If set these scopes will be in addition to scopes generated from the `DefaultScopes` and `ScopesByHttpMethod` configuration.
 
 ## Disable Export on Build
 
@@ -371,6 +373,19 @@ For Python controllers (all optional):
   ```
 
 For Ocelot controllers (all optional):
+
+- **DefaultScopes**    `string[]`    If specified, the scopes listed here will be outputed into the "AllowedScopes" section of "AuthenticationOptions" for all routes.  Scopes can include `{ServiceName}`, `{ServiceHost}` or `{ServicePort}` to have those placeholders replaced (see the demo file).
+
+- **ScopesByHttpMethod**    `Dictionary<string, string[]>`    Dictionary keyed on scope names.  Each element can contain an array of Http Methods; if the route matches a listed method, the key will be added to the "AllowedScopes" section of "AuthenticationOptions".  For example:
+  
+  ```json
+  "ScopesByHttpMethod": {
+  	"service.write": [ "POST", "PUT", "GET" ],
+  	"service.read": [ "GET" ]
+  }
+  ```
+  
+  Dictionary keys can include `{ServiceName}`, `{ServiceHost}` or `{ServicePort}` to have those placeholders replaced (see the demo file).
 
 - **NoAuth**    `bool`    If true, the "AuthenticationOptions" section of the Ocelot config will not be outputted.
 

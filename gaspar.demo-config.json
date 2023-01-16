@@ -26,7 +26,12 @@
 			{
 				"Type": "Ocelot",
 				"Location": "./ocelot.{ServiceName}.json",
-				"UrlPrefix": "/{ServiceName}"
+				"UrlPrefix": "/{ServiceName}",
+				"DefaultScopes": [ "{ServiceName}.admin" ],
+				"ScopesByHttpMethod": {
+					"{ServiceName}.write": [ "POST", "PUT", "GET" ],
+					"{ServiceName}.read": [ "GET" ]
+				}
 			},
 			{
 				"Type": "CSharp",

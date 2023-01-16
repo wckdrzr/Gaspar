@@ -56,6 +56,8 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 ControllerAction newAction = new(action.ActionName);
                 newAction.HttpMethod = action.HttpMethod;
+                newAction.Scopes = action.Scopes;
+                newAction.AdditionalScopes = action.AdditionalScopes;
 
                 int routeParamaterIndex = action.Route.IndexOf("{");
                 newAction.Route = routeParamaterIndex >= 0 ? action.Route[..routeParamaterIndex] + "{url}" : action.Route;
@@ -71,21 +73,45 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 bool lastAction = actionIterator == uniqueOcelotActions.Count - 1;
 
-                string service = Config.Controllers.ServiceName;
-                string scopes = $"\"{service}.admin\"";
-                if (action.HttpMethod == "POST" || action.HttpMethod == "PUT" || action.HttpMethod == "GET") { scopes = $"\"{service}.write\", {scopes}"; }
-                if (action.HttpMethod == "GET") { scopes = $"\"{service}.read\", {scopes}"; }
+                string scopes = "";
+                if (action.Scopes != null)
+                {
+                    scopes = $"\"{string.Join("\", \"", action.Scopes)}\"";
+                }
+                else
+                {
+                    if (outputConfig.DefaultScopes != null)
+                    {
+                        scopes = $"\"{string.Join("\", \"", outputConfig.DefaultScopes)}\"";
+                    }
+                    if (outputConfig.ScopesByHttpMethod != null)
+                    {
+                        foreach (KeyValuePair<string, string[]> scope in outputConfig.ScopesByHttpMethod)
+                        {
+                            if (scope.Value.Contains(action.HttpMethod, StringComparer.CurrentCultureIgnoreCase))
+                            {
+                                if (scopes != "") { scopes += ", "; }
+                                scopes += $"\"{scope.Key}\"";
+                            }
+                        }
+                    }
+                    if (action.AdditionalScopes != null)
+                    {
+                        if (scopes != "") { scopes += ", "; }
+                        scopes += $"\"{string.Join("\", \"", action.AdditionalScopes)}\"";
+                    }
+                }
 
                 lines.Add($"        {{");
                 lines.Add($"            \"DownstreamPathTemplate\": \"/{action.Route}\",");
                 lines.Add($"            \"DownstreamScheme\": \"{Config.Controllers.ServiceHost}\",");
                 lines.Add($"            \"DownstreamHostAndPorts\": [{{");
-                lines.Add($"                \"Host\": \"{service}\",");
+                lines.Add($"                \"Host\": \"{Config.Controllers.ServiceName}\",");
                 lines.Add($"                \"Port\": {Config.Controllers.ServicePort}");
                 lines.Add($"            }}],");
                 lines.Add($"            \"UpstreamPathTemplate\": \"{outputConfig.UrlPrefix}/{action.Route}\",");
                 lines.Add($"            \"UpstreamHttpMethod\": [ \"{action.HttpMethod}\" ]{(outputConfig.NoAuth ? "" : ",")}");
-                if (!outputConfig.NoAuth)
+                if (!outputConfig.NoAuth && !string.IsNullOrEmpty(scopes))
                 {
                     lines.Add($"            \"AuthenticationOptions\": {{");
                     lines.Add($"                \"AuthenticationProviderKey\": \"Bearer\"{(outputConfig.ExcludeScopes ? "" : ",")}");

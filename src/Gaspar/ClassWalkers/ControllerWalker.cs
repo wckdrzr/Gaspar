@@ -44,6 +44,8 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                 ExportOptionsAttribute options = new ExportOptionsAttribute();
                 string nodeClassReturnTypeOverrider = nodeClass.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride));
                 string nodeClassCustomSerializer = nodeClass.AttributeLists.StringAttributeValue(nameof(options.Serializer));
+                string[] nodeClassScopes = nodeClass.AttributeLists.StringArrayAttributeValue(nameof(options.Scopes));
+                string[] nodeClassAdditionalScopes = nodeClass.AttributeLists.StringArrayAttributeValue(nameof(options.AdditionalScopes));
 
                 if (nodeClass.IsController() && node.IsPublic())
                 {
@@ -89,6 +91,9 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     action.ReturnTypeOverride = node.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride)) ?? nodeClassReturnTypeOverrider;
                     
                     action.CustomSerializer = node.AttributeLists.StringAttributeValue(nameof(options.Serializer)) ?? nodeClassCustomSerializer;
+
+                    action.Scopes = node.AttributeLists.StringArrayAttributeValue(nameof(options.Scopes)) ?? nodeClassScopes;
+                    action.AdditionalScopes = node.AttributeLists.StringArrayAttributeValue(nameof(options.AdditionalScopes)) ?? nodeClassAdditionalScopes;
 
                     List<string> routeParameters = Regex.Matches(action.Route, "{(.*?)}").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
                     foreach (ParameterSyntax parameter in node.ParameterList.Parameters)

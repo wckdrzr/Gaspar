@@ -78,6 +78,8 @@ namespace WCKDRZR.Gaspar.Models
         public Dictionary<string, string> Imports { get; set; }
 
         //For Ocelot Controllers
+        public string[] DefaultScopes { get; set; }
+        public Dictionary<string, string[]> ScopesByHttpMethod { get; set; }
         public bool NoAuth { get; set; }
         public bool ExcludeScopes { get; set; }
 
