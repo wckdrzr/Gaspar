@@ -111,11 +111,14 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add($"            }}],");
                 lines.Add($"            \"UpstreamPathTemplate\": \"{outputConfig.UrlPrefix}/{action.Route}\",");
                 lines.Add($"            \"UpstreamHttpMethod\": [ \"{action.HttpMethod}\" ]{(outputConfig.NoAuth ? "" : ",")}");
-                if (!outputConfig.NoAuth && !string.IsNullOrEmpty(scopes))
+                if (!outputConfig.NoAuth)
                 {
                     lines.Add($"            \"AuthenticationOptions\": {{");
                     lines.Add($"                \"AuthenticationProviderKey\": \"Bearer\"{(outputConfig.ExcludeScopes ? "" : ",")}");
-                    if (!outputConfig.ExcludeScopes) { lines.Add($"                \"AllowedScopes\": [ {scopes} ]"); }
+                    if (!outputConfig.ExcludeScopes && !string.IsNullOrEmpty(scopes))
+                    {
+                        lines.Add($"                \"AllowedScopes\": [ {scopes} ]");
+                    }
                     lines.Add($"            }}");
                 }
                 lines.Add($"        }}{(lastAction && lastController ? "" : ",")}");
