@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Title>Gaspar</Title>
     <Authors>Ben Robinson</Authors>
     <Description>Consumes your C# domain models, types and controllers and exports them for other services and languages to consume</Description>
