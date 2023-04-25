@@ -6,10 +6,11 @@
 		"Output": [
 			{
 				"Type": "TypeScript",
-				"Location": "./api.d.ts"
+				"Location": "./api.d.ts",
+				"AddInferredNullables": true
 			}
 		],
-		"NumericEnums": true,
+		"UseEnumValue": true,
 		"StringLiteralTypesInsteadOfEnums": true
 	},
 	"Controllers": {
