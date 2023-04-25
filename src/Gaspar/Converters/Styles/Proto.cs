@@ -121,7 +121,7 @@ namespace WCKDRZR.Gaspar.Converters
                 int i = 0;
                 foreach (KeyValuePair<string, object> value in enumModel.Values)
                 {
-                    if (Config.Models.NumericEnums)
+                    if (Config.Models.UseEnumValue)
                     {
                         // include enum identifier as prefix since proto3 enforces uniqueness across enums
                         lines.Add($"    {enumModel.Identifier}_{value.Key} = {(value.Value != null ? value.Value : i)};");

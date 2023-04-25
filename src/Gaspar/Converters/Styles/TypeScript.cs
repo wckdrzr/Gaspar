@@ -133,7 +133,7 @@ namespace WCKDRZR.Gaspar.Converters
                 int i = 0;
                 foreach (KeyValuePair<string, object> value in enumModel.Values)
                 {
-                    if (Config.Models.NumericEnums)
+                    if (Config.Models.UseEnumValue)
                     {
                         if (value.Value == null || Double.TryParse(value.Value.ToString(), out double n))
                         {

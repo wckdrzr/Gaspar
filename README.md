@@ -265,7 +265,7 @@ You must supply either Models or Controllers, but you don't need both; all other
 
 For Models:
 
-- **NumericEnums**    `bool: default false`    If true, enums will be provided with numeric values.
+- **UseEnumValue**    `bool: default true`    Enums will be written with thier value, either set directly or from an Atrribute (e.g. `[EnumMember(Value = "name")]`).
 
 - **StringLiteralTypesInsteadOfEnums**    `bool: default false`    For TypeScript, if true will export enums as types instead of TS enums.
 
@@ -380,8 +380,8 @@ For Ocelot controllers (all optional):
   
   ```json
   "ScopesByHttpMethod": {
-  	"service.write": [ "POST", "PUT", "GET" ],
-  	"service.read": [ "GET" ]
+      "service.write": [ "POST", "PUT", "GET" ],
+      "service.read": [ "GET" ]
   }
   ```
   

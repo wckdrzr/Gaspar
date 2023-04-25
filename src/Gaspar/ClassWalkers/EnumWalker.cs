@@ -26,9 +26,13 @@ namespace WCKDRZR.Gaspar.ClassWalkers
 
                 foreach (var member in node.Members)
                 {
-                    values[member.Identifier.ToString()] = member.EqualsValue != null
-                        ? member.EqualsValue.Value.ToString()
-                        : null;
+                    values[member.Identifier.ToString()] =
+                        member.AttributeLists.StringAttributeValue("Value")
+                        ?? (
+                            member.EqualsValue != null
+                                ? member.EqualsValue.Value.ToString()
+                                : null
+                        );
                 }
 
                 this.Enums.Add(new EnumModel()

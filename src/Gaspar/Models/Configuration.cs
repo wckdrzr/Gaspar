@@ -37,12 +37,12 @@ namespace WCKDRZR.Gaspar.Models
 
     internal class ModelTypeConfiguration : ConfigurationType
     {
-        public bool NumericEnums { get; set; }
+        public bool UseEnumValue { get; set; }
         public bool StringLiteralTypesInsteadOfEnums { get; set; }
 
         public ModelTypeConfiguration()
         {
-            NumericEnums = false;
+            UseEnumValue = true;
             StringLiteralTypesInsteadOfEnums = false;
         }
     }
