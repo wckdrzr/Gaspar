@@ -145,8 +145,6 @@ ServiceResponse has the following convenience methods that you can use:
 
 - **HasError**    `bool`    True if there was an error
 
-- **Problem**    `ObjectResult`    (C# only)    Same as using ControllerBase.Problem(), but this is pre-populated with the Error details.
-
 ### Usage Examples
 
 Lets take this controller action, exported for all environments:
@@ -224,8 +222,6 @@ namespace MyProject
         else
         {
             // handle response.Error if appropriate
-            // Optionally, if in a controller action:
-            // return response.Problem();
         }
     }
 }
