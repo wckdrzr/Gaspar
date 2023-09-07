@@ -56,7 +56,7 @@ namespace WCKDRZR.Gaspar.Models
         public string? HelperFile { get; set; }
         public string? ModelPath { get; set; }
         public string? ErrorHandlerPath { get; set; }
-        public AngularServiceErrorMessage? DefaultErrorMessage { get; set; }
+        public AngularServiceErrorMessage DefaultErrorMessage { get; set; } = AngularServiceErrorMessage.None;
 
         //For CSharp Controllers
         public string? UrlHandlerFunction { get; set; }
