@@ -21,7 +21,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            if (node.IsPublic())
+            if (ShouldCreate(node))
             {
                 Models.Add(CreateModel(node));
             }
@@ -29,7 +29,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
-            if (node.IsPublic())
+            if (ShouldCreate(node))
             {
                 Models.Add(CreateModel(node));
             }
@@ -66,6 +66,13 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     ExportFor = nodeOutputType
                 });
             }
+        }
+
+        private static bool ShouldCreate(TypeDeclarationSyntax node)
+        {
+            List<string> baseClasses = node.BaseList?.Types.Select(s => s.ToString()).ToList() ?? new();
+            return node.IsPublic()
+                && !baseClasses.Any(s => s.StartsWith("Controller"));
         }
 
         private static Model CreateModel(TypeDeclarationSyntax node)
