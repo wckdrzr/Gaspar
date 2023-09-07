@@ -10,10 +10,10 @@ namespace WCKDRZR.Gaspar.Core
 {
     internal static class ConfigReader
 	{
-		public static Configuration Read(string configFile) =>
+		public static Configuration Read(string? configFile) =>
 		    ParseConfigurationFile(configFile).ReplaceVariablesInConfig();
 
-        private static Configuration ParseConfigurationFile(string configFile)
+        private static Configuration ParseConfigurationFile(string? configFile)
         {
             if (configFile == null)
             {
