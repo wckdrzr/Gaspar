@@ -55,7 +55,7 @@ namespace WCKDRZR.Gaspar.Models
         {
             OutputType exportForTypes = parentTypes;
 
-            string exportForArgument = attributes.GetAttribute("ExportFor")?.ArgumentList.Arguments[0].ToString();
+            string? exportForArgument = attributes.GetAttribute("ExportFor")?.ArgumentList?.Arguments[0].ToString();
             if (exportForArgument != null)
             {
                 foreach (string type in Regex.Split(exportForArgument, "[|&]"))
@@ -68,7 +68,7 @@ namespace WCKDRZR.Gaspar.Models
                         {
                             foreach (OutputType outputType in Enum.GetValues(typeof(OutputType)))
                             {
-                                if (outputType.GetAttributeOfType<OutputTypeGroupAttribute>().Types.HasFlag(parsedEnum))
+                                if (outputType.GetAttributeOfType<OutputTypeGroupAttribute>()?.Types.HasFlag(parsedEnum) == true)
                                 {
                                     if (not)
                                     {

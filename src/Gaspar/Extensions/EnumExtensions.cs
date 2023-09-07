@@ -7,7 +7,7 @@ namespace WCKDRZR.Gaspar.Extensions
 {
     internal static class EnumExtensions
     {
-        public static T GetAttributeOfType<T>(this Enum enumVal) where T : System.Attribute
+        public static T? GetAttributeOfType<T>(this Enum enumVal) where T : System.Attribute
         {
             var type = enumVal.GetType();
             var memInfo = type.GetMember(enumVal.ToString());

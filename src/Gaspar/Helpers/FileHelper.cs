@@ -44,7 +44,7 @@ namespace WCKDRZR.Gaspar.Helpers
 
         public static string RelativePath(string outputPath, string fromPath)
         {
-            return Path.GetRelativePath(Path.GetDirectoryName(outputPath), fromPath);
+            return Path.GetRelativePath(Path.GetDirectoryName(outputPath) ?? "", fromPath);
         }
     }
 }

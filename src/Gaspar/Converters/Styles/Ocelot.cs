@@ -104,10 +104,10 @@ namespace WCKDRZR.Gaspar.Converters
 
                 lines.Add($"        {{");
                 lines.Add($"            \"DownstreamPathTemplate\": \"/{action.Route}\",");
-                lines.Add($"            \"DownstreamScheme\": \"{Config.Controllers.ServiceHost}\",");
+                lines.Add($"            \"DownstreamScheme\": \"{Config.Controllers?.ServiceHost}\",");
                 lines.Add($"            \"DownstreamHostAndPorts\": [{{");
-                lines.Add($"                \"Host\": \"{Config.Controllers.ServiceName}\",");
-                lines.Add($"                \"Port\": {Config.Controllers.ServicePort}");
+                lines.Add($"                \"Host\": \"{Config.Controllers?.ServiceName}\",");
+                lines.Add($"                \"Port\": {Config.Controllers?.ServicePort}");
                 lines.Add($"            }}],");
                 lines.Add($"            \"UpstreamPathTemplate\": \"{outputConfig.UrlPrefix}/{action.Route}\",");
                 lines.Add($"            \"UpstreamHttpMethod\": [ \"{action.HttpMethod}\" ]{(outputConfig.NoAuth ? "" : ",")}");

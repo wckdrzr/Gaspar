@@ -19,7 +19,7 @@ namespace WCKDRZR.Gaspar.Models
         {
             if (file.HasModels || file.HasControllers)
             {
-                CSharpFile existingFile = Files.SingleOrDefault(f => f.Path == file.Path);
+                CSharpFile? existingFile = Files.SingleOrDefault(f => f.Path == file.Path);
                 if (existingFile == null)
                 {
                     Files.Add(file);
@@ -107,7 +107,7 @@ namespace WCKDRZR.Gaspar.Models
             return types;
         }
 
-        private void AddUniqueCustomType(ref List<string> types, TypeSyntax newType)
+        private void AddUniqueCustomType(ref List<string> types, TypeSyntax? newType)
         {
             if (newType is GenericNameSyntax)
             {
@@ -118,7 +118,7 @@ namespace WCKDRZR.Gaspar.Models
                 AddUniqueCustomType(ref types, newType.ToString());
             }
         }
-        private void AddUniqueCustomType(ref List<string> types, string newType)
+        private void AddUniqueCustomType(ref List<string> types, string? newType)
         {
             if (newType != null)
             {
@@ -133,10 +133,10 @@ namespace WCKDRZR.Gaspar.Models
 
     internal class CSharpFile
     {
-        public string Path { get; set; }
-        public List<Model> Models { get; set; }
-        public List<EnumModel> Enums { get; set; }
-        public List<Controller> Controllers { get; set; }
+        public required string Path { get; set; }
+        public List<Model> Models { get; set; } = new();
+        public List<EnumModel> Enums { get; set; } = new();
+        public List<Controller> Controllers { get; set; } = new();
 
         public bool HasModels => Models.Count > 0 || Enums.Count > 0;
         public bool HasControllers => Controllers.Count > 0;

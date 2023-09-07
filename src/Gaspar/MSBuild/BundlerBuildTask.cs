@@ -5,7 +5,7 @@ namespace WCKDRZR.Gaspar.MSBuild
 {
     public class OnBuild : Task
     {
-        public string ConfigFile { get; set; }
+        public required string ConfigFile { get; set; }
 
         public override bool Execute()
         {

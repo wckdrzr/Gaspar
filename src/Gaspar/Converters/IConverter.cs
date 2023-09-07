@@ -122,40 +122,42 @@ namespace WCKDRZR.Gaspar.Converters
             IConverter converter = GetConverter(outputConfig);
             List<string> lines = new();
 
-            lines.AddRange(OutputHeader.Controllers(converter, outputConfig, outputConfig.Location));
-
-            files.DeDuplicateControllerAndActionNames(outputConfig.Type, _allTypes, _config.Controllers.ServiceName);
-            lines.AddRange(converter.ControllerHeader(outputConfig, files.CustomTypes(outputConfig.Type, _allTypes)));
-
-            int actionCount = 0;
-            int fileIterator = 0;
-            List<CSharpFile> filesToIterate = _allTypes ? files.ToList() : files.FilesWithControllersWithActionsForType(outputConfig.Type);
-            foreach (CSharpFile file in filesToIterate)
+            if (_config.Controllers != null)
             {
-                List<Controller> controllersForType = _allTypes ? file.Controllers : file.ControllersWithActionsForType(outputConfig.Type);
-                lines.Add(converter.Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1));
+                lines.AddRange(OutputHeader.Controllers(converter, outputConfig, outputConfig.Location));
 
-                int controllerIterator = 0;
-                foreach (Controller controller in controllersForType)
+                files.DeDuplicateControllerAndActionNames(outputConfig.Type, _allTypes, _config.Controllers.ServiceName);
+                lines.AddRange(converter.ControllerHeader(outputConfig, files.CustomTypes(outputConfig.Type, _allTypes)));
+
+                int actionCount = 0;
+                int fileIterator = 0;
+                List<CSharpFile> filesToIterate = _allTypes ? files.ToList() : files.FilesWithControllersWithActionsForType(outputConfig.Type);
+                foreach (CSharpFile file in filesToIterate)
                 {
-                    List<ControllerAction> actionsForType = _allTypes ? controller.Actions : controller.ActionsForType(outputConfig.Type);
-                    actionCount += actionsForType.Count;
+                    List<Controller> controllersForType = _allTypes ? file.Controllers : file.ControllersWithActionsForType(outputConfig.Type);
+                    lines.Add(converter.Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1));
 
-                    bool lastController = fileIterator == filesToIterate.Count - 1 && controllerIterator == controllersForType.Count - 1;
-                    lines.AddRange(converter.ConvertController(actionsForType, controller.OutputClassName, outputConfig, lastController));
-                    controllerIterator++;
+                    int controllerIterator = 0;
+                    foreach (Controller controller in controllersForType)
+                    {
+                        List<ControllerAction> actionsForType = _allTypes ? controller.Actions : controller.ActionsForType(outputConfig.Type);
+                        actionCount += actionsForType.Count;
+
+                        bool lastController = fileIterator == filesToIterate.Count - 1 && controllerIterator == controllersForType.Count - 1;
+                        lines.AddRange(converter.ConvertController(actionsForType, controller.OutputClassName, outputConfig, lastController));
+                        controllerIterator++;
+                    }
+
+                    fileIterator++;
                 }
 
-                fileIterator++;
+                if (actionCount == 0)
+                {
+                    lines.Add(converter.Comment($"*** NO ACTIONS ATTRIBUTED ***"));
+                }
+
+                lines.AddRange(converter.ControllerFooter());
             }
-
-            if (actionCount == 0)
-            {
-                lines.Add(converter.Comment($"*** NO ACTIONS ATTRIBUTED ***"));
-            }
-
-            lines.AddRange(converter.ControllerFooter());
-
             return string.Join('\n', lines);
         }
     }

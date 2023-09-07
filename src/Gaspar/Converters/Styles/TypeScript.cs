@@ -63,18 +63,18 @@ namespace WCKDRZR.Gaspar.Converters
         {
             List<string> lines = new();
 
-            if (model.Enumerations != null)
+            if (model.Enumerations.Count > 0)
             {
                 lines = ConvertEnum(new EnumModel { Identifier = model.ModelName, Values = model.Enumerations });
                 model.ModelName += "_Properties";
-                if (model.BaseClasses != null)
+                if (model.BaseClasses.Count > 0)
                 {
                     int enumBaseIndex = model.BaseClasses.IndexOf("Enumeration");
                     model.BaseClasses.RemoveAt(enumBaseIndex);
                 }
             }
 
-            string indexSignature = null;
+            string? indexSignature = null;
             if (model.BaseClasses.Count > 0)
             {
                 indexSignature = model.BaseClasses.FirstOrDefault(type => Regex.Matches(type, dictionaryRegex).HasMatch());
@@ -88,7 +88,7 @@ namespace WCKDRZR.Gaspar.Converters
 
             lines.Add($"export interface {model.ModelName}{baseClasses} {{");
 
-            if (model.Enumerations != null)
+            if (model.Enumerations.Count > 0)
             {
                 lines.Add($"    id: number;");
                 lines.Add($"    name: string;");
@@ -113,12 +113,12 @@ namespace WCKDRZR.Gaspar.Converters
         {
             List<string> lines = new();
 
-            if (Config.Models.StringLiteralTypesInsteadOfEnums)
+            if (Config.Models?.StringLiteralTypesInsteadOfEnums == true)
             {
                 lines.Add($"export type {enumModel.Identifier} =");
 
                 int i = 0;
-                foreach (KeyValuePair<string, object> value in enumModel.Values)
+                foreach (KeyValuePair<string, object?> value in enumModel.Values)
                 {
                     string delimiter = (i == enumModel.Values.Count - 1) ? ";" : " |";
                     lines.Add($"    '{GetEnumStringValue(value.Key)}'{delimiter}");
@@ -132,9 +132,9 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add($"export enum {enumModel.Identifier} {{");
 
                 int i = 0;
-                foreach (KeyValuePair<string, object> value in enumModel.Values)
+                foreach (KeyValuePair<string, object?> value in enumModel.Values)
                 {
-                    if (Config.Models.UseEnumValue)
+                    if (Config.Models?.UseEnumValue == true)
                     {
                         if (value.Value == null || Double.TryParse(value.Value.ToString(), out double n))
                         {
@@ -244,7 +244,7 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("");
             }
 
-            lines.Add($"export namespace {Config.Controllers.ServiceName.ToProper()}Service {{");
+            lines.Add($"export namespace {Config.Controllers?.ServiceName.ToProper()}Service {{");
             lines.Add("");
             currentIndent++;
 
@@ -269,7 +269,7 @@ namespace WCKDRZR.Gaspar.Converters
                 List<string> parameters = new();
                 foreach (Parameter parameter in action.Parameters)
                 {
-                    string newParam = $"{parameter.Identifier}: {ParseType(parameter.Type.ToString(), outputConfig)}";
+                    string newParam = $"{parameter.Identifier}: {(parameter.Type != null ? ParseType(parameter.Type.ToString(), outputConfig) : null)}";
                     if (parameter.DefaultValue != null)
                     {
                         if (parameter.DefaultValue == "null" && !newParam.Contains("null"))
@@ -326,7 +326,7 @@ namespace WCKDRZR.Gaspar.Converters
         public string ConvertProperty(Property property, ConfigurationTypeOutput outputConfig)
         {
             string identifier = ConvertIdentifier(property.Identifier.Split(' ')[0]);
-            string type = ParseType(property.Type, outputConfig);
+            string? type = property.Type != null ? ParseType(property.Type, outputConfig) : null;
 
             return $"{identifier}: {type}";
         }

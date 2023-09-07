@@ -22,7 +22,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
         {
             if (node.IsPublic())
             {
-                var values = new Dictionary<string, object>();
+                var values = new Dictionary<string, object?>();
 
                 foreach (var member in node.Members)
                 {

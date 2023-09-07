@@ -40,7 +40,7 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add($"using {ns};");
             }
             lines.Add("");
-            lines.Add($"namespace WCKDRZR.Gaspar.ServiceCommunciation.{Config.Controllers.ServiceName.ToProper()}Service");
+            lines.Add($"namespace WCKDRZR.Gaspar.ServiceCommunciation.{Config.Controllers?.ServiceName.ToProper()}Service");
             lines.Add($"{{");
             currentIndent++;
             return lines;

@@ -139,7 +139,7 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("");
             }
 
-            lines.Add($"export namespace {Config.Controllers.ServiceName.ToProper()}Service {{");
+            lines.Add($"export namespace {Config.Controllers?.ServiceName.ToProper()}Service {{");
             lines.Add("");
             currentIndent++;
 
@@ -168,7 +168,7 @@ namespace WCKDRZR.Gaspar.Converters
                 List<string> parameters = new();
                 foreach (Parameter parameter in action.Parameters)
                 {
-                    string newParam = $"{parameter.Identifier}: {TypeScriptConverter.ParseType(parameter.Type.ToString(), outputConfig)}";
+                    string newParam = $"{parameter.Identifier}: {(parameter.Type != null ? TypeScriptConverter.ParseType(parameter.Type.ToString(), outputConfig) : null)}";
                     if (parameter.DefaultValue != null)
                     {
                         if (parameter.DefaultValue == "null" && !newParam.Contains("null"))

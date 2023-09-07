@@ -21,7 +21,7 @@ Other translations can easily be added
 
 ## Install
 
-Gaspar is written using .NET 6 and is available on NuGet.
+Gaspar is written using .NET 7 and is available on NuGet.
 
 To install, search "WckdRzr.Gaspar" in your NuGet package manager, or visit the NuGet page: <https://www.nuget.org/packages/WckdRzr.Gaspar/>
 
@@ -296,7 +296,7 @@ For Models:
 
 For Controllers:
 
-- **ServiceName**    `string`    Recommended, used to name exported items, can also be used in paths.
+- **ServiceName**    `string`    Required.  Used to name exported items, can also be used in paths.
 
 - **ServiceHost**    `string`    Optional.  Used by Ocelot Export, and can be used in paths.  Typically set to 'http' or 'https'
 

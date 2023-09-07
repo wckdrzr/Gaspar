@@ -25,10 +25,11 @@ namespace WCKDRZR.Gaspar.Core
                 throw new Exception($"The config file '{configFile}' was not found");
             }
 
-            Configuration config = new();
+            Configuration? config = null;
             try
             {
                 config = JsonSerializer.Deserialize<Configuration>(File.ReadAllText(configFile));
+                if (config == null) { throw new Exception("Deserialize to null"); }
                 config.ConfigFilePath = configFile;
             }
             catch (Exception e)
@@ -59,8 +60,8 @@ namespace WCKDRZR.Gaspar.Core
                 foreach (ConfigurationTypeOutput outputConfig in config.Controllers.Output)
                 {
                     string serviceName = config.Controllers.ServiceName;
-                    string serviceHost = config.Controllers.ServiceHost;
-                    string servicePort = config.Controllers.ServicePort.ToString();
+                    string? serviceHost = config.Controllers.ServiceHost;
+                    string? servicePort = config.Controllers.ServicePort.ToString();
 
                     if (outputConfig.Type == OutputType.CSharp)
                     {
@@ -70,24 +71,24 @@ namespace WCKDRZR.Gaspar.Core
                     if (!string.IsNullOrEmpty(outputConfig.Location))
                     {
                         outputConfig.Location = outputConfig.Location
-                            .Replace("{ServiceName}", serviceName ?? "", StringComparison.CurrentCultureIgnoreCase)
+                            .Replace("{ServiceName}", serviceName, StringComparison.CurrentCultureIgnoreCase)
                             .Replace("{ServiceHost}", serviceHost ?? "", StringComparison.CurrentCultureIgnoreCase)
                             .Replace("{ServicePort}", servicePort ?? "", StringComparison.CurrentCultureIgnoreCase);
                     }
                     if (!string.IsNullOrEmpty(outputConfig.UrlPrefix))
                     {
                         outputConfig.UrlPrefix = outputConfig.UrlPrefix
-                            .Replace("{ServiceName}", serviceName ?? "", StringComparison.CurrentCultureIgnoreCase)
+                            .Replace("{ServiceName}", serviceName, StringComparison.CurrentCultureIgnoreCase)
                             .Replace("{ServiceHost}", serviceHost ?? "", StringComparison.CurrentCultureIgnoreCase)
                             .Replace("{ServicePort}", servicePort ?? "", StringComparison.CurrentCultureIgnoreCase);
                     }
                     if (outputConfig.DefaultScopes != null)
                     {
                         outputConfig.DefaultScopes = outputConfig.DefaultScopes.Select(s => s
-                            .Replace("{ServiceName}", serviceName ?? "", StringComparison.CurrentCultureIgnoreCase)
+                            .Replace("{ServiceName}", serviceName, StringComparison.CurrentCultureIgnoreCase)
                             .Replace("{ServiceHost}", serviceHost ?? "", StringComparison.CurrentCultureIgnoreCase)
                             .Replace("{ServicePort}", servicePort ?? "", StringComparison.CurrentCultureIgnoreCase)
-                        ).ToArray();
+                        ).ToList();
                     }
                     if (outputConfig.ScopesByHttpMethod != null)
                     {
@@ -95,7 +96,7 @@ namespace WCKDRZR.Gaspar.Core
                         foreach (KeyValuePair<string, string[]> scope in outputConfig.ScopesByHttpMethod)
                         {
                             renamedScopes[scope.Key
-                                .Replace("{ServiceName}", serviceName ?? "", StringComparison.CurrentCultureIgnoreCase)
+                                .Replace("{ServiceName}", serviceName, StringComparison.CurrentCultureIgnoreCase)
                                 .Replace("{ServiceHost}", serviceHost ?? "", StringComparison.CurrentCultureIgnoreCase)
                                 .Replace("{ServicePort}", servicePort ?? "", StringComparison.CurrentCultureIgnoreCase)
                             ] = scope.Value;

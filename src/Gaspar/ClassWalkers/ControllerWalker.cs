@@ -21,7 +21,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
 
         public void AddAction(Controller controller, ControllerAction action)
         {
-            Controller existingController = Controllers.SingleOrDefault(f => f.ControllerName == controller.ControllerName);
+            Controller? existingController = Controllers.SingleOrDefault(f => f.ControllerName == controller.ControllerName);
             if (existingController == null)
             {
                 controller.Actions.Add(action);
@@ -42,18 +42,18 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                 OutputType nodeClassOutputType = nodeClass.GetExportType();
 
                 ExportOptionsAttribute options = new ExportOptionsAttribute();
-                string nodeClassReturnTypeOverrider = nodeClass.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride));
-                string nodeClassCustomSerializer = nodeClass.AttributeLists.StringAttributeValue(nameof(options.Serializer));
-                string[] nodeClassScopes = nodeClass.AttributeLists.StringArrayAttributeValue(nameof(options.Scopes));
-                string[] nodeClassAdditionalScopes = nodeClass.AttributeLists.StringArrayAttributeValue(nameof(options.AdditionalScopes));
+                string? nodeClassReturnTypeOverrider = nodeClass.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride));
+                string? nodeClassCustomSerializer = nodeClass.AttributeLists.StringAttributeValue(nameof(options.Serializer));
+                string[]? nodeClassScopes = nodeClass.AttributeLists.StringArrayAttributeValue(nameof(options.Scopes));
+                string[]? nodeClassAdditionalScopes = nodeClass.AttributeLists.StringArrayAttributeValue(nameof(options.AdditionalScopes));
 
                 if (nodeClass.IsController() && node.IsPublic())
                 {
                     Controller controller = new Controller(nodeClass);
                     ControllerAction action = new(node, node.GetExportType(nodeClassOutputType));
 
-                    AttributeSyntax httpAttribute = node.AttributeLists.GetAttribute("Http", true);
-                    AttributeSyntax routeAttribute = node.AttributeLists.GetAttribute("Route");
+                    AttributeSyntax? httpAttribute = node.AttributeLists.GetAttribute("Http", true);
+                    AttributeSyntax? routeAttribute = node.AttributeLists.GetAttribute("Route");
                     if (httpAttribute != null)
                     { 
                         action.HttpMethod = httpAttribute.Name.ToString()[4..].ToUpper();
@@ -65,11 +65,14 @@ namespace WCKDRZR.Gaspar.ClassWalkers
 
                     if (routeAttribute != null || httpAttribute?.ArgumentList?.Arguments[0] != null)
                     {
-                        AttributeArgumentSyntax argument = routeAttribute?.ArgumentList?.Arguments[0] ?? httpAttribute.ArgumentList.Arguments[0];
-                        action.Route = argument.ToString()[1..^1].Replace("?", "");
-                        action.Route = action.Route.Replace(("[controller]"), controller.ControllerName);
-                        action.Route = action.Route.Replace(("[action]"), action.ActionName);
-                        action.Route = Regex.Replace(action.Route, "({.*?)(:.*?)}", "$1}");
+                        AttributeArgumentSyntax? argument = routeAttribute?.ArgumentList?.Arguments[0] ?? httpAttribute?.ArgumentList?.Arguments[0];
+                        if (argument != null)
+                        {
+                            action.Route = argument.ToString()[1..^1].Replace("?", "");
+                            action.Route = action.Route.Replace(("[controller]"), controller.ControllerName);
+                            action.Route = action.Route.Replace(("[action]"), action.ActionName);
+                            action.Route = Regex.Replace(action.Route, "({.*?)(:.*?)}", "$1}");
+                        }
                     }
                     if (action.Route == null)
                     {

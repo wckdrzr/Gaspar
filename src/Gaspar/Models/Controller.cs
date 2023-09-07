@@ -34,21 +34,21 @@ namespace WCKDRZR.Gaspar.Models
         public string ActionName { get; set; }
         public string OutputActionName { get; set; }
 
-        public string HttpMethod { get; set; }
-        public string Route { get; set; }
+        public string HttpMethod { get; set; } = "GET";
+        public string Route { get; set; } = "/";
 
-        public TypeSyntax ReturnType { get; set; }
-        public string ReturnTypeOverride { get; set; }
+        public TypeSyntax? ReturnType { get; set; } = null;
+        public string? ReturnTypeOverride { get; set; } = null;
 
-        public List<Parameter> Parameters { get; set; }
-        public Parameter BodyParameter { get; set; }
+        public List<Parameter> Parameters { get; set; } = new();
+        public Parameter? BodyParameter { get; set; } = null;
 
-        public string CustomSerializer { get; set; }
+        public string? CustomSerializer { get; set; } = null;
 
-        public string[] Scopes { get; set; }
-        public string[] AdditionalScopes { get; set; }
+        public string[]? Scopes { get; set; }
+        public string[]? AdditionalScopes { get; set; }
 
-        public string BadMethodReason { get; set; }
+        public string? BadMethodReason { get; set; }
 
         public OutputType ExportFor { get; set; }
 
@@ -59,10 +59,6 @@ namespace WCKDRZR.Gaspar.Models
         public ControllerAction(string name)
         {
             ActionName = name;
-            ReturnType = null;
-            Parameters = new();
-            BodyParameter = null;
-
             OutputActionName = ActionName;
         }
     }
@@ -70,8 +66,8 @@ namespace WCKDRZR.Gaspar.Models
     internal class Parameter
     {
         public string Identifier { get; set; }
-        public TypeSyntax Type { get; set; }
-        public string DefaultValue { get; set; }
+        public TypeSyntax? Type { get; set; }
+        public string? DefaultValue { get; set; }
         public bool OnQueryString { get; set; }
         public bool IsNullable { get; set; }
 

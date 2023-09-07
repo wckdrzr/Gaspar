@@ -7,22 +7,22 @@ namespace WCKDRZR.Gaspar.Extensions
 {
     internal static class FieldSyntaxExtensions
     {
-        public static Dictionary<string, object> ConvertEnumerations(this IEnumerable<FieldDeclarationSyntax> fields)
+        public static Dictionary<string, object?> ConvertEnumerations(this IEnumerable<FieldDeclarationSyntax> fields)
         {
-            var values = new Dictionary<string, object>();
+            var values = new Dictionary<string, object?>();
 
             foreach (FieldDeclarationSyntax field in fields)
             {
                 VariableDeclaratorSyntax variable = field.Declaration.Variables.First();
                 List<SyntaxToken> tokens = variable.DescendantTokens().ToList();
 
-                string idValue = tokens.Count > 4 ? tokens[4].Value.ToString() : null;
+                string? idValue = tokens.Count > 4 ? tokens[4].Value?.ToString() : null;
                 if (idValue == "id" && tokens.Count > 6)
                 {
-                    idValue = tokens[6].Value.ToString();
+                    idValue = tokens[6].Value?.ToString();
                     if (idValue == "-" && tokens.Count > 7)
                     {
-                        idValue += tokens[7].Value.ToString();
+                        idValue += tokens[7].Value?.ToString();
                     }
                 }
 

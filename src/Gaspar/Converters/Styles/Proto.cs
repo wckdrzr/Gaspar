@@ -78,7 +78,7 @@ namespace WCKDRZR.Gaspar.Converters
         {
             List<string> lines = new();
 
-            if (model.Enumerations != null)
+            if (model.Enumerations.Count > 0)
             {
                 throw new NotImplementedException();
             }
@@ -110,7 +110,7 @@ namespace WCKDRZR.Gaspar.Converters
         {
             List<string> lines = new();
 
-            if (Config.Models.StringLiteralTypesInsteadOfEnums)
+            if (Config.Models?.StringLiteralTypesInsteadOfEnums == true)
             {
                 throw new NotSupportedException("String literals instead of enums is not supported in proto3.");
             }
@@ -119,9 +119,9 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add($"enum {enumModel.Identifier} {{");
 
                 int i = 0;
-                foreach (KeyValuePair<string, object> value in enumModel.Values)
+                foreach (KeyValuePair<string, object?> value in enumModel.Values)
                 {
-                    if (Config.Models.UseEnumValue)
+                    if (Config.Models?.UseEnumValue == true)
                     {
                         // include enum identifier as prefix since proto3 enforces uniqueness across enums
                         lines.Add($"    {enumModel.Identifier}_{value.Key} = {(value.Value != null ? value.Value : i)};");
@@ -165,7 +165,7 @@ namespace WCKDRZR.Gaspar.Converters
         {
             string identifier = ConvertIdentifier(property.Identifier.Split(" ")[0]);
 
-            string type = ParseType(property.Type);
+            string? type = property.Type != null ? ParseType(property.Type) : null;
 
             return $"{type} {identifier} = {count}";
         }

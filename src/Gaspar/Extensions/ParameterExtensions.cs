@@ -33,7 +33,7 @@ namespace WCKDRZR.Gaspar.Extensions
             foreach (Parameter parameter in queryStringParameters)
             {
                 string coalesce = "";
-                string typeName = parameter.Type.ToString().ToLower();
+                string? typeName = parameter.Type?.ToString().ToLower();
 
                 if (!string.IsNullOrEmpty(coalesceMark))
                 {
@@ -43,7 +43,7 @@ namespace WCKDRZR.Gaspar.Extensions
                     }
                     else if (parameter.IsNullable && typeName != "datetime?") //datetime is odd on a query string; if "null" just allow
                     {
-                        coalesce = $" {coalesceMark} " + (parameter.Type.ToString().ToLower() == "bool?" ? "false" : "0");
+                        coalesce = $" {coalesceMark} " + (parameter.Type?.ToString().ToLower() == "bool?" ? "false" : "0");
                     }
                 }
 

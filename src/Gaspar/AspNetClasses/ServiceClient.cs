@@ -61,13 +61,13 @@ namespace WCKDRZR.Gaspar
                 }
                 else
                 {
-                    MethodInfo deserializeMethod = serializer.GetMethod("Deserialize");
+                    MethodInfo? deserializeMethod = serializer.GetMethod("Deserialize");
                     if (deserializeMethod != null)
                     {
                         MethodInfo deserializeMethodGeneric = deserializeMethod.MakeGenericMethod(typeof(T));
                         return new ServiceResponse<T>
                         {
-                            Data = (T)deserializeMethodGeneric.Invoke(serializer, new[] { httpResponse.Content.ReadAsStringAsync().Result }),
+                            Data = (T?)deserializeMethodGeneric.Invoke(serializer, new[] { httpResponse.Content.ReadAsStringAsync().Result }),
                             Error = null
                         };
                     }
@@ -116,7 +116,7 @@ namespace WCKDRZR.Gaspar
             return Error<T>($"Gaspar: Service call to {url} failed to connect", message, 0);
         }
 
-        private static ServiceResponse<T> Error<T>(string title, string detail, int status)
+        private static ServiceResponse<T> Error<T>(string title, string? detail, int status)
         {
             return new()
             {
@@ -131,7 +131,7 @@ namespace WCKDRZR.Gaspar
             {
                 if (logReceiver != null)
                 {
-                    MethodInfo logMethod = logReceiver.GetMethod("GasparError");
+                    MethodInfo? logMethod = logReceiver.GetMethod("GasparError");
                     if (logMethod != null)
                     {
                         logMethod.Invoke(logReceiver, new[] { message });

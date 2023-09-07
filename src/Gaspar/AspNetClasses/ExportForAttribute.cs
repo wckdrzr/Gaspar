@@ -9,26 +9,26 @@ namespace WCKDRZR.Gaspar
 
         public bool NoInheritance { get; set; }
 
-        public string ReturnTypeOverride { get; set; }
+        public string? ReturnTypeOverride { get; set; }
 
-        public string Serializer { get; set; }
+        public string? Serializer { get; set; }
 
-        public string[] Scopes { get; set; }
+        public string[]? Scopes { get; set; }
 
-        public string[] AdditionalScopes { get; set; }
+        public string[]? AdditionalScopes { get; set; }
     }
 
     public class ExportOptionsAttribute : Attribute
     {
         public bool NoInheritance { get; set; }
 
-        public string ReturnTypeOverride { get; set; }
+        public string? ReturnTypeOverride { get; set; }
 
-        public string Serializer { get; set; }
+        public string? Serializer { get; set; }
 
-        public string[] Scopes { get; set; }
+        public string[]? Scopes { get; set; }
 
-        public string[] AdditionalScopes { get; set; }
+        public string[]? AdditionalScopes { get; set; }
     }
 
     public class ExportWithoutInheritance : Attribute

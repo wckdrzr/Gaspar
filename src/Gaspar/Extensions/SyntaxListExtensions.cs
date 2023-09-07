@@ -30,7 +30,7 @@ namespace WCKDRZR.Gaspar.Extensions
             return propertyAttributeList.GetAttribute(attributeName, startsWith) != null;
         }
 
-        public static AttributeSyntax GetAttribute(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName, bool startsWith = false)
+        public static AttributeSyntax? GetAttribute(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName, bool startsWith = false)
         {
             foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
             {
@@ -46,7 +46,7 @@ namespace WCKDRZR.Gaspar.Extensions
             return null;
         }
 
-        public static string StringAttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
+        public static string? StringAttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
         {
             foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
             {
@@ -75,7 +75,7 @@ namespace WCKDRZR.Gaspar.Extensions
             return null;
         }
 
-        public static string[] StringArrayAttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
+        public static string[]? StringArrayAttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
         {
             foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
             {

@@ -50,9 +50,9 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                             .Select(field => new Property
                             {
                                 Identifier = field.Identifier.ToString(),
-                                Type = field.Type.ToString(),
+                                Type = field.Type?.ToString(),
                                 ExportFor = field.GetExportType(nodeOutputType),
-                            }).ToList(),
+                            }).ToList() ?? new(),
                     Properties = node.Members.OfType<PropertyDeclarationSyntax>()
                             .Where(property => property.Modifiers.IsAccessible())
                             .Where(property => !property.AttributeLists.JsonIgnore())
@@ -79,7 +79,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
         {
             ExportOptionsAttribute options = new ExportOptionsAttribute();
             bool noBase = node.AttributeLists.HasAttribute(nameof(ExportWithoutInheritance)) || node.AttributeLists.BoolAttributeValue(nameof(options.NoInheritance));
-            List<string> baseClasses = noBase ? new() : node.BaseList?.Types.Select(s => s.ToString()).ToList();
+            List<string> baseClasses = noBase ? new() : node.BaseList?.Types.Select(s => s.ToString()).ToList() ?? new();
 
             OutputType nodeOutputType = node.GetExportType();
 
@@ -108,8 +108,8 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                 Enumerations = baseClasses != null && baseClasses.Contains("Enumeration")
                                 ? node.Members.OfType<FieldDeclarationSyntax>()
                                     .Where(property => !property.AttributeLists.JsonIgnore()).ConvertEnumerations()
-                                : null,
-                Type = node.Keyword.Text,
+                                : new(),
+                IsInterface = node.Keyword.Text == "interface",
                 ExportFor = nodeOutputType
             };
         }
