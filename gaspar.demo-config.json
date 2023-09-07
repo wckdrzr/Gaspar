@@ -19,8 +19,14 @@
 		],
 		"Output": [
 			{
-				"Type": "Angular",
+				"Type": "TypeScript",
 				"Location": "./{ServiceName}.ts",
+				"UrlPrefix": "/api/{ServiceName}",
+				"ModelPath": "./api.d"
+			},
+			{
+				"Type": "Angular",
+				"Location": "./ng{ServiceName}.ts",
 				"UrlPrefix": "/api/{ServiceName}",
 				"ModelPath": "./api.d"
 			},

@@ -8,7 +8,7 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 
 |                         | C# Models and Types | C# Controllers |
 | ----------------------- |:-------------------:|:--------------:|
-| Export to TypeScript    | ✅                   |                |
+| Export to TypeScript    | ✅                   | ✅              |
 | Export to Angular       | ✅ *                 | ✅              |
 | Export to Ocelot Config |                     | ✅              |
 | Python                  |                     | ✅              |
@@ -21,7 +21,7 @@ Other translations can easily be added
 
 ## Install
 
-Gaspar is written using .NET 5 and is available on NuGet.
+Gaspar is written using .NET 6 and is available on NuGet.
 
 To install, search "WckdRzr.Gaspar" in your NuGet package manager, or visit the NuGet page: <https://www.nuget.org/packages/WckdRzr.Gaspar/>
 
@@ -91,7 +91,7 @@ The class provided must implement a generic `Deserialize<T>` method that returns
 
 *make sure to include the namespace to your serializer in the config (see below)*
 
-**ReturnTypeOverride**    `string`    For Angular Service Communication you can override the return type name that is generated, e.g.
+**ReturnTypeOverride**    `string`    For TypeScript and Angular Service Communication you can override the return type name that is generated, e.g.
 
 - `[ExportFor(GasparType.Angular, ReturnTypeOverride = "MyType"]`
 
@@ -165,6 +165,35 @@ namespace WCKDRZR.DataWatchdog.DNA.API.Controllers
             // action code...
             return true;
         }
+    }
+}
+```
+
+#### To use in TypeScript
+
+```typescript
+import { Service } from 'src/app/interfaces/services'; //Service will be prefixed with ServiceName from config
+
+export class MyTypeScriptPage {
+
+    service = new Service.MyController();
+
+    constructor() {
+
+        requestId = 1;
+        requestObj = {};
+
+        this.service.myAction(requestObj, requestId).then(response => {
+            if (response.data) {
+                //use the data
+            } else {
+                // handle response.error if appropriate
+            }
+        });
+
+        //if you have a custom error handler definded in config, you could also:
+        //with: import { ServiceErrorMessage } from 'src/app/interfaces/service-helper';
+        //this.service.myAction(requestId, requestObj, ServiceErrorMessage.ServerResponse).then...
     }
 }
 ```
@@ -329,13 +358,26 @@ For TypeScript and Angular models and controllers (all optional)
 
 - **NullablesAlsoUndefinded**    `boolean`    If set to true, all nullable properties (those exported with `| null`) will additional have `| undefined` added to the type.
 
-For Angular controllers (all optional):
+For TypeScript and Angular controllers (all optional):
 
 - **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests.  This is the name of the file that should be exported.  If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
 
 - **ModelPath**    `string`    Path to a file containing definitions for any custom types used in your service communications (excluding the extension, as is usual for TypeScript includes).  Ideally, this is the file exported by the model export part of this application.
 
 - **ErrorHandlerPath**    `string`    If an error is received from the requested endpoint, it will be absorbed (although it will always be seen in the browser console).  The response will include the error details if you want to handle it from the calling class, but if you always want to show a message to the user (e.g. using a SnackBar), you can provide an error handler, as below:
+  
+  In TypeScript:
+  
+  ```typescript
+  export class ServiceErrorHandler {
+      showError(message: string | null): void {
+          message = message ?? 'An unknown error occurred');
+          //show error to user
+      }
+  }
+  ```
+  
+  In Angular:
   
   ```typescript
   import { Injectable } from "@angular/core";

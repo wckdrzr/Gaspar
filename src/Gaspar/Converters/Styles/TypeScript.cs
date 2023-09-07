@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.IO;
 using System.Text.RegularExpressions;
-using WCKDRZR.Gaspar;
 using WCKDRZR.Gaspar.Extensions;
 using WCKDRZR.Gaspar.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,6 +13,7 @@ namespace WCKDRZR.Gaspar.Converters
     internal class TypeScriptConverter : IConverter
 	{
         public Configuration Config { get; set; }
+        private int currentIndent = 0;
 
         public Dictionary<string, string> DefaultTypeTranslations = new() {
             { "int", "number" },
@@ -55,7 +56,7 @@ namespace WCKDRZR.Gaspar.Converters
 
         public string Comment(string comment, int followingBlankLines = 0)
         {
-            return $"//{comment}{new String('\n', followingBlankLines)}";
+            return $"{new String(' ', currentIndent * 4)}//{comment}{new String('\n', followingBlankLines)}";
         }
 
         public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig)
@@ -159,22 +160,165 @@ namespace WCKDRZR.Gaspar.Converters
 
         public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
         {
-            throw new NotImplementedException();
+            List<string> lines = new();
+
+            if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
+            {
+                lines.Add($"import {{ ServiceErrorHandler }} from \"{outputConfig.ErrorHandlerPath}\";");
+            }
+            lines.Add("");
+            lines.Add("export class ServiceResponse<T> {");
+            lines.Add("    data: T | null;");
+            lines.Add("    error: ActionResultError | null;");
+            lines.Add("    success: boolean;");
+            lines.Add("    hasError: boolean;");
+            lines.Add("    constructor(data: T | null, error: ActionResultError | null) {");
+            lines.Add("        this.data = data;");
+            lines.Add("        this.error = error;");
+            lines.Add("        this.success = error == null;");
+            lines.Add("        this.hasError = error != null;");
+            lines.Add("    }");
+            lines.Add("}");
+            lines.Add("export interface ActionResultError {");
+            lines.Add("    detail: string,");
+            lines.Add("    instance: string,");
+            lines.Add("    status: number,");
+            lines.Add("    title: string,");
+            lines.Add("    traceId: string,");
+            lines.Add("    type: string,");
+            lines.Add("}");
+            lines.Add("export enum ServiceErrorMessage {");
+            lines.Add("    None,");
+            lines.Add("    Generic,");
+            lines.Add("    ServerResponse,");
+            lines.Add("}");
+
+            lines.Add("export class ServiceErrorHelper {");
+            lines.Add("    async handler<T>(response: Response, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
+            lines.Add("        let error: ActionResultError = await response.text().then((body: any) => {");
+            lines.Add("            try {");
+            lines.Add("                return JSON.parse(body);");
+            lines.Add("            }");
+            lines.Add("            catch {");
+            lines.Add("                return { status: response.status, title: response.statusText, detail: body } as ActionResultError");
+            lines.Add("            }");
+            lines.Add("        });");
+            if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
+            {
+                lines.Add("        if (showError != ServiceErrorMessage.None) {");
+                lines.Add("            new ServiceErrorHandler().showError(showError == ServiceErrorMessage.ServerResponse && (error?.detail || error?.title) ? error.detail || error.title : null);");
+                lines.Add("        }");
+            }
+            lines.Add("        return new ServiceResponse<T>(null, error);");
+            lines.Add("    }");
+            lines.Add("}");
+            lines.Add("");
+
+            return lines;
         }
 
         public List<string> ControllerHeader(ConfigurationTypeOutput outputConfig, List<string> customTypes)
         {
-            throw new NotImplementedException();
+            List<string> lines = new();
+
+            List<string> parsedCustomTypes = new();
+            foreach (string type in customTypes)
+            {
+                string parsed = ParseType(type, outputConfig, allowAddNull: false);
+                if (parsed != "string" && !parsedCustomTypes.Contains(parsed))
+                {
+                    parsedCustomTypes.Add(parsed);
+                }
+            }
+
+            lines.Add($"import {{ {string.Join(", ", parsedCustomTypes)} }} from \"{outputConfig.ModelPath}\";");
+
+            if (outputConfig.HelperFile == null)
+            {
+                lines.AddRange(ControllerHelperFile(outputConfig));
+            }
+            else
+            {
+                string helperFilePath = "./" + outputConfig.HelperFile.Replace(Path.GetExtension(outputConfig.HelperFile), "");
+                lines.Add($"import {{ ServiceResponse, ServiceErrorHelper, ServiceErrorMessage }} from \"{helperFilePath}\"");
+                lines.Add("");
+            }
+
+            lines.Add($"export namespace {Config.Controllers.ServiceName.ToProper()}Service {{");
+            lines.Add("");
+            currentIndent++;
+
+            return lines;
         }
 
         public List<string> ControllerFooter()
         {
-            throw new NotImplementedException();
+            currentIndent--;
+            return new() { "}" };
         }
 
         public List<string> ConvertController(List<ControllerAction> actions, string outputClassName, ConfigurationTypeOutput outputConfig, bool lastController)
         {
-            throw new NotImplementedException();
+            List<string> lines = new();
+            lines.Add($"    export class {outputClassName}Controller {{");
+            
+            foreach (ControllerAction action in actions)
+            {
+                string actionName = ConvertIdentifier(action.OutputActionName);
+
+                List<string> parameters = new();
+                foreach (Parameter parameter in action.Parameters)
+                {
+                    string newParam = $"{parameter.Identifier}: {ParseType(parameter.Type.ToString(), outputConfig)}";
+                    if (parameter.DefaultValue != null)
+                    {
+                        if (parameter.DefaultValue == "null" && !newParam.Contains("null"))
+                        {
+                            newParam += " | null";
+                        }
+                        newParam += $" = {parameter.DefaultValue.Replace("\"", "'")}";
+                    }
+                    parameters.Add(newParam);
+                }
+                if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
+                {
+                    parameters.Add($"showError = ServiceErrorMessage.{outputConfig.DefaultErrorMessage}");
+                }
+
+                if (action.BadMethodReason != null) {
+
+                    lines.Add($"        /** @deprecated This method is broken: {action.BadMethodReason} */");
+                    lines.Add($"        {actionName}({string.Join(", ", parameters)}) {{");
+                    lines.Add($"        }}");
+                }
+                else
+                {
+                    string url = $"{outputConfig.UrlPrefix}/{action.Route.Replace("{", "${")}";
+                    url += action.Parameters.QueryString(OutputType.Angular, "$");
+
+                    string bodyParam = "";
+                    string httpMethod = action.HttpMethod.ToUpper();
+                    if (action.BodyParameter?.Identifier != null && (httpMethod == "POST" || httpMethod == "PUT" || httpMethod == "DELETE"))
+                    {
+                        bodyParam = $", body: JSON.stringify({action.BodyParameter.Identifier}), headers: {{ 'Content-Type': 'application/json' }}";
+                    }
+
+                    string returnType = ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);
+
+                    lines.Add($"        {actionName}({string.Join(", ", parameters)}): Promise<ServiceResponse<{returnType}>> {{");
+                    lines.Add($"            return fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}).then(async response => {{");
+                    lines.Add($"                return response.ok");
+                    lines.Add($"                    ? new ServiceResponse(await response.json(), null)");
+                    lines.Add($"                    : new ServiceErrorHelper().handler(response,  {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")});");
+                    lines.Add($"            }});");
+                    lines.Add($"        }}");
+                }
+            }
+
+            lines.Add("    }");
+            lines.Add("    ");
+
+            return lines;
         }
 
 
