@@ -21,7 +21,7 @@ Other translations can easily be added
 
 ## Install
 
-Gaspar is written using .NET 7 and is available on NuGet.
+Gaspar is written using .NET 6 and is available on NuGet.
 
 To install, search "WckdRzr.Gaspar" in your NuGet package manager, or visit the NuGet page: <https://www.nuget.org/packages/WckdRzr.Gaspar/>
 
