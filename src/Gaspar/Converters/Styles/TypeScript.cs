@@ -193,8 +193,18 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("    ServerResponse,");
             lines.Add("}");
 
-            lines.Add("export class ServiceErrorHelper {");
-            lines.Add("    async handler<T>(response: Response, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
+            lines.Add("export class GasparServiceHelper {");
+            lines.Add("    async fetch<T>(url: string, options: RequestInit, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
+            lines.Add("        return fetch(url, options).then(async response => {");
+            lines.Add("            if (response.ok) {");
+            lines.Add("                try {");
+            lines.Add("                    return new ServiceResponse<T>(await response.json(), null);");
+            lines.Add("                } catch {}");
+            lines.Add("            }");
+            lines.Add("            return this.responseErrorHandler<T>(response, showError);");
+            lines.Add("        }).catch((reason: Error) => this.caughtErrorHandler<T>(reason, url, showError));");
+            lines.Add("    }");
+            lines.Add("    async responseErrorHandler<T>(response: Response, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
             lines.Add("        let error: ActionResultError = await response.text().then((body: any) => {");
             lines.Add("            try {");
             lines.Add("                return JSON.parse(body);");
@@ -203,6 +213,14 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("                return { status: response.status, title: response.statusText, detail: body } as ActionResultError");
             lines.Add("            }");
             lines.Add("        });");
+            lines.Add("        return this.actionResultErrorHandler(error, showError);");
+            lines.Add("    }");
+            lines.Add("    async caughtErrorHandler<T>(caughtError: Error, url: string, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
+            lines.Add("        console.error(url, caughtError);");
+            lines.Add("        let error = { status: -1, title: caughtError.name, detail: caughtError.message } as ActionResultError;");
+            lines.Add("        return this.actionResultErrorHandler(error, showError);");
+            lines.Add("    }");
+            lines.Add("    async actionResultErrorHandler<T>(error: ActionResultError, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
             if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
             {
                 lines.Add("        if (showError != ServiceErrorMessage.None) {");
@@ -240,7 +258,7 @@ namespace WCKDRZR.Gaspar.Converters
             else
             {
                 string helperFilePath = "./" + outputConfig.HelperFile.Replace(Path.GetExtension(outputConfig.HelperFile), "");
-                lines.Add($"import {{ ServiceResponse, ServiceErrorHelper, ServiceErrorMessage }} from \"{helperFilePath}\"");
+                lines.Add($"import {{ GasparServiceHelper, ServiceResponse, ServiceErrorMessage }} from \"{helperFilePath}\"");
                 lines.Add("");
             }
 
@@ -306,11 +324,7 @@ namespace WCKDRZR.Gaspar.Converters
                     string returnType = ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);
 
                     lines.Add($"        {actionName}({string.Join(", ", parameters)}): Promise<ServiceResponse<{returnType}>> {{");
-                    lines.Add($"            return fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}).then(async response => {{");
-                    lines.Add($"                return response.ok");
-                    lines.Add($"                    ? new ServiceResponse(await response.json(), null)");
-                    lines.Add($"                    : new ServiceErrorHelper().handler(response,  {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")});");
-                    lines.Add($"            }});");
+                    lines.Add($"            return new GasparServiceHelper().fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}, showError);");
                     lines.Add($"        }}");
                 }
             }
