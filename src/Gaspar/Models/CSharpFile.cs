@@ -113,7 +113,7 @@ namespace WCKDRZR.Gaspar.Models
             {
                 newType = ((GenericNameSyntax)newType).TypeArgumentList.Arguments[0];
             }
-            if (newType != null && newType is not PredefinedTypeSyntax && newType is not NullableTypeSyntax)
+            if (newType != null && newType is not PredefinedTypeSyntax)
             {
                 AddUniqueCustomType(ref types, newType.ToString());
             }
