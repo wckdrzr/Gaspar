@@ -64,7 +64,7 @@ namespace WCKDRZR.Gaspar.Extensions
             int i = 0;
             foreach (Parameter parameter in parameters)
             {
-                name += parameter.Identifier.ToProper();
+                name += parameter.Identifier.CapitaliseFirst();
                 name += i < parameters.Count - 1 ? "And" : "";
                 i++;
             }

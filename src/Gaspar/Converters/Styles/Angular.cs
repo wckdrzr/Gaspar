@@ -139,7 +139,7 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("");
             }
 
-            lines.Add($"export namespace {Config.Controllers?.ServiceName.ToProper()}Service {{");
+            lines.Add($"export namespace {Config.Controllers?.ServiceName.CapitaliseFirst()}Service {{");
             lines.Add("");
             currentIndent++;
 

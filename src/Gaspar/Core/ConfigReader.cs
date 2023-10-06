@@ -65,7 +65,7 @@ namespace WCKDRZR.Gaspar.Core
 
                     if (outputConfig.Type == OutputType.CSharp)
                     {
-                        serviceName = serviceName.ToProper();
+                        serviceName = serviceName.CapitaliseFirst();
                     }
 
                     if (!string.IsNullOrEmpty(outputConfig.Location))

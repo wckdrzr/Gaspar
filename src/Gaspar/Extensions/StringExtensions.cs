@@ -9,5 +9,8 @@ namespace WCKDRZR.Gaspar.Extensions
     {
         public static string ToProper(this string s) =>
             string.IsNullOrEmpty(s) ? s : s[..1].ToUpper() + s[1..].ToLower();
+
+        public static string CapitaliseFirst(this string s) =>
+            string.IsNullOrEmpty(s) ? s : s[..1].ToUpper() + s[1..];
     }
 }

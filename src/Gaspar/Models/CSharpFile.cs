@@ -57,7 +57,7 @@ namespace WCKDRZR.Gaspar.Models
                     while (UsedControllerNames.Contains(newControllerName))
                     {
                         newControllerName = controller.ControllerName +
-                            (controllerIndex >= 0 ? serviceName.ToProper() : "") +
+                            (controllerIndex >= 0 ? serviceName.CapitaliseFirst() : "") +
                             (controllerIndex > 0 ? controllerIndex : "");
                         controllerIndex++;
                     }
