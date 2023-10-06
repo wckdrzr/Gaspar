@@ -115,7 +115,7 @@ Gaspar will export all your controller actions, but they must be written in a wa
 
 Improve your actions as follows:
 
-- Controller classes must be derived from `Controller` or `ControllerBase`
+- Controller classes must be derived a class with `Controller` in the name (e.g. `Controller`, `ControllerBase`, `MyBaseController`, etc...)
 
 - Actions should be decorated with an http method and route, e.g. `[HttpPost("[controller]/[action]")]`
 

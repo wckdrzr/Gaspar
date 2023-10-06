@@ -8,6 +8,6 @@ namespace WCKDRZR.Gaspar.Extensions
     {
         public static bool IsController(this ClassDeclarationSyntax propertyClass) =>
             propertyClass.BaseList != null && propertyClass.BaseList.Types.Any(t =>
-                t.ToString().Equals("Controller") || t.ToString().Equals("ControllerBase"));
+                t.ToString().Contains("Controller"));
     }
 }

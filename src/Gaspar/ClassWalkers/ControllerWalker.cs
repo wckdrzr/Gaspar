@@ -122,8 +122,6 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     {
                         action.BadMethodReason = $"Route parameter '{missingParameters[0]}' not declared on action method";
                     }
-                        
-                    if (!nodeClass.IsController()) { action.BadMethodReason = "Class must inherit 'Controller' for methods to work here"; }
 
                     AddAction(controller, action);
                 }
