@@ -25,6 +25,14 @@ Gaspar is written using .NET 7 and is available on NuGet.
 
 To install, search "WckdRzr.Gaspar" in your NuGet package manager, or visit the NuGet page: <https://www.nuget.org/packages/WckdRzr.Gaspar/>
 
+### Older versions
+
+The latest version of Gaspar requires .net7.0, to use with an older project you will need to use an older version of Gaspar (which may have unresolved bugs):
+
+- For .net6.0 use version 2.6.3
+
+- For .net5.0 use version 2.3.2
+
 ## How to use
 
 After including the NuGet package, follow these steps:
