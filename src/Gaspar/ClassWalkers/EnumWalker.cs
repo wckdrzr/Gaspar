@@ -28,6 +28,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                 {
                     values[member.Identifier.ToString()] =
                         member.AttributeLists.StringAttributeValue("Value")
+                        ?? member.AttributeLists.StringAttributeValue("Name")
                         ?? (
                             member.EqualsValue != null
                                 ? member.EqualsValue.Value.ToString()
