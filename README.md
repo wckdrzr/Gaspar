@@ -410,7 +410,15 @@ For TypeScript and Angular controllers (all optional):
   
   All the endpoints created in the service communication export provide an additional `showError` parameter that allows you to override this default directly in the calling class.  It is likely that you will set this to `Generic`, and then for particular routes and pages you can override to `None` or `ServerResponse` as required.
 
+- **Imports**    `Dictionary<string, string>`    List of imports to include at the top of your exported Service Communication class. Will be written in the form
+  
+  ```typescript
+  import { key } from "value";
+  ```
+
 For Python controllers (all optional):
+
+- **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests. This is the name of the file that should be exported. If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
 
 - **Imports**    `Dictionary<string, string>`    List of imports to include at the top of your exported Service Communication class.  Will be written in the form
   

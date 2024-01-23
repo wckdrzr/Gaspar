@@ -250,6 +250,11 @@ namespace WCKDRZR.Gaspar.Converters
             }
 
             lines.Add($"import {{ {string.Join(", ", parsedCustomTypes)} }} from \"{outputConfig.ModelPath}\";");
+            lines.Add($"import {{ {string.Join(", ", parsedCustomTypes.Except(outputConfig.Imports.Keys))} }} from \"{outputConfig.ModelPath}\";");
+            foreach (string key in outputConfig.Imports.Keys)
+            {
+                lines.Add($"import {{ {key} }} from \"{outputConfig.Imports[key]}\";");
+            }
 
             if (outputConfig.HelperFile == null)
             {
@@ -312,7 +317,7 @@ namespace WCKDRZR.Gaspar.Converters
                 else
                 {
                     string url = $"{outputConfig.UrlPrefix}/{action.Route.Replace("{", "${")}";
-                    url += action.Parameters.QueryString(OutputType.Angular, "$");
+                    url += action.Parameters.QueryString(OutputType.TypeScript, "$");
 
                     string bodyParam = "";
                     string httpMethod = action.HttpMethod.ToUpper();
@@ -360,9 +365,20 @@ namespace WCKDRZR.Gaspar.Converters
             MatchCollection dictionary = Regex.Matches(record, dictionaryRegex);
             MatchCollection simpleDictionary = Regex.Matches(record, simpleDictionaryRegex);
 
-            string propType = simpleDictionary.HasMatch() ? dictionary.At(2) : ParseType(dictionary.At(2), outputConfig);
+            string propType = "";
+            if (simpleDictionary.HasMatch())
+            {
+                propType = ConvertType(dictionary.At(2));
+                if (IsOptional(propType, outputConfig)) { propType += NullSuffix(outputConfig); }
+            }
+            else
+            {
+                propType = ConvertType(ParseType(dictionary.At(2), outputConfig));
+            }
 
-            return $"Record<{ConvertType(dictionary.At(1))}, {ConvertType(propType)}>";
+            
+
+            return $"Record<{ConvertType(dictionary.At(1))}, {propType}>";
         }
 
         public string ConvertKeyValue(string record)
@@ -403,7 +419,7 @@ namespace WCKDRZR.Gaspar.Converters
             if (collection.HasMatch())
             {
                 MatchCollection simpleCollection = Regex.Matches(propType, simpleCollectionRegex);
-                propType = simpleCollection.HasMatch() ? collection.At(1) : ParseType(collection.At(1), outputConfig);
+                propType = simpleCollection.HasMatch() ? collection.At(1) : ParseType(collection.At(1), outputConfig, allowAddNull: false);
                 type = $"{ConvertType(propType)}[]";
             }
             else if (dictionary.HasMatch())
@@ -425,13 +441,19 @@ namespace WCKDRZR.Gaspar.Converters
             }
             if (allowAddNull && IsOptional(propType, outputConfig))
             {
-                type += " | null";
-                if (outputConfig.NullablesAlsoUndefinded)
-                {
-                    type += " | undefined";
-                }
+                type += NullSuffix(outputConfig);
             }
             return type;
+        }
+
+        private string NullSuffix(ConfigurationTypeOutput outputConfig)
+        {
+            string prefix = " | null";
+            if (outputConfig.NullablesAlsoUndefinded)
+            {
+                prefix += " | undefined";
+            }
+            return prefix;
         }
 
         private bool IsOptional(string propertyName, ConfigurationTypeOutput outputConfig)

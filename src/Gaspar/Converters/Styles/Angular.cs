@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using WCKDRZR.Gaspar.Extensions;
 using WCKDRZR.Gaspar.Models;
 
@@ -122,7 +123,12 @@ namespace WCKDRZR.Gaspar.Converters
 
             lines.Add("import { HttpClient } from \"@angular/common/http\";");
             lines.Add("import { catchError, map } from \"rxjs/operators\";");
-            lines.Add($"import {{ {string.Join(", ", parsedCustomTypes)} }} from \"{outputConfig.ModelPath}\";");
+
+            lines.Add($"import {{ {string.Join(", ", parsedCustomTypes.Except(outputConfig.Imports.Keys))} }} from \"{outputConfig.ModelPath}\";");
+            foreach (string key in outputConfig.Imports.Keys)
+            {
+                lines.Add($"import {{ {key} }} from \"{outputConfig.Imports[key]}\";");
+            }
 
             if (outputConfig.HelperFile == null)
             {

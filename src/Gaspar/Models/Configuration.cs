@@ -63,7 +63,7 @@ namespace WCKDRZR.Gaspar.Models
         public string? LoggingReceiver { get; set; }
         public List<string> ModelNamespaces { get; set; } = new();
 
-        //For Pyton Controllers
+        //For TypeScript/Angular/Python Controllers
         public Dictionary<string, string> Imports { get; set; } = new();
 
         //For Ocelot Controllers

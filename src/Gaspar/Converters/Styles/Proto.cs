@@ -32,6 +32,7 @@ namespace WCKDRZR.Gaspar.Converters
         public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(Config.CustomTypeTranslations ?? new()).ToDictionary(k => k.Key, v => v.Value);
         public string ConvertType(string type) => TypeTranslations.ContainsKey(type) ? TypeTranslations[type] : type;
 
+        // [StringSyntax(StringSyntaxAttribute.Regex)]
         public string arrayRegex = /*language=regex*/ @"^(.+)\[\]$";
         public string simpleCollectionRegex = /*language=regex*/ @"^(?:I?List|IReadOnlyList|IEnumerable|ICollection|IReadOnlyCollection|HashSet)<([\w\d]+)>\??$";
         public string collectionRegex = /*language=regex*/ @"^(?:I?List|IReadOnlyList|IEnumerable|ICollection|IReadOnlyCollection|HashSet)<(.+)>\??$";
