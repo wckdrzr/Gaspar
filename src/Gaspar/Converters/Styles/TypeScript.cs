@@ -36,7 +36,9 @@ namespace WCKDRZR.Gaspar.Converters
             { "Guid", "string" },
             { "dynamic", "any" },
             { "object", "any" },
-            { "byte[]", "string" }
+            { "byte[]", "string" },
+            { "ContentResult", "string" },
+            { "JsonResult", "object" },
         };
         public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(Config.CustomTypeTranslations ?? new()).ToDictionary(k => k.Key, v => v.Value);
         public string ConvertType(string type) => TypeTranslations.ContainsKey(type) ? TypeTranslations[type] : type;
@@ -243,7 +245,7 @@ namespace WCKDRZR.Gaspar.Converters
             foreach (string type in customTypes)
             {
                 string parsed = ParseType(type, outputConfig, allowAddNull: false);
-                if (parsed != "string" && !parsedCustomTypes.Contains(parsed))
+                if (parsed != "string" && parsed != "object" && !parsedCustomTypes.Contains(parsed))
                 {
                     parsedCustomTypes.Add(parsed);
                 }

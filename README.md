@@ -99,7 +99,7 @@ The class provided must implement a generic `Deserialize<T>` method that returns
 
 *make sure to include the namespace to your serializer in the config (see below)*
 
-**ReturnTypeOverride**    `string`    For TypeScript and Angular Service Communication you can override the return type name that is generated, e.g.
+**ReturnTypeOverride**    `string`    Allows you to override the return type name that is generated.  Particularly useful if your return type is obscured (e.g. in `ContentResult`). Use as follows:
 
 - `[ExportFor(GasparType.Angular, ReturnTypeOverride = "MyType"]`
 
@@ -130,6 +130,8 @@ Improve your actions as follows:
 Other recommendations (not required, but good practice):
 
 - Have you controller actions return `ActionResult<T>`. This will provide a strongly-typed interface in the service communication endpoints.
+  
+  - If you return `ContentResult` or `JsonResult`, these will be translated to `string` and `object` respectively.
 
 - Avoid returning `Ok()` from your actions as it will mask type errors; just return the object of the correct type; or a problem ActionResult (e.g. `NotFound()`, `Problem()`, etc...)
 

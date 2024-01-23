@@ -94,7 +94,12 @@ namespace WCKDRZR.Gaspar.Converters
 
                     string returnTypeString = "";
                     string fetchMethodName = "FetchVoidAsync";
-                    if (action.ReturnType != null)
+                    if (action.ReturnTypeOverride != null)
+                    {
+                        returnTypeString = $"<{action.ReturnTypeOverride}>";
+                        fetchMethodName = "FetchAsync";
+                    }
+                    else if (action.ReturnType != null)
                     {
                         returnTypeString = action.ReturnType.ToString();
                         if ((action.ReturnType is PredefinedTypeSyntax && action.ReturnType is not NullableTypeSyntax && returnTypeString != "string") || returnTypeString == "DateTime")
@@ -104,6 +109,9 @@ namespace WCKDRZR.Gaspar.Converters
                         returnTypeString = $"<{returnTypeString}>";
                         fetchMethodName = "FetchAsync";
                     }
+
+                    if (returnTypeString == "<ContentResult>") { returnTypeString = "<string>"; }
+                    if (returnTypeString == "<JsonResult>") { returnTypeString = "<object>"; }
 
                     lines.Add($"        public static ServiceResponse{returnTypeString} {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{");
