@@ -205,11 +205,11 @@ namespace WCKDRZR.Gaspar.Converters
                     string httpMethod = action.HttpMethod.ToLower();
                     if (httpMethod == "post" || httpMethod == "put")
                     {
-                        bodyParam = $", {action.BodyParameter?.Identifier ?? "null"}";
+                        bodyParam = $", {BodyParameterFetchObject(action.BodyParameter)}";
                     }
                     if (httpMethod == "delete" && action.BodyParameter != null)
                     {
-                        bodyParam = $", {{ body: {action.BodyParameter?.Identifier ?? "null"} }}";
+                        bodyParam = $", {{ body: {BodyParameterFetchObject(action.BodyParameter)} }}";
                     }
 
                     string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);
@@ -227,6 +227,19 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("    ");
 
             return lines;
+        }
+
+        private string BodyParameterFetchObject(Parameter? parameter)
+        {
+            if (parameter == null || parameter.Identifier == null)
+            {
+                return "null";
+            }
+            if (parameter.Type?.ToString() == "string" || parameter.Type?.ToString() == "string?")
+            {
+                return $"{parameter.Identifier} == null ? null : `\"${{{parameter.Identifier}}}\"`";
+            }
+            return parameter.Identifier;
         }
 
         public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)

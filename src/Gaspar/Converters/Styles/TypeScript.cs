@@ -196,11 +196,11 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("}");
 
             lines.Add("export class GasparServiceHelper {");
-            lines.Add("    async fetch<T>(url: string, options: RequestInit, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
+            lines.Add("    async fetch<T>(url: string, options: RequestInit, responseIsString: boolean, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
             lines.Add("        return fetch(url, options).then(async response => {");
             lines.Add("            if (response.ok) {");
             lines.Add("                try {");
-            lines.Add("                    return new ServiceResponse<T>(await response.json(), null);");
+            lines.Add("                    return new ServiceResponse<T>(await (responseIsString ? (response.status == 200 ? response.text() : null) : response.json()), null);");
             lines.Add("                } catch {}");
             lines.Add("            }");
             lines.Add("            return this.responseErrorHandler<T>(response, showError);");
@@ -251,7 +251,6 @@ namespace WCKDRZR.Gaspar.Converters
                 }
             }
 
-            lines.Add($"import {{ {string.Join(", ", parsedCustomTypes)} }} from \"{outputConfig.ModelPath}\";");
             lines.Add($"import {{ {string.Join(", ", parsedCustomTypes.Except(outputConfig.Imports.Keys))} }} from \"{outputConfig.ModelPath}\";");
             foreach (string key in outputConfig.Imports.Keys)
             {
@@ -330,8 +329,10 @@ namespace WCKDRZR.Gaspar.Converters
 
                     string returnType = ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);
 
+                    string returnTypeIsString = returnType == "string" || returnType.StartsWith("string |") ? "true" : "false";
+
                     lines.Add($"        {actionName}({string.Join(", ", parameters)}): Promise<ServiceResponse<{returnType}>> {{");
-                    lines.Add($"            return new GasparServiceHelper().fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}, showError);");
+                    lines.Add($"            return new GasparServiceHelper().fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}, {returnTypeIsString}, showError);");
                     lines.Add($"        }}");
                 }
             }
