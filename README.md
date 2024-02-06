@@ -193,7 +193,7 @@ export class MyTypeScriptPage {
         requestId = 1;
         requestObj = {};
 
-        this.service.myAction(requestObj, requestId).then(response => {
+        this.service.myAction(requestId, requestObj).then(response => {
             if (response.data) {
                 //use the data
             } else {
@@ -220,7 +220,7 @@ export class MyAngularPage {
         requestId = 1;
         requestObj = {};
 
-        this.service.myAction(requestObj, requestId).subscribe(response => {
+        this.service.myAction(requestId, requestObj).subscribe(response => {
             if (response.data) {
                 //use the data
             } else {
@@ -249,14 +249,17 @@ namespace MyProject
         MyObj requestObj = new();
 
         //MyController becomes MyService; MyAction method name is intact
-        ServiceResponse<bool?> response = MyService.MyAction(requestObj, requestId);
+        ServiceResponse<bool?> response = MyService.MyAction(requestId, requestObj);
 
         //or call async:
-        ServiceResponse<bool?> response = await MyService.MyActionAsync(requestObj, requestId);
+        ServiceResponse<bool?> response = await MyService.MyActionAsync(requestId, requestObj);
+
+        //you can also optionally specify a timeout TimeSpan if the request is expected to be long running, e.g.:
+        //MyService.MyAction(requestId, requestObj, timeout: TimeSpan.FromMinutes(30));
 
         if (response.Data != null)
         {
-            // use the data    
+            // use the data
         }
         else
         {

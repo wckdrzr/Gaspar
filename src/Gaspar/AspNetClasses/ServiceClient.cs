@@ -10,16 +10,16 @@ namespace WCKDRZR.Gaspar
 {
     public static class ServiceClient
     {
-        public static async Task<ServiceResponse> FetchVoidAsync(HttpMethod method, string url, dynamic body, Type logReceiver, Type serializer)
+        public static async Task<ServiceResponse> FetchVoidAsync(HttpMethod method, string url, dynamic body, TimeSpan? timeout, Type logReceiver, Type serializer)
         {
-            return await FetchAsync<VoidObject>(method, url, body, logReceiver, serializer);
+            return await FetchAsync<VoidObject>(method, url, body, timeout, logReceiver, serializer);
         }
 
-        public static async Task<ServiceResponse<T>> FetchAsync<T>(HttpMethod method, string url, dynamic body, Type logReceiver, Type serializer)
+        public static async Task<ServiceResponse<T>> FetchAsync<T>(HttpMethod method, string url, dynamic body, TimeSpan? timeout, Type logReceiver, Type serializer)
         {
             try
             {
-                HttpResponseMessage httpResponse = await Load(method, url, body);
+                HttpResponseMessage httpResponse = await Load(method, url, body, timeout);
                 if (httpResponse.IsSuccessStatusCode)
                 {
                     return Success<T>(httpResponse, serializer, url, logReceiver);
@@ -35,9 +35,13 @@ namespace WCKDRZR.Gaspar
             }
         }
 
-        private static async Task<HttpResponseMessage> Load(HttpMethod method, string url, dynamic body)
+        private static async Task<HttpResponseMessage> Load(HttpMethod method, string url, dynamic body, TimeSpan? timeout)
         {
             HttpClient httpClient = new();
+            if (timeout != null)
+            {
+                httpClient.Timeout = (TimeSpan)timeout;
+            }
             return await httpClient.SendAsync(new HttpRequestMessage
             {
                 Method = method,
