@@ -16,6 +16,8 @@ namespace WCKDRZR.Gaspar
         public string[]? Scopes { get; set; }
 
         public string[]? AdditionalScopes { get; set; }
+
+        public long Timeout { get; set; }
     }
 
     public class ExportOptionsAttribute : Attribute
@@ -29,6 +31,8 @@ namespace WCKDRZR.Gaspar
         public string[]? Scopes { get; set; }
 
         public string[]? AdditionalScopes { get; set; }
+
+        public long Timeout { get; set; }
     }
 
     public class ExportWithoutInheritance : Attribute

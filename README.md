@@ -91,7 +91,7 @@ These parameters are avaliable on the `[ExportFor]` attribute.  Note, if you are
 
 You can also use the `[ExportWithoutInheritance]` attribute if more convenient.
 
-**Serializer**    `string`    For C# Service Communcations, if the JSON returned by the decorated action won't deserialize through the Newtonsoft serializer, add your custom serialize class here, e.g.
+**Serializer**    `string`    For C# Service Communications, if the JSON returned by the decorated action won't deserialize through the Newtonsoft serializer, add your custom serialize class here, e.g.
 
 - `[ExportFor(GasparType.CSharp, Serializer = nameof(MySerializer)]`
 
@@ -102,6 +102,10 @@ The class provided must implement a generic `Deserialize<T>` method that returns
 **ReturnTypeOverride**    `string`    Allows you to override the return type name that is generated.  Particularly useful if your return type is obscured (e.g. in `ContentResult`). Use as follows:
 
 - `[ExportFor(GasparType.Angular, ReturnTypeOverride = "MyType"]`
+
+**Timeout**    `long (milliseconds)`    For C# Service Communications this provides a default timeout value for calls made to this controller/action.  This can easily be overridden on any individual call.
+
+For Ocelot, this allows you to provide a QoS Timeout value in the configuration.
 
 **Scopes**    `Array of strings`    For Ocelot - list of scopes to be used in "AllowedScopes" of the "AuthenticationOptions" section in the Ocelot config.  If set this will override scopes generated from the `DefaultScopes` and `ScopesByHttpMethod` configuration.
 

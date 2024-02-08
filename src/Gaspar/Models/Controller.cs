@@ -48,6 +48,8 @@ namespace WCKDRZR.Gaspar.Models
         public string[]? Scopes { get; set; }
         public string[]? AdditionalScopes { get; set; }
 
+        public long? Timeout { get; set; }
+
         public string? BadMethodReason { get; set; }
 
         public OutputType ExportFor { get; set; }

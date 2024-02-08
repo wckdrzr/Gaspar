@@ -113,14 +113,19 @@ namespace WCKDRZR.Gaspar.Converters
                     if (returnTypeString == "<ContentResult>") { returnTypeString = "<string>"; }
                     if (returnTypeString == "<JsonResult>") { returnTypeString = "<object>"; }
 
-                    parameters.Add("TimeSpan? timeout = null");
+                    string defaultTimeout = "";
+                    if (action.Timeout != null)
+                    {
+                        defaultTimeout = $"\n\t\t\tif (timeout == null) {{ timeout = TimeSpan.FromMilliseconds({action.Timeout}); }}";
+                    }
+                    parameters.Add($"TimeSpan? timeout = null");
 
                     lines.Add($"        public static ServiceResponse{returnTypeString} {action.ActionName}({string.Join(", ", parameters)})");
-                    lines.Add($"        {{");
+                    lines.Add($"        {{{defaultTimeout}");
                     lines.Add($"            return ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, timeout, {loggingReceiver}, {customSerializer}).Result;");
                     lines.Add($"        }}");
                     lines.Add($"        public static async Task<ServiceResponse{returnTypeString}> {action.ActionName}Async({string.Join(", ", parameters)})");
-                    lines.Add($"        {{");
+                    lines.Add($"        {{{defaultTimeout}");
                     lines.Add($"            return await ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, timeout, {loggingReceiver}, {customSerializer});");
                     lines.Add($"        }}");
                 }

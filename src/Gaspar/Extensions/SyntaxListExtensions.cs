@@ -121,5 +121,29 @@ namespace WCKDRZR.Gaspar.Extensions
             return false;
         }
 
+        public static long? IntAttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
+        {
+            foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
+            {
+                foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
+                {
+                    if (attributeSyntax.ArgumentList != null)
+                    {
+                        foreach (AttributeArgumentSyntax argument in attributeSyntax.ArgumentList.Arguments)
+                        {
+                            if (argument.NameEquals?.Name?.ToString() == attributeName)
+                            {
+                                if (long.TryParse(argument.Expression.ToString().Trim(), out long value))
+                                {
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
     }
 }

@@ -58,6 +58,7 @@ namespace WCKDRZR.Gaspar.Converters
                 newAction.HttpMethod = action.HttpMethod;
                 newAction.Scopes = action.Scopes;
                 newAction.AdditionalScopes = action.AdditionalScopes;
+                newAction.Timeout = action.Timeout;
 
                 int routeParamaterIndex = action.Route.IndexOf("{");
                 newAction.Route = routeParamaterIndex >= 0 ? action.Route[..routeParamaterIndex] + "{url}" : action.Route;
@@ -110,7 +111,7 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add($"                \"Port\": {Config.Controllers?.ServicePort}");
                 lines.Add($"            }}],");
                 lines.Add($"            \"UpstreamPathTemplate\": \"{outputConfig.UrlPrefix}/{action.Route}\",");
-                lines.Add($"            \"UpstreamHttpMethod\": [ \"{action.HttpMethod}\" ]{(outputConfig.NoAuth ? "" : ",")}");
+                lines.Add($"            \"UpstreamHttpMethod\": [ \"{action.HttpMethod}\" ]{(!outputConfig.NoAuth || action.Timeout != null ? "," : "")}");
                 if (!outputConfig.NoAuth)
                 {
                     lines.Add($"            \"AuthenticationOptions\": {{");
@@ -119,6 +120,12 @@ namespace WCKDRZR.Gaspar.Converters
                     {
                         lines.Add($"                \"AllowedScopes\": [ {scopes} ]");
                     }
+                    lines.Add($"            }}{(action.Timeout != null ? "," : "")}");
+                }
+                if (action.Timeout != null)
+                {
+                    lines.Add($"            \"QoSOptions\": {{");
+                    lines.Add($"                \"TimeoutValue\": {action.Timeout}");
                     lines.Add($"            }}");
                 }
                 lines.Add($"        }}{(lastAction && lastController ? "" : ",")}");
