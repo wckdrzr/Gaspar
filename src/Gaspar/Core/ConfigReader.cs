@@ -29,7 +29,7 @@ namespace WCKDRZR.Gaspar.Core
             try
             {
                 config = JsonSerializer.Deserialize<Configuration>(File.ReadAllText(configFile));
-                if (config == null) { throw new Exception("Deserialize to null"); }
+                if (config == null) { throw new Exception("Deserialized to null"); }
                 config.ConfigFilePath = configFile;
             }
             catch (Exception e)

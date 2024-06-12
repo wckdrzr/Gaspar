@@ -43,6 +43,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     ExportFor = node.GetExportType()
                 });
             }
+            foreach (MemberDeclarationSyntax m in node.Members) { Visit(m); }
         }
     }
 }

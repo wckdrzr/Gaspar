@@ -1,6 +1,6 @@
 # Gaspar
 
-Gaspar is a tool that consumes your C# domain models, types and controllers and exports them for other services and languages to consume.  For example, make your C# models available in TypeScript and your controller endpoints available in TypeScript and other C# services, removing the need to use boilerplate code and hardcoded variable names, urls, etc.
+Gaspar is a tool that consumes your C# domain models, types and controllers and exports them for other services and languages to consume.  For example, make your C# models available in TypeScript and your controller endpoints available in TypeScript and other C# services, removing the need to use boilerplate code and hardcode variable names, urls, etc.
 
 It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript project](https://github.com/svenheden/csharp-models-to-typescript) (written in C# and JavaScript).  It makes use of the [Roslyn (the .NET compiler platform)](https://github.com/dotnet/roslyn) to parse the source files, which removes the need to create and maintain our own parser and makes the whole process very fast.
 
@@ -9,13 +9,14 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 |                         | C# Models and Types | C# Controllers |
 | ----------------------- |:-------------------:|:--------------:|
 | Export to TypeScript    | ✅                   | ✅              |
-| Export to Angular       | ✅ *                 | ✅              |
+| Export to Angular *     | ✅                   | ✅              |
 | Export to Ocelot Config |                     | ✅              |
-| Python                  |                     | ✅              |
+| Python †                |                     | ✅              |
 | Export to C#            |                     | ✅              |
-| Export to Proto         | ✅                   |                |
+| Export to Proto †       | ✅                   |                |
 
-**Same as TypeScript export*
+** Angular model export same as TypeScript export*
+*† Not actively maintained (please contribute!)*
 
 Other translations can easily be added
 

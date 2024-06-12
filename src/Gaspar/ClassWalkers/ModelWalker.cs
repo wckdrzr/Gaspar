@@ -25,6 +25,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
             {
                 Models.Add(CreateModel(node));
             }
+            foreach (MemberDeclarationSyntax m in node.Members) { Visit(m); }
         }
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
@@ -33,6 +34,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
             {
                 Models.Add(CreateModel(node));
             }
+            foreach (MemberDeclarationSyntax m in node.Members) { Visit(m); }
         }
 
         public override void VisitRecordDeclaration(RecordDeclarationSyntax node)
@@ -66,6 +68,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     ExportFor = nodeOutputType
                 });
             }
+            foreach (MemberDeclarationSyntax m in node.Members) { Visit(m); }
         }
 
         private static bool ShouldCreate(TypeDeclarationSyntax node)
@@ -80,6 +83,21 @@ namespace WCKDRZR.Gaspar.ClassWalkers
             ExportOptionsAttribute options = new ExportOptionsAttribute();
             bool noBase = node.AttributeLists.HasAttribute(nameof(ExportWithoutInheritance)) || node.AttributeLists.BoolAttributeValue(nameof(options.NoInheritance));
             List<string> baseClasses = noBase ? new() : node.BaseList?.Types.Select(s => s.ToString()).ToList() ?? new();
+
+            List<ClassDeclarationSyntax> parentClasses = new();
+            SyntaxNode? parent = node.Parent;
+            while (parent != null)
+            {
+                if (parent.GetType() == typeof(ClassDeclarationSyntax))
+                {
+                    parentClasses.Add((ClassDeclarationSyntax)parent);
+                    parent = parent.Parent;
+                }
+                else
+                {
+                    parent = null;
+                }
+            }
 
             OutputType nodeOutputType = node.GetExportType();
 
@@ -105,6 +123,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                     ExportFor = p.GetExportType(nodeOutputType),
                                 }).ToList(),
                 BaseClasses = baseClasses ?? new(),
+                ParentClasses = parentClasses,
                 Enumerations = baseClasses != null && baseClasses.Contains("Enumeration")
                                 ? node.Members.OfType<FieldDeclarationSyntax>()
                                     .Where(property => !property.AttributeLists.JsonIgnore()).ConvertEnumerations()

@@ -88,22 +88,35 @@ namespace WCKDRZR.Gaspar.Converters
             }
             string baseClasses = model.BaseClasses.Count > 0 ? $" extends {string.Join(", ", model.BaseClasses)}" : "";
 
-            lines.Add($"export interface {model.ModelName}{baseClasses} {{");
+            int namespaceDepth = 0;
+            for (int i = model.ParentClasses.Count - 1; i >= 0; i--)
+            {
+                lines.Add($"{new String(' ', namespaceDepth * 4)}export namespace {model.ParentClasses[i].Identifier} {{");
+                namespaceDepth++;
+            }
+
+            lines.Add($"{new String(' ', namespaceDepth * 4)}export interface {model.ModelName}{baseClasses} {{");
 
             if (model.Enumerations.Count > 0)
             {
-                lines.Add($"    id: number;");
-                lines.Add($"    name: string;");
+                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}id: number;");
+                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}name: string;");
             }
 
             if (indexSignature != null)
             {
-                lines.Add($"    {ConvertIndexType(indexSignature, outputConfig)};");
+                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}{ConvertIndexType(indexSignature, outputConfig)};");
             }
 
             foreach (Property member in model.Fields.Concat(model.Properties))
             {
-                lines.Add($"    {ConvertProperty(member, outputConfig)};");
+                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}{ConvertProperty(member, outputConfig)};");
+            }
+
+            foreach (ClassDeclarationSyntax parentClass in model.ParentClasses)
+            {
+                namespaceDepth--;
+                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}}}");
             }
 
             lines.Add("}\n");
