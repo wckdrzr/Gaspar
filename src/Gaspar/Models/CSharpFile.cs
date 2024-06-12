@@ -123,6 +123,7 @@ namespace WCKDRZR.Gaspar.Models
             if (newType != null)
             {
                 if (newType.EndsWith("[]")) { newType = newType[..^2]; }
+                newType = newType.Split('.')[0];
                 if (types.SingleOrDefault(t => t == newType) == null)
                 {
                     types.Add(newType);
