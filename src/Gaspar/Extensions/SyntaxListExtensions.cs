@@ -46,6 +46,25 @@ namespace WCKDRZR.Gaspar.Extensions
             return null;
         }
 
+        public static string? StringValueOfAttribute(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
+        {
+            foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)
+            {
+                foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
+                {
+                    if (attributeSyntax.Name.ToString() == attributeName)
+                    {
+                        string? argument = attributeSyntax.ArgumentList?.Arguments.FirstOrDefault()?.ToString();
+                        if (argument != null && argument.StartsWith("\""))
+                        {
+                            return argument[1..^1];
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
         public static string? StringAttributeValue(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName)
         {
             foreach (AttributeListSyntax attributeListSyntax in propertyAttributeList)

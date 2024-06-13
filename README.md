@@ -6,17 +6,18 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 
 ## Supported Translations
 
-|                         | C# Models and Types | C# Controllers |
-| ----------------------- |:-------------------:|:--------------:|
-| Export to TypeScript    | ✅                   | ✅              |
-| Export to Angular *     | ✅                   | ✅              |
-| Export to Ocelot Config |                     | ✅              |
-| Python †                |                     | ✅              |
-| Export to C#            |                     | ✅              |
-| Export to Proto †       | ✅                   |                |
+|                                  | C# Models and Types | C# Controllers |
+| -------------------------------- |:-------------------:|:--------------:|
+| Export to TypeScript             | ✅                   | ✅              |
+| Export to Angular * <sup>1</sup> | ✅                   | ✅              |
+| Export to Ocelot Config          |                     | ✅              |
+| Python <sup>† 1</sup>            |                     | ✅              |
+| Export to C#                     |                     | ✅              |
+| Export to Proto †                | ✅                   |                |
 
-** Angular model export same as TypeScript export*
-*† Not actively maintained (please contribute!)*
+*\* Angular model export same as TypeScript export*\
+*<sup>† </sup>Not actively maintained (please contribute!)*\
+*<sup>1</sup> Controllers missing JsonPropertyKey support (please contribute!)*
 
 Other translations can easily be added
 

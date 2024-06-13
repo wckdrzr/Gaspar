@@ -50,10 +50,19 @@ namespace WCKDRZR.Gaspar.Converters
         public string dictionaryRegex = /*language=regex*/ @"^(?:I?Dictionary|OrderedDictionary|SortedDictionary|IReadOnlyDictionary)\s*<([\w\d]+)\s*,\s*(.+)>\??$";
         public string keyValuePairRegex = /*language=regex*/ @"^KeyValuePair<([\w\d]+)\s*,\s*(.+)>\??$";
 
+        private Dictionary<string, Dictionary<string, string>> _jsonPropertyKeys = new();
 
-        public TypeScriptConverter(Configuration config)
+
+        public TypeScriptConverter(Configuration config, List<Model> allModels)
         {
             Config = config;
+
+            foreach (Model model in allModels)
+            {
+                Dictionary<string, string> jsonKeys = new();
+                GetJsonPropertyKeys(model, allModels, ref jsonKeys);
+                if (jsonKeys.Any()) { _jsonPropertyKeys.Add(model.FullName, jsonKeys); }
+            }
         }
 
         public string Comment(string comment, int followingBlankLines = 0)
@@ -91,32 +100,32 @@ namespace WCKDRZR.Gaspar.Converters
             int namespaceDepth = 0;
             for (int i = model.ParentClasses.Count - 1; i >= 0; i--)
             {
-                lines.Add($"{new String(' ', namespaceDepth * 4)}export namespace {model.ParentClasses[i].Identifier} {{");
+                lines.Add($"{new(' ', namespaceDepth * 4)}export namespace {model.ParentClasses[i].Identifier} {{");
                 namespaceDepth++;
             }
 
-            lines.Add($"{new String(' ', namespaceDepth * 4)}export interface {model.ModelName}{baseClasses} {{");
+            lines.Add($"{new(' ', namespaceDepth * 4)}export interface {model.ModelName}{baseClasses} {{");
 
             if (model.Enumerations.Count > 0)
             {
-                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}id: number;");
-                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}name: string;");
+                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}id: number;");
+                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}name: string;");
             }
 
             if (indexSignature != null)
             {
-                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}{ConvertIndexType(indexSignature, outputConfig)};");
+                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}{ConvertIndexType(indexSignature, outputConfig)};");
             }
 
             foreach (Property member in model.Fields.Concat(model.Properties))
             {
-                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}{ConvertProperty(member, outputConfig)};");
+                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}{ConvertProperty(member, outputConfig)};");
             }
 
             foreach (ClassDeclarationSyntax parentClass in model.ParentClasses)
             {
                 namespaceDepth--;
-                lines.Add($"{new String(' ', (namespaceDepth + 1) * 4)}}}");
+                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}}}");
             }
 
             lines.Add("}\n");
@@ -209,11 +218,13 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("}");
 
             lines.Add("export class GasparServiceHelper {");
-            lines.Add("    async fetch<T>(url: string, options: RequestInit, responseIsString: boolean, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
+            lines.Add("    async fetch<T>(url: string, options: RequestInit, responseIsString: boolean, returnKeyMap: Record<string, string> | null, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
             lines.Add("        return fetch(url, options).then(async response => {");
             lines.Add("            if (response.ok) {");
             lines.Add("                try {");
-            lines.Add("                    return new ServiceResponse<T>(await (responseIsString ? (response.status == 200 ? response.text() : null) : response.json()), null);");
+            lines.Add("                    let data = await (responseIsString ? (response.status == 200 ? response.text() : null) : response.json());");
+            lines.Add("                    if (returnKeyMap) { data = JsonProperyKeys.fromJson(data, returnKeyMap); }");
+            lines.Add("                    return new ServiceResponse<T>(data, null);");
             lines.Add("                } catch {}");
             lines.Add("            }");
             lines.Add("            return this.responseErrorHandler<T>(response, showError);");
@@ -245,8 +256,48 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("        return new ServiceResponse<T>(null, error);");
             lines.Add("    }");
             lines.Add("}");
-            lines.Add("");
 
+            if (_jsonPropertyKeys.Any())
+            {
+                lines.Add("export namespace JsonProperyKeys {");
+                foreach (var x in _jsonPropertyKeys)
+                {
+                    string keys = string.Join(", ", x.Value.Select(k => $"'{ConvertIdentifier(k.Key)}': '{k.Value}'"));
+                    lines.Add($"    export let {x.Key.Replace(".", "_")} = {{ {keys} }}");
+                }
+                lines.Add("");
+                lines.Add("    export function toJson<T>(obj: T, map: Record<string, string>): T {");
+                lines.Add("        if (Array.isArray(obj)) {");
+                lines.Add("            for (let i = 0; i < obj.length; i++) {");
+                lines.Add("                obj[i] = fromJson(obj[i], map);");
+                lines.Add("            }");
+                lines.Add("        } else {");
+                lines.Add("            obj = {...obj}");
+                lines.Add("            Object.keys(map).forEach(key => {");
+                lines.Add("                (obj as any)[(map as any)[key]] = (obj as any)[key]");
+                lines.Add("                delete (obj as any)[key]");
+                lines.Add("            })");
+                lines.Add("        }");
+                lines.Add("        return obj");
+                lines.Add("    }");
+                lines.Add("    export function fromJson<T>(obj: T, map: Record<string, string>): T {");
+                lines.Add("        if (Array.isArray(obj)) {");
+                lines.Add("            for (let i = 0; i < obj.length; i++) {");
+                lines.Add("                obj[i] = fromJson(obj[i], map);");
+                lines.Add("            }");
+                lines.Add("        } else {");
+                lines.Add("            obj = {...obj}");
+                lines.Add("            Object.keys(map).forEach(key => {");
+                lines.Add("                (obj as any)[key] = (obj as any)[(map as any)[key]]");
+                lines.Add("                delete (obj as any)[(map as any)[key]]");
+                lines.Add("            })");
+                lines.Add("        }");
+                lines.Add("        return obj");
+                lines.Add("    }");
+                lines.Add("}");
+            }
+
+            lines.Add("");
             return lines;
         }
 
@@ -304,9 +355,11 @@ namespace WCKDRZR.Gaspar.Converters
                 string actionName = ConvertIdentifier(action.OutputActionName);
 
                 List<string> parameters = new();
+                List<string> parameterKeyMaps = new();
                 foreach (Parameter parameter in action.Parameters)
                 {
-                    string newParam = $"{parameter.Identifier}: {(parameter.Type != null ? ParseType(parameter.Type.ToString(), outputConfig) : null)}";
+                    string? type = parameter.Type != null ? ParseType(parameter.Type.ToString(), outputConfig) : null;
+                    string newParam = $"{parameter.Identifier}: {type}";
                     if (parameter.DefaultValue != null)
                     {
                         if (parameter.DefaultValue == "null" && !newParam.Contains("null"))
@@ -316,6 +369,12 @@ namespace WCKDRZR.Gaspar.Converters
                         newParam += $" = {parameter.DefaultValue.Replace("\"", "'")}";
                     }
                     parameters.Add(newParam);
+
+                    string? parameterKeyMap = KeyMapForProperty(type);
+                    if (parameterKeyMap != null)
+                    {
+                        parameterKeyMaps.Add($"{parameter.Identifier} = JsonProperyKeys.toJson({parameter.Identifier}, {parameterKeyMap})");
+                    }
                 }
                 if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
                 {
@@ -344,8 +403,11 @@ namespace WCKDRZR.Gaspar.Converters
 
                     string returnTypeIsString = returnType == "string" || returnType.StartsWith("string |") ? "true" : "false";
 
+                    string returnKeyMap = KeyMapForProperty(returnType) ?? "null";
+
                     lines.Add($"        {actionName}({string.Join(", ", parameters)}): Promise<ServiceResponse<{returnType}>> {{");
-                    lines.Add($"            return new GasparServiceHelper().fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}, {returnTypeIsString}, showError);");
+                    lines.AddRange(parameterKeyMaps.Select(m => $"            {m}"));
+                    lines.Add($"            return new GasparServiceHelper().fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}, {returnTypeIsString}, {returnKeyMap}, showError);");
                     lines.Add($"        }}");
                 }
             }
@@ -477,6 +539,41 @@ namespace WCKDRZR.Gaspar.Converters
             List<string> explicitlyNulled = new() { "number", "boolean", "any" };
             return propertyName.EndsWith("?")
                 || (outputConfig.AddInferredNullables && !explicitlyNulled.Contains(propertyName));
+        }
+
+        private void GetJsonPropertyKeys(Model model, List<Model> allModels, ref Dictionary<string, string> jsonKeys)
+        {
+            foreach (Property property in model.Properties)
+            {
+                if (property.JsonPropertyName != null)
+                {
+                    jsonKeys.Add(property.Identifier, property.JsonPropertyName);
+                }
+            }
+            foreach (string baseClass in model.BaseClasses)
+            {
+                Model? baseClassModel = allModels.FirstOrDefault(m => m.FullName == baseClass);
+                if (baseClassModel != null)
+                {
+                    GetJsonPropertyKeys(baseClassModel, allModels, ref jsonKeys);
+                }
+            }
+        }
+
+        private string? KeyMapForProperty(string? propertyName)
+        {
+            if (propertyName != null)
+            {
+                if (_jsonPropertyKeys.TryGetValue(propertyName, out _))
+                {
+                    return $"JsonProperyKeys.{propertyName.Replace('.', '_')}";
+                }
+                else if (_jsonPropertyKeys.TryGetValue(propertyName[..^2], out _))
+                {
+                    return $"JsonProperyKeys.{propertyName[..^2].Replace('.', '_')}";
+                }
+            }
+            return null;
         }
 
         public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)

@@ -14,10 +14,10 @@ namespace WCKDRZR.Gaspar.Converters
 
         TypeScriptConverter TypeScriptConverter { get; set; }
 
-        public AngularConverter(Configuration config)
+        public AngularConverter(Configuration config, List<Model> allModels)
         {
             Config = config;
-            TypeScriptConverter = new(config);
+            TypeScriptConverter = new(config, allModels);
         }
 
 

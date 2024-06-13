@@ -50,6 +50,7 @@ namespace WCKDRZR.Gaspar.Converters
     {
         private Configuration _config;
         private bool _allTypes => _config.IgnoreAnnotations;
+        private List<Model> _allModels = new();
 
         public Converter(Configuration config)
 		{
@@ -60,10 +61,10 @@ namespace WCKDRZR.Gaspar.Converters
         {
             switch (outputConfig.Type)
             {
-                case OutputType.Angular: return new AngularConverter(_config);
+                case OutputType.Angular: return new AngularConverter(_config, _allModels);
                 case OutputType.CSharp: return new CSharpConverter(_config);
                 case OutputType.Ocelot: return new OcelotConverter(_config);
-                case OutputType.TypeScript: return new TypeScriptConverter(_config);
+                case OutputType.TypeScript: return new TypeScriptConverter(_config, _allModels);
                 case OutputType.Proto: return new ProtoConverter(_config);
                 case OutputType.Python: return new PythonConverter(_config);
                 default: throw new NotImplementedException();
@@ -95,6 +96,8 @@ namespace WCKDRZR.Gaspar.Converters
                         lines.AddRange(converter.ConvertModels(modelsForType, outputConfig));
                         lines.AddRange(converter.ConvertEnums(enumsForType));
                     }
+
+                    _allModels.AddRange(file.Models);
                 }
             }
 

@@ -62,8 +62,10 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                             {
                                 Identifier = p.Identifier.ToString(),
                                 Type = p.Type.ToString(),
+                                JsonPropertyName = p.AttributeLists.StringValueOfAttribute("JsonPropertyName"),
                                 ExportFor = p.GetExportType(nodeOutputType),
                             }).ToList(),
+                    ParentClasses = new(),
                     BaseClasses = new List<string>(),
                     ExportFor = nodeOutputType
                 });
@@ -120,6 +122,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                 {
                                     Identifier = p.Identifier.ToString(),
                                     Type = p.Type.ToString(),
+                                    JsonPropertyName = p.AttributeLists.StringValueOfAttribute("JsonPropertyName"),
                                     ExportFor = p.GetExportType(nodeOutputType),
                                 }).ToList(),
                 BaseClasses = baseClasses ?? new(),
