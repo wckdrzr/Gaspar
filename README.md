@@ -9,7 +9,7 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 |                                    | C# Models and Types | C# Controllers |
 | ---------------------------------- |:-------------------:|:--------------:|
 | Export to TypeScript               | ✅                   | ✅              |
-| Export to Angular * <sup>1 2</sup> | ✅                   | ✅              |
+| Export to Angular * <sup>1</sup>   | ✅                   | ✅              |
 | Export to Ocelot Config            |                     | ✅              |
 | Python <sup>† 1 2</sup>            |                     | ✅              |
 | Export to C# <sup>2</sup>          |                     | ✅              |

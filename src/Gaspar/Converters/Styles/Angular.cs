@@ -114,8 +114,9 @@ namespace WCKDRZR.Gaspar.Converters
             List<string> parsedCustomTypes = new();
             foreach (string type in customTypes)
             {
+                List<string> disallowList = new() { "string", "object", "any", "File" };
                 string parsed = TypeScriptConverter.ParseType(type, outputConfig, allowAddNull: false);
-                if (parsed != "string" && parsed != "object" && parsed != "any" && !parsedCustomTypes.Contains(parsed))
+                if (!parsedCustomTypes.Contains(parsed) && !disallowList.Contains(parsed))
                 {
                     parsedCustomTypes.Add(parsed);
                 }
@@ -202,20 +203,58 @@ namespace WCKDRZR.Gaspar.Converters
                     url += action.Parameters.QueryString(OutputType.Angular, "$");
 
                     string bodyParam = "";
+                    List<string> formParams = new();
+                    List<string> headerParams = new();
+
                     string httpMethod = action.HttpMethod.ToLower();
-                    Parameter? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body);
+                    if (httpMethod == "post" || httpMethod == "put" || httpMethod == "delete")
+                    {
+                        Parameter? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body);
+                        if (bodyParameter != null)
+                        {
+                            bodyParam = BodyParameterFetchObject(bodyParameter);
+                        }
+                        IEnumerable<Parameter> formParameters = action.Parameters.Where(p => p.Source == ParameterSource.Form);
+                        if (formParameters.Any())
+                        {
+                            formParams.Add("let data = new FormData()");
+                            bodyParam = "data";
+                            foreach (Parameter parameter in formParameters)
+                            {
+                                string value = $"JSON.stringify({parameter.Identifier})";
+                                string? type = parameter.Type != null ? TypeScriptConverter.ParseType(parameter.Type.ToString(), outputConfig) : null;
+                                if (type == "File" || type == "File | null" || type == "string" || type == "string | null")
+                                {
+                                    value = parameter.Identifier;
+                                }
+                                formParams.Add($"if ({parameter.Identifier}) {{ data.append('{parameter.Identifier}', {value}) }}");
+                            }
+                        }
+                    }                    
+                    IEnumerable<Parameter> headerParameters = action.Parameters.Where(p => p.Source == ParameterSource.Header);
+                    if (headerParameters.Any())
+                    {
+                        headerParams.Add("let headers: Record<string, string> = {}");
+                        foreach (Parameter parameter in headerParameters)
+                        {
+                            headerParams.Add($"if ({parameter.Identifier}) {{ headers['{parameter.Identifier}'] = {parameter.Identifier}.toString(); }}");
+                        }
+                    }
                     if (httpMethod == "post" || httpMethod == "put")
                     {
-                        bodyParam = $", {BodyParameterFetchObject(bodyParameter)}";
+                        bodyParam = $", {bodyParam}";
+                        if (headerParams.Any()) { bodyParam += $", {{ headers: headers }}"; }
                     }
-                    if (httpMethod == "delete" && bodyParameter != null)
+                    if (httpMethod == "delete" && bodyParam != "")
                     {
-                        bodyParam = $", {{ body: {BodyParameterFetchObject(bodyParameter)} }}";
+                        bodyParam = $", {{ body: {bodyParam}{(headerParams.Any() ? ", headers: headers" : "")} }}";
                     }
 
                     string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);
 
                     lines.Add($"        {actionName}({string.Join(", ", parameters)}): Observable<ServiceResponse<{returnType}>> {{");
+                    lines.AddRange(formParams.Select(f => $"            {f}"));
+                    lines.AddRange(headerParams.Select(f => $"            {f}"));
                     lines.Add($"            return this.http.{httpMethod}<{returnType}>(`{url}`{bodyParam}).pipe(");
                     lines.Add($"                map(data => new ServiceResponse(data, null)),");
                     lines.Add($"                catchError(error => this.errorHelper.handler<{returnType}>(error, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")}))");
