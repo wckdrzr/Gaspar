@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -10,16 +12,16 @@ namespace WCKDRZR.Gaspar
 {
     public static class ServiceClient
     {
-        public static async Task<ServiceResponse> FetchVoidAsync(HttpMethod method, string url, dynamic body, TimeSpan? timeout, Type logReceiver, Type serializer)
+        public static async Task<ServiceResponse> FetchVoidAsync(HttpMethod method, string url, dynamic body, Dictionary<string, string> headers, TimeSpan? timeout, Type logReceiver, Type serializer)
         {
-            return await FetchAsync<VoidObject>(method, url, body, timeout, logReceiver, serializer);
+            return await FetchAsync<VoidObject>(method, url, body, headers, timeout, logReceiver, serializer);
         }
 
-        public static async Task<ServiceResponse<T>> FetchAsync<T>(HttpMethod method, string url, dynamic body, TimeSpan? timeout, Type logReceiver, Type serializer)
+        public static async Task<ServiceResponse<T>> FetchAsync<T>(HttpMethod method, string url, dynamic body, Dictionary<string, string> headers, TimeSpan? timeout, Type logReceiver, Type serializer)
         {
             try
             {
-                HttpResponseMessage httpResponse = await Load(method, url, body, timeout);
+                HttpResponseMessage httpResponse = await Load(method, url, body, headers, timeout);
                 if (httpResponse.IsSuccessStatusCode)
                 {
                     return Success<T>(httpResponse, serializer, url, logReceiver);
@@ -35,19 +37,26 @@ namespace WCKDRZR.Gaspar
             }
         }
 
-        private static async Task<HttpResponseMessage> Load(HttpMethod method, string url, dynamic body, TimeSpan? timeout)
+        private static async Task<HttpResponseMessage> Load(HttpMethod method, string url, dynamic body, Dictionary<string, string> headers, TimeSpan? timeout)
         {
             HttpClient httpClient = new();
             if (timeout != null)
             {
                 httpClient.Timeout = (TimeSpan)timeout;
             }
-            return await httpClient.SendAsync(new HttpRequestMessage
+
+            HttpRequestMessage request = new()
             {
                 Method = method,
                 RequestUri = new Uri(url),
-                Content = body == null ? null : JsonContent.Create(body)
-            });
+                Content = body == null ? null : JsonContent.Create(body),
+            };
+            foreach (var header in headers)
+            {
+                request.Headers.Add(header.Key, header.Value);
+            }
+
+            return await httpClient.SendAsync(request);
         }
 
         private static ServiceResponse<T> Success<T>(HttpResponseMessage httpResponse, Type serializer, string url, Type logReceiver)

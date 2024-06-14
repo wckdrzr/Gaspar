@@ -11,14 +11,13 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 | Export to TypeScript               | ✅                   | ✅              |
 | Export to Angular * <sup>1</sup>   | ✅                   | ✅              |
 | Export to Ocelot Config            |                     | ✅              |
-| Python <sup>† 1 2</sup>            |                     | ✅              |
-| Export to C# <sup>2</sup>          |                     | ✅              |
+| Python <sup>† 1</sup>              |                     | ✅              |
+| Export to C#                       |                     | ✅              |
 | Export to Proto †                  | ✅                   |                |
 
 *\* Angular model export same as TypeScript export*\
 *<sup>† </sup>Not actively maintained (please contribute!)*\
 *<sup>1</sup> Controllers missing JsonPropertyKey support (please contribute!)*\
-*<sup>2</sup> Controllers missing full [FromXXX] support (soon)*
 
 Other translations can easily be added
 

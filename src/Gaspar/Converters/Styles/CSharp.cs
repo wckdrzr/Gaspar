@@ -64,7 +64,7 @@ namespace WCKDRZR.Gaspar.Converters
                 List<string> parameters = new();
                 foreach (Parameter parameter in action.Parameters)
                 {
-                    string newParam = $"{parameter.Type} {parameter.Identifier}";
+                    string newParam = $"{ConvertType(parameter.Type)} {parameter.Identifier}";
                     if (parameter.DefaultValue != null)
                     {
                         newParam += $" = {parameter.DefaultValue}";
@@ -120,15 +120,50 @@ namespace WCKDRZR.Gaspar.Converters
                     }
                     parameters.Add($"TimeSpan? timeout = null");
 
-                    Parameter? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body);
+                    string? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body)?.Identifier;
+
+                    List<string> formParamsBuilder = new();
+                    IEnumerable<Parameter> formParameters = action.Parameters.Where(p => p.Source == ParameterSource.Form);
+                    if (formParameters.Any())
+                    {
+                        formParamsBuilder.Add("MultipartFormDataContent data = new();");
+                        bodyParameter = "data";
+                        foreach (Parameter parameter in formParameters)
+                        {
+                            string value = $"new StringContent({parameter.Identifier}.ToString())";
+                            string type = ConvertType(parameter.Type);
+                            if (type.StartsWith("byte[]"))
+                            {
+                                value = $"new ByteArrayContent({parameter.Identifier})";
+                            }
+                            formParamsBuilder.Add($"data.Add({value}, \"{parameter.Identifier}\");");
+                        }
+                    }
+
+                    List<string> headerParamBuilder = new();
+                    string headersParam = "new()";
+                    IEnumerable<Parameter> headerParameters = action.Parameters.Where(p => p.Source == ParameterSource.Header);
+                    if (headerParameters.Any())
+                    {
+                        headerParamBuilder.Add("Dictionary<string, string> headers = new();");
+                        headersParam = "headers";
+                        foreach (Parameter parameter in headerParameters)
+                        {
+                            headerParamBuilder.Add($"headers.Add(\"{parameter.Identifier}\", {parameter.Identifier}.ToString());");
+                        }
+                    }
 
                     lines.Add($"        public static ServiceResponse{returnTypeString} {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{{defaultTimeout}");
-                    lines.Add($"            return ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {bodyParameter?.Identifier ?? "null"}, timeout, {loggingReceiver}, {customSerializer}).Result;");
+                    lines.AddRange(formParamsBuilder.Select(f => $"            {f}"));
+                    lines.AddRange(headerParamBuilder.Select(f => $"            {f}"));
+                    lines.Add($"            return ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {bodyParameter ?? "null"}, {headersParam}, timeout, {loggingReceiver}, {customSerializer}).Result;");
                     lines.Add($"        }}");
                     lines.Add($"        public static async Task<ServiceResponse{returnTypeString}> {action.ActionName}Async({string.Join(", ", parameters)})");
                     lines.Add($"        {{{defaultTimeout}");
-                    lines.Add($"            return await ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {bodyParameter?.Identifier ?? "null"}, timeout, {loggingReceiver}, {customSerializer});");
+                    lines.AddRange(formParamsBuilder.Select(f => $"            {f}"));
+                    lines.AddRange(headerParamBuilder.Select(f => $"            {f}"));
+                    lines.Add($"            return await ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {bodyParameter ?? "null"}, {headersParam}, timeout, {loggingReceiver}, {customSerializer});");
                     lines.Add($"        }}");
                 }
             }
@@ -156,6 +191,14 @@ namespace WCKDRZR.Gaspar.Converters
         public void PreProcess(CSharpFiles files)
         {
             return;
+        }
+
+        private string ConvertType(TypeSyntax? typeSyntax)
+        {
+            string type = typeSyntax?.ToString() ?? "";
+            if (type == "IFormFile") { type = "byte[]"; }
+            if (type == "IFormFile?") { type = "byte[]?"; }
+            return type;
         }
     }
 }
