@@ -129,9 +129,13 @@ namespace WCKDRZR.Gaspar.Converters
 
                 string bodyParam = "";
                 string httpMethod = action.HttpMethod.ToLower();
-                if (action.BodyParameter != null && (httpMethod == "post" || httpMethod == "put" || httpMethod == "delete"))
+                if (httpMethod == "post" || httpMethod == "put" || httpMethod == "delete")
                 {
-                    bodyParam = $", data = {action.BodyParameter?.Identifier ?? "null"}";
+                    Parameter? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body);
+                    if (bodyParameter != null)
+                    {
+                        bodyParam = $", data = {bodyParameter.Identifier}";
+                    }
                 }
 
                 bodyParam += ", headers = headers";

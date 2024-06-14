@@ -26,7 +26,7 @@ namespace WCKDRZR.Gaspar.Extensions
                     break;
             }
 
-            List<Parameter> queryStringParameters = parameters.Where(p => p.OnQueryString).ToList();
+            List<Parameter> queryStringParameters = parameters.Where(p => p.Source == ParameterSource.Query).ToList();
             if (queryStringParameters.Count > 0) { qs += "?"; }
 
             int i = 0;
@@ -34,7 +34,7 @@ namespace WCKDRZR.Gaspar.Extensions
             {
                 string coalesce = "";
                 string? typeName = parameter.Type?.ToString().ToLower();
-
+                
                 if (!string.IsNullOrEmpty(coalesceMark))
                 {
                     if (typeName == "string")

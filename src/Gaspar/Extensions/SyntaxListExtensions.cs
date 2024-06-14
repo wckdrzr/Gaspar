@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using WCKDRZR.Gaspar.Models;
 
 namespace WCKDRZR.Gaspar.Extensions
 {
@@ -24,6 +24,19 @@ namespace WCKDRZR.Gaspar.Extensions
                 propertyAttributeList.Any(attributeList =>
                     attributeList.Attributes.Any(attribute =>
                         attribute.Name.ToString().Equals(attributeName)));
+
+        public static ParameterSource GetParameterSource(this SyntaxList<AttributeListSyntax> propertyAttributeList)
+        {
+            if (propertyAttributeList.ContainsAttribute("FromBody")) { return ParameterSource.Body; }
+            if (propertyAttributeList.ContainsAttribute("FromForm")) { return ParameterSource.Form; }
+            if (propertyAttributeList.ContainsAttribute("FromFormObject")) { return ParameterSource.Form; }
+            if (propertyAttributeList.ContainsAttribute("FromHeader")) { return ParameterSource.Header; }
+            if (propertyAttributeList.ContainsAttribute("FromRoute")) { return ParameterSource.Route; }
+            if (propertyAttributeList.ContainsAttribute("FromQuery")) { return ParameterSource.Query; }
+            if (propertyAttributeList.ContainsAttribute("FromServices")) { return ParameterSource.Services; }
+            if (propertyAttributeList.ContainsAttribute("FromKeyedServices")) { return ParameterSource.KeyedServices; }
+            return ParameterSource.Unspecified;
+        }
 
         public static bool HasAttribute(this SyntaxList<AttributeListSyntax> propertyAttributeList, string attributeName, bool startsWith = false)
         {

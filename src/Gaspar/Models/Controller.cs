@@ -41,7 +41,6 @@ namespace WCKDRZR.Gaspar.Models
         public string? ReturnTypeOverride { get; set; } = null;
 
         public List<Parameter> Parameters { get; set; } = new();
-        public Parameter? BodyParameter { get; set; } = null;
 
         public string? CustomSerializer { get; set; } = null;
 
@@ -70,16 +69,28 @@ namespace WCKDRZR.Gaspar.Models
         public string Identifier { get; set; }
         public TypeSyntax? Type { get; set; }
         public string? DefaultValue { get; set; }
-        public bool OnQueryString { get; set; }
+        public ParameterSource Source { get; set; }
         public bool IsNullable { get; set; }
 
-        public Parameter(ParameterSyntax parameterSyntax, bool onQueryString)
+        public Parameter(ParameterSyntax parameterSyntax, ParameterSource source)
         {
             Identifier = parameterSyntax.Identifier.ToString();
             Type = parameterSyntax.Type;
             DefaultValue = parameterSyntax.Default == null ? null : parameterSyntax.Default.Value.ToString();
-            OnQueryString = onQueryString;
+            Source = source;
             IsNullable = parameterSyntax.Type is NullableTypeSyntax;
         }
+    }
+
+    internal enum ParameterSource
+    {
+        Unspecified,
+        Body,
+        Form,
+        Header,
+        Route,
+        Query,
+        Services,
+        KeyedServices,
     }
 }

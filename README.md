@@ -6,18 +6,19 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 
 ## Supported Translations
 
-|                                  | C# Models and Types | C# Controllers |
-| -------------------------------- |:-------------------:|:--------------:|
-| Export to TypeScript             | ✅                   | ✅              |
-| Export to Angular * <sup>1</sup> | ✅                   | ✅              |
-| Export to Ocelot Config          |                     | ✅              |
-| Python <sup>† 1</sup>            |                     | ✅              |
-| Export to C#                     |                     | ✅              |
-| Export to Proto †                | ✅                   |                |
+|                                    | C# Models and Types | C# Controllers |
+| ---------------------------------- |:-------------------:|:--------------:|
+| Export to TypeScript               | ✅                   | ✅              |
+| Export to Angular * <sup>1 2</sup> | ✅                   | ✅              |
+| Export to Ocelot Config            |                     | ✅              |
+| Python <sup>† 1 2</sup>            |                     | ✅              |
+| Export to C# <sup>2</sup>          |                     | ✅              |
+| Export to Proto †                  | ✅                   |                |
 
 *\* Angular model export same as TypeScript export*\
 *<sup>† </sup>Not actively maintained (please contribute!)*\
-*<sup>1</sup> Controllers missing JsonPropertyKey support (please contribute!)*
+*<sup>1</sup> Controllers missing JsonPropertyKey support (please contribute!)*\
+*<sup>2</sup> Controllers missing full [FromXXX] support (soon)*
 
 Other translations can easily be added
 
@@ -112,6 +113,28 @@ For Ocelot, this allows you to provide a QoS Timeout value in the configuration.
 **Scopes**    `Array of strings`    For Ocelot - list of scopes to be used in "AllowedScopes" of the "AuthenticationOptions" section in the Ocelot config.  If set this will override scopes generated from the `DefaultScopes` and `ScopesByHttpMethod` configuration.
 
  **AdditionalScopes**    `Array of strings`    For Ocelot - scopes to be added to "AllowedScopes" of the "AuthenticationOptions" section in the Ocelot config. If set these scopes will be in addition to scopes generated from the `DefaultScopes` and `ScopesByHttpMethod` configuration.
+
+### [From*xxxx*]
+
+Within your controller actions, you can decorate parameters with [FromBody], [FromForm], [FromHeader], [FromRoute], [FromQuery], [FromServices] or [FromKeyedServices] and they will work exactly as you expect; the later two options will not export as they are for internal data.
+
+#### [FromFormObject]
+
+Natively in C#, binding of complex objects from a JSON payload is only supported using [FromBody], however you can only specify one [FromBody] argument in any given function.
+
+If you would like to send a file along with a complex object, or simply send multiple complex objects; using [FromForm] makes sense.  However [FromForm] only works with HTMLInputElement values; namely simple types (string, int, etc) and IFormFile.
+
+In order to make this work seamlessly when using Gaspar, you can decorate complex objects with [FromFormObject]; and this will work as you would expect, for example:
+
+```csharp
+[HttpPost("[action]")]
+[ExportFor(GasparType.All)]
+public void Save([FromForm] IFormFile? image, [FromFormObject] ModelData model)
+{
+}
+```
+
+As shown above, you should continue to use [FromForm] for simple types and IFormFile.
 
 ## Disable Export on Build
 

@@ -8,7 +8,7 @@
     <Authors>Ben Robinson</Authors>
     <Description>Consumes your C# domain models, types and controllers and exports them for other services and languages to consume</Description>
     <PackageId>WckdRzr.Gaspar</PackageId>
-    <Version>2.9.2</Version>
+    <Version>2.9.7</Version>
 
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -26,6 +26,7 @@
      <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.7.2" /> 
      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" /> 
      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.1.38" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,7 +41,7 @@
 
   <Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
     <ItemGroup>
-      <_PackageFiles Include="bin\$(Configuration)\*\Glob.dll;bin\$(Configuration)\*\Microsoft.CodeAnalysis.CSharp.dll;bin\$(Configuration)\*\Microsoft.CodeAnalysis.dll;bin\$(Configuration)\*\System.IO.Abstractions.dll;bin\$(Configuration)\*\TestableIO.System.IO.Abstractions.dll;bin\$(Configuration)\*\TestableIO.System.IO.Abstractions.Wrappers.dll">
+      <_PackageFiles Include="bin\$(Configuration)\*\Glob.dll;bin\$(Configuration)\*\Microsoft.CodeAnalysis.CSharp.dll;bin\$(Configuration)\*\Microsoft.CodeAnalysis.dll;bin\$(Configuration)\*\Microsoft.AspNetCore.Mvc.Abstractions.dll;bin\$(Configuration)\*\System.IO.Abstractions.dll;bin\$(Configuration)\*\TestableIO.System.IO.Abstractions.dll;bin\$(Configuration)\*\TestableIO.System.IO.Abstractions.Wrappers.dll">
         <PackagePath>tools\%(RecursiveDir)</PackagePath>
         <Visible>false</Visible>
         <BuildAction>Content</BuildAction>

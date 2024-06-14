@@ -103,23 +103,29 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     List<string> routeParameters = Regex.Matches(action.Route, "{(.*?)}").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
                     foreach (ParameterSyntax parameter in node.ParameterList.Parameters)
                     {
-                        bool onQueryString = false;
-                        if (parameter.AttributeLists.ContainsAttribute("FromBody"))
+                        ParameterSource source = parameter.AttributeLists.GetParameterSource();
+                        if (source == ParameterSource.Unspecified)
                         {
-                            action.BodyParameter = new(parameter, false);
-                            if (action.HttpMethod == "GET")
-                            {
-                                action.BadMethodReason = $"HttpGet has [FromBody] attribute; remove parameter or change from HttpGet";
-                            }
+                            source = routeParameters.Contains(parameter.Identifier.ToString()) ? ParameterSource.Route : ParameterSource.Query;
                         }
-                        else if (!routeParameters.Contains(parameter.Identifier.ToString()))
+                        if ((source == ParameterSource.Body || source == ParameterSource.Form) && action.HttpMethod == "GET")
                         {
-                            onQueryString = true;
+                            action.BadMethodReason = $"HttpGet has [From{source}] attribute; remove parameter or change from HttpGet";
                         }
-
-                        action.Parameters.Add(new(parameter, onQueryString));                        
+                        if (source != ParameterSource.Services && source != ParameterSource.KeyedServices)
+                        {
+                            action.Parameters.Add(new(parameter, source));
+                        }
                     }
-                    List<string> missingParameters = routeParameters.Except(action.Parameters.Select(ap => ap.Identifier)).ToList();
+                    if (action.Parameters.Count(p => p.Source == ParameterSource.Body) > 1)
+                    {
+                        action.BadMethodReason = $"Action has multiple [FromBody] parameters; try [FromForm] instead";
+                    }
+                    if (action.Parameters.Count(p => p.Source == ParameterSource.Body) > 0 && action.Parameters.Count(p => p.Source == ParameterSource.Form) > 0)
+                    {
+                        action.BadMethodReason = $"Action has both [FromBody] and [FromForm] parameters; try using only [FromForm]";
+                    }
+                    List<string> missingParameters = routeParameters.Except(action.Parameters.Where(ap => ap.Source == ParameterSource.Route).Select(ap => ap.Identifier)).ToList();
                     if (missingParameters.Count > 0)
                     {
                         action.BadMethodReason = $"Route parameter '{missingParameters[0]}' not declared on action method";

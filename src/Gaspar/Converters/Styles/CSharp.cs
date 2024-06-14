@@ -120,13 +120,15 @@ namespace WCKDRZR.Gaspar.Converters
                     }
                     parameters.Add($"TimeSpan? timeout = null");
 
+                    Parameter? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body);
+
                     lines.Add($"        public static ServiceResponse{returnTypeString} {action.ActionName}({string.Join(", ", parameters)})");
                     lines.Add($"        {{{defaultTimeout}");
-                    lines.Add($"            return ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, timeout, {loggingReceiver}, {customSerializer}).Result;");
+                    lines.Add($"            return ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {bodyParameter?.Identifier ?? "null"}, timeout, {loggingReceiver}, {customSerializer}).Result;");
                     lines.Add($"        }}");
                     lines.Add($"        public static async Task<ServiceResponse{returnTypeString}> {action.ActionName}Async({string.Join(", ", parameters)})");
                     lines.Add($"        {{{defaultTimeout}");
-                    lines.Add($"            return await ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {action.BodyParameter?.Identifier ?? "null"}, timeout, {loggingReceiver}, {customSerializer});");
+                    lines.Add($"            return await ServiceClient.{fetchMethodName}{returnTypeString}(HttpMethod.{httpMethod}, $\"{url}\"{urlHandler}, {bodyParameter?.Identifier ?? "null"}, timeout, {loggingReceiver}, {customSerializer});");
                     lines.Add($"        }}");
                 }
             }

@@ -203,13 +203,14 @@ namespace WCKDRZR.Gaspar.Converters
 
                     string bodyParam = "";
                     string httpMethod = action.HttpMethod.ToLower();
+                    Parameter? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body);
                     if (httpMethod == "post" || httpMethod == "put")
                     {
-                        bodyParam = $", {BodyParameterFetchObject(action.BodyParameter)}";
+                        bodyParam = $", {BodyParameterFetchObject(bodyParameter)}";
                     }
-                    if (httpMethod == "delete" && action.BodyParameter != null)
+                    if (httpMethod == "delete" && bodyParameter != null)
                     {
-                        bodyParam = $", {{ body: {BodyParameterFetchObject(action.BodyParameter)} }}";
+                        bodyParam = $", {{ body: {BodyParameterFetchObject(bodyParameter)} }}";
                     }
 
                     string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);
