@@ -209,6 +209,8 @@ namespace WCKDRZR.Gaspar.Converters
                     string httpMethod = action.HttpMethod.ToLower();
                     if (httpMethod == "post" || httpMethod == "put" || httpMethod == "delete")
                     {
+                        bodyParam = "null";
+
                         Parameter? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body);
                         if (bodyParameter != null)
                         {
@@ -245,9 +247,9 @@ namespace WCKDRZR.Gaspar.Converters
                         bodyParam = $", {bodyParam}";
                         if (headerParams.Any()) { bodyParam += $", {{ headers: headers }}"; }
                     }
-                    if (httpMethod == "delete" && bodyParam != "")
+                    if (httpMethod == "delete")
                     {
-                        bodyParam = $", {{ body: {bodyParam}{(headerParams.Any() ? ", headers: headers" : "")} }}";
+                        bodyParam = (bodyParam != "null" || headerParams.Any()) ? $", {{ {(bodyParam != "null" ? $"body: {bodyParam}" : "")}{(headerParams.Any() ? ", headers: headers" : "")} }}" : "";
                     }
 
                     string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);
