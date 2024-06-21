@@ -6,14 +6,14 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 
 ## Supported Translations
 
-|                                    | C# Models and Types | C# Controllers |
-| ---------------------------------- |:-------------------:|:--------------:|
-| Export to TypeScript               | ✅                   | ✅              |
-| Export to Angular * <sup>1</sup>   | ✅                   | ✅              |
-| Export to Ocelot Config            |                     | ✅              |
-| Python <sup>† 1</sup>              |                     | ✅              |
-| Export to C#                       |                     | ✅              |
-| Export to Proto †                  | ✅                   |                |
+|                                  | C# Models and Types | C# Controllers |
+| -------------------------------- |:-------------------:|:--------------:|
+| Export to TypeScript             | ✅                   | ✅              |
+| Export to Angular * <sup>1</sup> | ✅                   | ✅              |
+| Export to Ocelot Config          |                     | ✅              |
+| Python <sup>† 1</sup>            |                     | ✅              |
+| Export to C#                     |                     | ✅              |
+| Export to Proto †                | ✅                   |                |
 
 *\* Angular model export same as TypeScript export*\
 *<sup>† </sup>Not actively maintained (please contribute!)*\
@@ -134,6 +134,14 @@ public void Save([FromForm] IFormFile? image, [FromFormObject] ModelData model)
 ```
 
 As shown above, you should continue to use [FromForm] for simple types and IFormFile.
+
+#### 405/415 Errors
+
+If the object you pass to a controller action is malformed in some way (number as text, or missing required properties), a 4XX error will be sent back to the browser.  The actual error is swallowed and it can sometime be really difficult to find the cause.
+
+[FromFormObject] will write errors to the console - so you can fix them!
+
+If your struggling with 405 or similar errors, trying changing to [FromFormObject] temporarily.
 
 ## Disable Export on Build
 

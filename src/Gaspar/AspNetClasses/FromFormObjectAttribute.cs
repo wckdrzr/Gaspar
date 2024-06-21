@@ -45,7 +45,10 @@ namespace WCKDRZR.Gaspar
                             return Task.CompletedTask;
                         }
                     }
-                    catch {}
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"FromFormObject: {e.Message}");
+                    }
                 }
             }
 
