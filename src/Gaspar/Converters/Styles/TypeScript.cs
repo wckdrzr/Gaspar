@@ -140,7 +140,7 @@ namespace WCKDRZR.Gaspar.Converters
 
             if (model.Enumerations.Count > 0)
             {
-                lines = ConvertEnum(new EnumModel { Identifier = model.ModelName, Values = model.Enumerations }, outputConfig, file);
+                lines.AddRange(ConvertEnum(new EnumModel { Identifier = model.ModelName, Values = model.Enumerations }, outputConfig, file));
                 model.ModelName += "_Properties";
                 if (model.BaseClasses.Count > 0)
                 {
@@ -202,7 +202,7 @@ namespace WCKDRZR.Gaspar.Converters
                     lines.Add($"    '{GetEnumStringValue(value.Key)}'{delimiter}");
                     
                     i++;
-                }    
+                }
                 lines.Add("");
             }
             else
