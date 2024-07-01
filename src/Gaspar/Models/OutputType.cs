@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
@@ -43,15 +44,53 @@ namespace WCKDRZR.Gaspar.Models
     {
         public static OutputType GetExportType(this ParameterSyntax node, OutputType parentTypes = 0)
         {
-            return node.AttributeLists.GetExportType(parentTypes);
+            OutputType types = 0;
+            if (node.Parent != null && node.Parent.GetType() == typeof(ClassDeclarationSyntax))
+            {
+                types = ((ClassDeclarationSyntax)node.Parent).GetParentExportTypes();
+            }
+            return node.AttributeLists.GetExportType(types);
         }
 
         public static OutputType GetExportType(this MemberDeclarationSyntax node, OutputType parentTypes = 0)
         {
-            return node.AttributeLists.GetExportType(parentTypes);
+            OutputType types = 0;
+            if (node.Parent != null && node.Parent.GetType() == typeof(ClassDeclarationSyntax))
+            {
+                types = ((ClassDeclarationSyntax)node.Parent).GetParentExportTypes();
+            }
+            return node.AttributeLists.GetExportType(types);
         }
 
-        public static OutputType GetExportType(this SyntaxList<AttributeListSyntax> attributes, OutputType parentTypes = 0)
+        private static OutputType GetParentExportTypes(this ClassDeclarationSyntax node)
+        {
+            Stack<ClassDeclarationSyntax> classHierarchy = new();
+            classHierarchy.Push(node);
+
+            SyntaxNode? parent = node.Parent;
+            while (parent != null)
+            {
+                if (parent.GetType() == typeof(ClassDeclarationSyntax))
+                {
+                    classHierarchy.Push((ClassDeclarationSyntax)parent);
+                    parent = parent.Parent;
+                }
+                else
+                {
+                    parent = null;
+                }
+            }
+
+            OutputType types = 0;
+            while (classHierarchy.Count > 0)
+            {
+                types = classHierarchy.Pop().AttributeLists.GetExportType(types);
+            }
+
+            return types;
+        }
+
+        private static OutputType GetExportType(this SyntaxList<AttributeListSyntax> attributes, OutputType parentTypes = 0)
         {
             OutputType exportForTypes = parentTypes;
 

@@ -39,8 +39,6 @@ namespace WCKDRZR.Gaspar.ClassWalkers
             {
                 ClassDeclarationSyntax nodeClass = (ClassDeclarationSyntax)node.Parent;
 
-                OutputType nodeClassOutputType = nodeClass.GetExportType();
-
                 ExportOptionsAttribute options = new ExportOptionsAttribute();
                 string? nodeClassReturnTypeOverrider = nodeClass.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride));
                 string? nodeClassCustomSerializer = nodeClass.AttributeLists.StringAttributeValue(nameof(options.Serializer));
@@ -51,7 +49,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                 if (nodeClass.IsController() && node.IsPublic())
                 {
                     Controller controller = new Controller(nodeClass);
-                    ControllerAction action = new(node, node.GetExportType(nodeClassOutputType));
+                    ControllerAction action = new(node, node.GetExportType());
 
                     AttributeSyntax? httpAttribute = node.AttributeLists.GetAttribute("Http", true);
                     AttributeSyntax? routeAttribute = node.AttributeLists.GetAttribute("Route");
