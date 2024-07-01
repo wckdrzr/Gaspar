@@ -8,6 +8,7 @@ using WCKDRZR.Gaspar.Extensions;
 using WCKDRZR.Gaspar.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Drawing;
+using WCKDRZR.Gaspar.Helpers;
 
 namespace WCKDRZR.Gaspar.Converters
 {
@@ -16,6 +17,9 @@ namespace WCKDRZR.Gaspar.Converters
     internal class TypeScriptConverter : IConverter
 	{
         public Configuration Config { get; set; }
+        public string CurrentFile { get; set; } = "";
+        
+        private List<string> currentNamespace = new();
         private int currentIndent = 0;
 
         public Dictionary<string, string> DefaultTypeTranslations = new() {
@@ -75,16 +79,68 @@ namespace WCKDRZR.Gaspar.Converters
 
         public string Comment(string comment, int followingBlankLines = 0)
         {
-            return $"{new String(' ', currentIndent * 4)}//{comment}{new String('\n', followingBlankLines)}";
+            return $"{Indent()}//{comment}{new String('\n', followingBlankLines)}";
+        }
+        private string Indent(int offset = 0) => new(' ', (currentIndent + offset) * 4);
+
+        public List<string> FileComment(ConfigurationTypeOutput outputConfig, CSharpFile file)
+        {
+            if (file.Path != CurrentFile)
+            {
+                CurrentFile = file.Path;
+                return new() { Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1) };
+            }
+            return new();
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig)
+        public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
+        {
+            return new();
+        }
+
+        public List<string> ModelNamespace(List<ClassDeclarationSyntax> parentClasses)
         {
             List<string> lines = new();
 
+            List<string> ns = parentClasses.Select(c => c.Identifier.ToString()).Reverse().ToList();
+
+            int matchingPath = 0;
+            for (int i = 0; i < currentNamespace.Count(); i++)
+            {
+                if (ns.Count > i && ns[i] == currentNamespace[i])
+                {
+                    matchingPath++;
+                }
+            }
+            for (int i = 0; i < currentNamespace.Count() - matchingPath; i++)
+            {
+                lines.Add($"{Indent(-1)}}}\n");
+                currentIndent--;
+            }
+
+            for (int i = 0; i < ns.Count(); i++)
+            {
+                if (currentNamespace.Count <= i || currentNamespace[i] != ns[i])
+                {
+                    lines.Add($"{Indent()}export namespace {ns[i]} {{\n");
+                    currentIndent++;
+                }
+            }
+            currentNamespace = ns;
+
+            return lines;
+        }
+
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
+        {
+            List<string> lines = new();
+
+            lines.AddRange(ModelNamespace(model.ParentClasses));
+            lines.AddRange(FileComment(outputConfig, file));
+
             if (model.Enumerations.Count > 0)
             {
-                lines = ConvertEnum(new EnumModel { Identifier = model.ModelName, Values = model.Enumerations });
+                lines = ConvertEnum(new EnumModel { Identifier = model.ModelName, Values = model.Enumerations }, outputConfig, file);
                 model.ModelName += "_Properties";
                 if (model.BaseClasses.Count > 0)
                 {
@@ -105,45 +161,35 @@ namespace WCKDRZR.Gaspar.Converters
             }
             string baseClasses = model.BaseClasses.Count > 0 ? $" extends {string.Join(", ", model.BaseClasses)}" : "";
 
-            int namespaceDepth = 0;
-            for (int i = model.ParentClasses.Count - 1; i >= 0; i--)
-            {
-                lines.Add($"{new(' ', namespaceDepth * 4)}export namespace {model.ParentClasses[i].Identifier} {{");
-                namespaceDepth++;
-            }
-
-            lines.Add($"{new(' ', namespaceDepth * 4)}export interface {model.ModelName}{baseClasses} {{");
+            lines.Add($"{Indent()}export interface {model.ModelName}{baseClasses} {{");
 
             if (model.Enumerations.Count > 0)
             {
-                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}id: number;");
-                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}name: string;");
+                lines.Add($"{Indent(1)}id: number;");
+                lines.Add($"{Indent(1)}name: string;");
             }
 
             if (indexSignature != null)
             {
-                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}{ConvertIndexType(indexSignature, outputConfig)};");
+                lines.Add($"{Indent(1)}{ConvertIndexType(indexSignature, outputConfig)};");
             }
 
             foreach (Property member in model.Fields.Concat(model.Properties))
             {
-                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}{ConvertProperty(member, outputConfig)};");
+                lines.Add($"{Indent(1)}{ConvertProperty(member, outputConfig)};");
             }
 
-            foreach (ClassDeclarationSyntax parentClass in model.ParentClasses)
-            {
-                namespaceDepth--;
-                lines.Add($"{new(' ', (namespaceDepth + 1) * 4)}}}");
-            }
-
-            lines.Add("}\n");
+            lines.Add($"{Indent()}}}\n");
 
             return lines;
         }
 
-        public List<string> ConvertEnum(EnumModel enumModel)
+        public List<string> ConvertEnum(EnumModel enumModel, ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
             List<string> lines = new();
+
+            lines.AddRange(ModelNamespace(enumModel.ParentClasses));
+            lines.AddRange(FileComment(outputConfig, file));
 
             if (Config.Models?.StringLiteralTypesInsteadOfEnums == true)
             {
@@ -185,6 +231,21 @@ namespace WCKDRZR.Gaspar.Converters
                 }
                 lines.Add("}");
                 lines.Add("");
+            }
+
+            return lines;
+        }
+
+        public List<string> ModelFooter()
+        {
+            List<string> lines = new();
+
+            Console.WriteLine(currentNamespace.Count);
+
+            for (int i = 0; i < currentNamespace.Count(); i++)
+            {
+                lines.Add($"{Indent(-1)}}}\n");
+                currentIndent--;
             }
 
             return lines;
@@ -290,7 +351,9 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("            Object.keys(map).forEach(key => {");
                 lines.Add("                if (workingObj[key] !== undefined) {");
                 lines.Add("                    workingObj[map[key].k] = map[key].m ? toJson(workingObj[key], map[key].m!) : workingObj[key]");
-                lines.Add("                    delete workingObj[key]");
+                lines.Add("                    if (key != map[key].k) {");
+                lines.Add("                        delete workingObj[key]");
+                lines.Add("                    }");
                 lines.Add("                }");
                 lines.Add("            })");
                 lines.Add("            return workingObj");
@@ -311,7 +374,9 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("            Object.keys(map).forEach(key => {");
                 lines.Add("                if (workingObj[map[key].k] !== undefined) {");
                 lines.Add("                    workingObj[key] = map[key].m ? fromJson(workingObj[map[key].k], map[key].m!) : workingObj[map[key].k]");
-                lines.Add("                    delete workingObj[map[key].k]");
+                lines.Add("                    if (key != map[key].k) {");
+                lines.Add("                        delete workingObj[map[key].k]");
+                lines.Add("                    }");
                 lines.Add("                }");
                 lines.Add("            })");
                 lines.Add("            return workingObj");
@@ -636,6 +701,10 @@ namespace WCKDRZR.Gaspar.Converters
                     string? matchingJsonKey = _jsonPropertyKeys.FirstOrDefault(k => k.Key == qualifitedType).Key;
                     if (matchingJsonKey == null)
                     {
+                        matchingJsonKey = _jsonPropertyKeys.FirstOrDefault(k => k.Key == mapKey + '.' + type).Key;
+                    }
+                    if (matchingJsonKey == null)
+                    {
                         matchingJsonKey = _jsonPropertyKeys.FirstOrDefault(k => k.Key == type).Key;
                     }
                     if (matchingJsonKey != null) { matchingJsonKey = matchingJsonKey.Replace(".", "_"); }
@@ -659,11 +728,6 @@ namespace WCKDRZR.Gaspar.Converters
                 }
             }
             return null;
-        }
-
-        public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
-        {
-            return new();
         }
 
         public void PreProcess(CSharpFiles files)

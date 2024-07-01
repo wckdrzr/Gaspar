@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace WCKDRZR.Gaspar.Core
 {
@@ -38,6 +39,21 @@ namespace WCKDRZR.Gaspar.Core
                 {
                     files.Add(ParseModels(fileName, config));
                 }
+
+                //Fully qualify nested class types
+                foreach (CSharpFile file in files) { foreach (Model model in file.Models) { foreach (Property property in model.Properties)
+                {
+                    if (!property.Identifier.Contains('.'))
+                    {
+                        foreach (CSharpFile innerFile in files) { foreach (Model innerModel in innerFile.Models)
+                        {
+                                if ($"{model.FullName}.{property.Type}" == innerModel.FullName)
+                                {
+                                    property.Type = $"{model.FullName}.{property.Type}";
+                                }
+                        } }
+                    }
+                } } }
 
                 foreach (ConfigurationTypeOutput output in config.Models.Output)
                 {

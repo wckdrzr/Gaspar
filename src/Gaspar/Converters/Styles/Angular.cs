@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using WCKDRZR.Gaspar.Extensions;
+using WCKDRZR.Gaspar.Helpers;
 using WCKDRZR.Gaspar.Models;
 
 namespace WCKDRZR.Gaspar.Converters
@@ -10,6 +12,7 @@ namespace WCKDRZR.Gaspar.Converters
     internal class AngularConverter : IConverter
 	{
         public Configuration Config { get; set; }
+        public string CurrentFile { get; set; } = "";
         private int currentIndent = 0;
 
         TypeScriptConverter TypeScriptConverter { get; set; }
@@ -26,14 +29,24 @@ namespace WCKDRZR.Gaspar.Converters
             return $"{new String(' ', currentIndent * 4)}//{comment}{new String('\n', followingBlankLines)}";
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig)
+        public List<string> FileComment(ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
-            return TypeScriptConverter.ConvertModel(model, outputConfig);
+            if (file.Path != CurrentFile)
+            {
+                CurrentFile = file.Path;
+                return new() { Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1) };
+            }
+            return new();
         }
 
-        public List<string> ConvertEnum(EnumModel enumModel)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
-            return TypeScriptConverter.ConvertEnum(enumModel);
+            return TypeScriptConverter.ConvertModel(model, outputConfig, file);
+        }
+
+        public List<string> ConvertEnum(EnumModel enumModel, ConfigurationTypeOutput outputConfig, CSharpFile file)
+        {
+            return TypeScriptConverter.ConvertEnum(enumModel, outputConfig, file);
         }
 
         public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
@@ -285,6 +298,16 @@ namespace WCKDRZR.Gaspar.Converters
         }
 
         public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
+        {
+            return new();
+        }
+
+        public List<string> ModelNamespace(List<ClassDeclarationSyntax> parentClasses)
+        {
+            return new();
+        }
+
+        public List<string> ModelFooter()
         {
             return new();
         }

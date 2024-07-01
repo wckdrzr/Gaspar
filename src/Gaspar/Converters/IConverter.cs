@@ -11,10 +11,12 @@ namespace WCKDRZR.Gaspar.Converters
     internal interface IConverter
     {
         Configuration Config { get; set; }
+        string CurrentFile { get; set; }
 
         List<string> ModelHeader(ConfigurationTypeOutput outputConfig);
-        List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig);
-        List<string> ConvertEnum(EnumModel enumModel);
+        List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file);
+        List<string> ConvertEnum(EnumModel enumModel, ConfigurationTypeOutput outputConfig, CSharpFile file);
+        List<string> ModelFooter();
 
         List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig);
         List<string> ControllerHeader(ConfigurationTypeOutput outputConfig, List<string> customTypes);
@@ -25,22 +27,22 @@ namespace WCKDRZR.Gaspar.Converters
 
         void PreProcess(CSharpFiles files);
 
-        public virtual List<string> ConvertModels(List<Model> models, ConfigurationTypeOutput outputConfig)
+        public virtual List<string> ConvertModels(List<Model> models, ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
-            List<string> lines = new List<string>();
+            List<string> lines = new();
             foreach (Model model in models)
             {
-                lines.AddRange(this.ConvertModel(model, outputConfig));
+                lines.AddRange(ConvertModel(model, outputConfig, file));
             }
             return lines;
         }
 
-        public virtual List<string> ConvertEnums(List<EnumModel> enumModels)
+        public virtual List<string> ConvertEnums(List<EnumModel> enumModels, ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
             List<string> lines = new List<string>();
             foreach (EnumModel enumModel in enumModels)
             {
-                lines.AddRange(this.ConvertEnum(enumModel));
+                lines.AddRange(this.ConvertEnum(enumModel, outputConfig, file));
             }
             return lines;
         }
@@ -75,7 +77,7 @@ namespace WCKDRZR.Gaspar.Converters
         {
             IConverter converter = GetConverter(outputConfig);
             converter.PreProcess(files);
-            List<string> lines = new();
+            List<string> lines = converter.ModelHeader(outputConfig);
 
             lines.AddRange(OutputHeader.Models(converter, outputConfig, outputConfig.Location));
 
@@ -89,12 +91,10 @@ namespace WCKDRZR.Gaspar.Converters
 
                     if (modelsForType.Count > 0 || enumsForType.Count > 0)
                     {
-                        lines.Add(converter.Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1));
-
                         modelCount += modelsForType.Count + enumsForType.Count;
 
-                        lines.AddRange(converter.ConvertModels(modelsForType, outputConfig));
-                        lines.AddRange(converter.ConvertEnums(enumsForType));
+                        lines.AddRange(converter.ConvertModels(modelsForType, outputConfig, file));
+                        lines.AddRange(converter.ConvertEnums(enumsForType, outputConfig, file));
                     }
 
                     _allModels.AddRange(file.Models);
@@ -105,6 +105,8 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 lines.Add(converter.Comment($"*** NO MODELS or ENUMS ATTRIBUTED ***"));
             }
+
+            lines.AddRange(converter.ModelFooter());
 
             return string.Join('\n', lines);
         }

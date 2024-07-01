@@ -4,12 +4,14 @@ using System.Linq;
 using WCKDRZR.Gaspar.Extensions;
 using WCKDRZR.Gaspar.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using WCKDRZR.Gaspar.Helpers;
 
 namespace WCKDRZR.Gaspar.Converters
 {
     internal class CSharpConverter : IConverter
 	{
         public Configuration Config { get; set; }
+        public string CurrentFile { get; set; } = "";
         private int currentIndent = 0;
 
         public CSharpConverter(Configuration config)
@@ -20,6 +22,16 @@ namespace WCKDRZR.Gaspar.Converters
         public string Comment(string comment, int followingBlankLines = 0)
         {
             return $"{new String(' ', currentIndent * 4)}//{comment}{new String('\n', followingBlankLines)}";
+        }
+
+        public List<string> FileComment(ConfigurationTypeOutput outputConfig, CSharpFile file)
+        {
+            if (file.Path != CurrentFile)
+            {
+                CurrentFile = file.Path;
+                return new() { Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1) };
+            }
+            return new();
         }
 
         public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
@@ -173,17 +185,27 @@ namespace WCKDRZR.Gaspar.Converters
             return lines;
         }
 
-        public List<string> ConvertEnum(EnumModel enumModel)
+        public List<string> ConvertEnum(EnumModel enumModel, ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
             throw new NotImplementedException();
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
             throw new NotImplementedException();
         }
 
         public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
+        {
+            return new();
+        }
+
+        public List<string> ModelNamespace(List<ClassDeclarationSyntax> parentClasses)
+        {
+            return new();
+        }
+
+        public List<string> ModelFooter()
         {
             return new();
         }
@@ -199,6 +221,11 @@ namespace WCKDRZR.Gaspar.Converters
             if (type == "IFormFile") { type = "byte[]"; }
             if (type == "IFormFile?") { type = "byte[]?"; }
             return type;
+        }
+
+        public List<string> ModelNamespace(Model model, ConfigurationTypeOutput outputConfig)
+        {
+            throw new NotImplementedException();
         }
     }
 }

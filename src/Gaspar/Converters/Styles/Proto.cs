@@ -17,6 +17,7 @@ namespace WCKDRZR.Gaspar.Converters
     internal class ProtoConverter : IConverter
 	{
         public Configuration Config { get; set; }
+        public string CurrentFile { get; set; } = "";
         
         public Dictionary<string, string> DefaultTypeTranslations = new() {
             { "string", "string" },
@@ -51,6 +52,16 @@ namespace WCKDRZR.Gaspar.Converters
             return $"//{comment}{new String('\n', followingBlankLines)}";
         }
 
+        public List<string> FileComment(ConfigurationTypeOutput outputConfig, CSharpFile file)
+        {
+            if (file.Path != CurrentFile)
+            {
+                CurrentFile = file.Path;
+                return new() { Comment("File: " + FileHelper.RelativePath(outputConfig.Location, file.Path), 1) };
+            }
+            return new();
+        }
+
         public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
         {
             List<string> lines = new();
@@ -63,19 +74,29 @@ namespace WCKDRZR.Gaspar.Converters
             return lines;
         }
 
-        public List<string> ConvertModels(List<Model> models, ConfigurationTypeOutput outputConfig)
+        public List<string> ModelNamespace(List<ClassDeclarationSyntax> parentClasses)
+        {
+            return new();
+        }
+
+        public List<string> ModelFooter()
+        {
+            return new();
+        }
+
+        public List<string> ConvertModels(List<Model> models, ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
             // lines to return for building the .proto file
             List<string> lines = new List<string>();
 
-            foreach(Model model in models)
+            foreach (Model model in models)
             {
-                lines.AddRange(this.ConvertModel(model, outputConfig));
+                lines.AddRange(ConvertModel(model, outputConfig, file));
             }
             return lines;
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
             List<string> lines = new();
 
@@ -107,7 +128,7 @@ namespace WCKDRZR.Gaspar.Converters
             return lines;
         }
 
-        public List<string> ConvertEnum(EnumModel enumModel)
+        public List<string> ConvertEnum(EnumModel enumModel, ConfigurationTypeOutput outputConfig, CSharpFile file)
         {
             List<string> lines = new();
 
