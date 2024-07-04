@@ -75,6 +75,8 @@ namespace WCKDRZR.Gaspar.Converters
 
         public string BuildModelsFile(ConfigurationTypeOutput outputConfig, CSharpFiles files)
         {
+            bool collectModels = _allModels.Count == 0;
+
             IConverter converter = GetConverter(outputConfig);
             converter.PreProcess(files);
             List<string> lines = converter.ModelHeader(outputConfig);
@@ -97,7 +99,10 @@ namespace WCKDRZR.Gaspar.Converters
                         lines.AddRange(converter.ConvertEnums(enumsForType, outputConfig, file));
                     }
 
-                    _allModels.AddRange(file.Models);
+                    if (collectModels)
+                    {
+                        _allModels.AddRange(file.Models);
+                    }
                 }
             }
 
