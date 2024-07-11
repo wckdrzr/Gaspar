@@ -11,11 +11,11 @@ namespace WCKDRZR.Gaspar.ClassWalkers
     internal class EnumWalker : CSharpSyntaxWalker
     {
         public readonly List<EnumModel> Enums = new List<EnumModel>();
-        private readonly Configuration Config;
+        private readonly Configuration _config;
 
         public EnumWalker(Configuration config)
         {
-            Config = config;
+            _config = config;
         }
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
@@ -56,7 +56,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     Identifier = node.Identifier.ToString(),
                     Values = values,
                     ParentClasses = parentClasses,
-                    ExportFor = node.GetExportType()
+                    ExportFor = node.GetExportType(_config)
                 });
             }
             foreach (MemberDeclarationSyntax m in node.Members) { Visit(m); }

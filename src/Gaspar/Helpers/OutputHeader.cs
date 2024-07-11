@@ -12,7 +12,6 @@ namespace WCKDRZR.Gaspar.Helpers
             if (converter.Config.Models != null)
             {
                 lines.AddRange(Header(converter, converter.Config.Models, outputConfig, "models and enums", outputPath));
-                lines.AddRange(converter.ModelHeader(outputConfig));
             }
             return lines;
         }

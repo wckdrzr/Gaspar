@@ -11,12 +11,12 @@ namespace WCKDRZR.Gaspar.ClassWalkers
     internal class ControllerWalker : CSharpSyntaxWalker
     {
         public readonly List<Controller> Controllers = new();
-        private readonly Configuration Config;
+        private readonly Configuration _config;
 
         public ControllerWalker(Configuration config)
         {
             Controllers = new();
-            Config = config;
+            _config = config;
         }
 
         public void AddAction(Controller controller, ControllerAction action)
@@ -49,7 +49,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                 if (nodeClass.IsController() && node.IsPublic())
                 {
                     Controller controller = new Controller(nodeClass);
-                    ControllerAction action = new(node, node.GetExportType());
+                    ControllerAction action = new(node, node.GetExportType(_config));
 
                     AttributeSyntax? httpAttribute = node.AttributeLists.GetAttribute("Http", true);
                     AttributeSyntax? routeAttribute = node.AttributeLists.GetAttribute("Route");

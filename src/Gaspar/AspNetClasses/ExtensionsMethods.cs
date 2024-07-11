@@ -6,27 +6,27 @@ namespace WCKDRZR.Gaspar
 {
     public static class GasparExtensions
     {
-        public static bool ExportsFor(this TypeInfo typeInfo, GasparType gasparType, bool includeParent = true, bool anyChildrenMatch = false)
+        public static bool ExportsFor(this TypeInfo typeInfo, int gasparType, bool includeParent = true, bool anyChildrenMatch = false)
         {
             return ExportsFor((MemberInfo)typeInfo, gasparType, includeParent, anyChildrenMatch);
         }
 
-        public static bool ExportsFor(this Type type, GasparType gasparType, bool includeParent = true, bool anyChildrenMatch = false)
+        public static bool ExportsFor(this Type type, int gasparType, bool includeParent = true, bool anyChildrenMatch = false)
         {
             return ExportsFor((MemberInfo)type, gasparType, includeParent, anyChildrenMatch);
         }
 
-        public static bool ExportsFor(this MemberInfo member, GasparType gasparType, bool includeParent = true, bool anyChildrenMatch = false)
+        public static bool ExportsFor(this MemberInfo member, int gasparType, bool includeParent = true, bool anyChildrenMatch = false)
         {
-            CustomAttributeData? customAttribute = member.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(Gaspar.ExportForAttribute));
+            CustomAttributeData? customAttribute = member.CustomAttributes.FirstOrDefault(a => a.AttributeType == typeof(ExportForAttribute));
             if (customAttribute != null)
             {
-                bool isGasparExport = customAttribute.AttributeType == typeof(Gaspar.ExportForAttribute);
+                bool isGasparExport = customAttribute.AttributeType == typeof(ExportForAttribute);
                 if (isGasparExport
                     && customAttribute.ConstructorArguments.Count == 1
-                    && Int32.TryParse(customAttribute.ConstructorArguments[0].Value?.ToString(), out int argValue)
-                    && argValue == (int)gasparType)
-                {
+                    && int.TryParse(customAttribute.ConstructorArguments[0].Value?.ToString(), out int argValue)
+                    && (argValue == GasparType.All || (argValue & gasparType) != 0)
+                ) {
                     return true;
                 }
             }

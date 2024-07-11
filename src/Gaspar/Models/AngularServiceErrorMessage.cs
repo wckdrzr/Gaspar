@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace WCKDRZR.Gaspar.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    internal enum AngularServiceErrorMessage
+    internal enum TypeScriptServiceErrorMessage
     {
         None,
         Generic,

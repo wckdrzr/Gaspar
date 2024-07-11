@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace WCKDRZR.Gaspar.Models
 {
@@ -10,7 +9,10 @@ namespace WCKDRZR.Gaspar.Models
         public ModelTypeConfiguration? Models { get; set; }
         public ControllerTypeConfiguration? Controllers { get; set; }
 
-        public Dictionary<string, string>? CustomTypeTranslations { get; set; }
+        public Dictionary<string, List<string>>? GroupTypes { get; set; }
+
+        public Dictionary<string, Dictionary<string, string>>? TypeTranslations { get; set; }
+        public Dictionary<string, string>? GlobalTypeTranslations { get; set; }
 
         public bool IgnoreMissingOutputLocations { get; set; } = false;
         public bool IgnoreAnnotations { get; set; } = false;
@@ -52,11 +54,11 @@ namespace WCKDRZR.Gaspar.Models
         //For Controllers
         public string? UrlPrefix { get; set; }
 
-        //For Angular Controllers
+        //For TypeScript/Angular Controllers
         public string? HelperFile { get; set; }
         public string? ModelPath { get; set; }
         public string? ErrorHandlerPath { get; set; }
-        public AngularServiceErrorMessage DefaultErrorMessage { get; set; } = AngularServiceErrorMessage.None;
+        public TypeScriptServiceErrorMessage DefaultErrorMessage { get; set; } = TypeScriptServiceErrorMessage.None;
 
         //For CSharp Controllers
         public string? UrlHandlerFunction { get; set; }
@@ -72,11 +74,13 @@ namespace WCKDRZR.Gaspar.Models
         public bool NoAuth { get; set; } = false;
         public bool ExcludeScopes { get; set; } = false;
 
-        //For Typescript/Angular Models and Controllers
+        //For Typescript/Angular/Swift/Kotlin Models and Typescript/Angular Controllers
         public bool AddInferredNullables { get; set; } = false;
+
+        //For Typescript/Angular Models and Controllers
         public bool NullablesAlsoUndefinded { get; set; } = false;
 
-        //For Proto Models
+        //For Kotlin/Proto Models
         public string? PackageNamespace { get; set; }
     }
 

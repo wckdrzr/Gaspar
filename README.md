@@ -1,8 +1,20 @@
 # Gaspar
 
-Gaspar is a tool that consumes your C# domain models, types and controllers and exports them for other services and languages to consume.  For example, make your C# models available in TypeScript and your controller endpoints available in TypeScript and other C# services, removing the need to use boilerplate code and hardcode variable names, urls, etc.
+If you build APIs in C# and consume them elsewhere, Gaspar is your essential companion!
 
-It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript project](https://github.com/svenheden/csharp-models-to-typescript) (written in C# and JavaScript).  It makes use of the [Roslyn (the .NET compiler platform)](https://github.com/dotnet/roslyn) to parse the source files, which removes the need to create and maintain our own parser and makes the whole process very fast.
+You C# code is the single point of truth; it is where the functionally actually is and describes the format and model of your API; Gaspar will share that information with your client services automatically at build time.  Everything stays up to date, and if things change clients will fail to compile; faster break-fix-build.
+
+Gaspar consumes your C# domain models, enums, types and controllers and exports them for other services and languages to consume. 
+
+- No more boilerplate code for communicating with APIs
+
+- No more hardcoded URL strings
+
+- No more misspelt, or misplaced variables.
+
+- JsonPropertyKeys converted; it just works!
+
+Using the [Roslyn (the .NET compiler platform)](https://github.com/dotnet/roslyn) to parse the source files, Gaspar quickly and reliably builds all the output files you need.
 
 ## Supported Translations
 
@@ -10,10 +22,12 @@ It is a C# port and enhancement of [Jonathan Svenheden's C# models to TypeScript
 | -------------------------------- |:-------------------:|:--------------:|
 | Export to TypeScript             | ✅                   | ✅              |
 | Export to Angular * <sup>1</sup> | ✅                   | ✅              |
+| Export to Swift                  | ✅                   |                |
+| Export to Kotlin                 | ✅                   |                |
+| Export to C#                     |                     | ✅              |
 | Export to Ocelot Config          |                     | ✅              |
 | Python <sup>† 1</sup>            |                     | ✅              |
-| Export to C#                     |                     | ✅              |
-| Export to Proto †                | ✅                   |                |
+| Export to Proto <sup>†</sup>     | ✅                   |                |
 
 *\* Angular model export same as TypeScript export*\
 *<sup>† </sup>Not actively maintained (please contribute!)*\
@@ -26,6 +40,35 @@ Other translations can easily be added
 Gaspar is written using .NET 7 and is available on NuGet.
 
 To install, search "WckdRzr.Gaspar" in your NuGet package manager, or visit the NuGet page: <https://www.nuget.org/packages/WckdRzr.Gaspar/>
+
+## Version 3 Breaking Changes
+
+Version 3 breaks some existing functionally; if you're upgrading consider the following:
+
+- `CustomTypeTranslations` has been renamed to `GlobalTypeTranslations`.  The functionally remains the same.  We have done this because these translations are applied to all output languages and wanted to make that clearer.  A new `TypeTranslations` config property has been added to allow translations at an individual language level - this is probably what you want most of the time!
+
+- Export type `GasparType.FrontEnd` has been removed.  As part of adding Swift and Kotlin, a `GasparType.App` seemed appropriate.  However hard coding these groups seemed wrong, so you can now build your own groups as you like; unfortunately this meant that `.FrontEnd` needed to be removed!
+  
+  `GasparType.All` is a special case and will always be available.
+  
+  See `GroupTypes` below; but if you want to recreate the FrontEnd group exactly as was; add the following to the root of your config:
+  
+  ```json
+  "GroupTypes": {
+      "FrontEnd": [ "TypeScript", "Angular", "Ocelot" ]
+  }
+  ```
+  
+  Then add this static class anywhere in your code to allow use of a strongly typed property (you will also need to rename instances of `GasparType.FrontEnd` to `GasparGroupType.FrontEnd` (the actual class name isn't important):
+  
+  ```csharp
+  public static class GasparGroupType
+  {
+      public const int FrontEnd = 1 << 1000;
+  }
+  ```
+  
+  *If you don't want to add the class above, you can now use the type name as a string instead; i.e. `[ExportFor("FrontEnd")]`*
 
 ### Older versions
 
@@ -57,7 +100,7 @@ That's all; play with the config and see what you can do...
 
 In order for your models to be exported, you need to add the `[ExportFor(...)]` decorator to the classes, properties and controller actions you want to export.  For controllers, you can add to the controller class.  Properties and Actions within a decorated class can also be decorated to supplement the parent class attribute.
 
-The attribute has one required parameter `GasparType types`. This is the type of export you want, or a group of exports you want.  Use bitwise operators for multiple types, for example:
+The attribute has one required parameter `int types`. This is the type of export you want, or a selection of exports you want.  Use bitwise operators for multiple types, for example:
 
 - `[ExportFor(GasparType.All)]` to export to all known types.
 
@@ -65,15 +108,17 @@ The attribute has one required parameter `GasparType types`. This is the type of
 
 - `[ExportFor(GasparType.TypeScript | GasparType.CSharp)]` to export to TypeScript and CSharp.
 
-- `[ExportFor(GasparType.FrontEnd)]` to export to TypeScript, Angular and Ocelot.
-
 - `[ExportFor(GasparType.All | ~Gaspar.Ocelot)]` to export to all types, except Ocelot.
+
+The `types` parameter is an `int`, but you should use one of the properties in the `GasparType` static class provided.  Using an int value will be unclear, and it will not work.  It is setup like this (rather than an enum) to allow the options to be extended - see `GroupTypes` below.
+
+There is also an overload attribute that accepts a string should you want to use it like that, for example: `[ExportFor("TypeScript")]`.  This is not recommend, but some may find it useful.
 
 ### Notes
 
-- Feel free to use `&` or `|` to join types; they will have the same effect.
+- Use `|` to join/add types.  Using `&` may work but is unpredictable.
 
-- The bitwize NOT operator `~` will remove the type; particularly useful as above, or when you want to override the parent attribute on the controller class
+- The bitwize NOT operator `~` will remove the type; particularly useful as above, or when you want to override the parent attribute on the class
 
 - Exports will only work if they are configured to output in `gaspar.config.json`
 
@@ -87,7 +132,7 @@ Gaspar will still only export `public` objects for configured types.
 
 ### Optional Parameters
 
-These parameters are avaliable on the `[ExportFor]` attribute.  Note, if you are adding ExportFor only to selected class properties or methods, but would add the same options to each, you can use the `[ExportOptions]` attribute instead; which has the same parameters available.  This also works the other way round (ExportFor on the class and options on selected methods)
+These parameters are available on the `[ExportFor]` attribute.  Note, if you are adding ExportFor only to selected class properties or methods, but would add the same options to each, you can use the `[ExportOptions]` attribute instead; which has the same parameters available.  This also works the other way round (ExportFor on the class and options on selected methods)
 
 **NoInheritance**    `bool`    When present on C# models (and set to true), the inherited base classes will not be included in the export.
 
@@ -159,13 +204,13 @@ Gaspar will export all your controller actions, but they must be written in a wa
 
 Improve your actions as follows:
 
-- Controller classes must be derived a class with `Controller` in the name (e.g. `Controller`, `ControllerBase`, `MyBaseController`, etc...)
+- Controller classes must be derived from a class with `Controller` in the name (e.g. `Controller`, `ControllerBase`, `MyBaseController`, etc...)
 
 - Actions should be decorated with an http method and route, e.g. `[HttpPost("[controller]/[action]")]`
 
 Other recommendations (not required, but good practice):
 
-- Have you controller actions return `ActionResult<T>`. This will provide a strongly-typed interface in the service communication endpoints.
+- Have your controller actions return `ActionResult<T>`. This will provide a strongly-typed interface in the service communication endpoints.
   
   - If you return `ContentResult` or `JsonResult`, these will be translated to `string` and `object` respectively.
 
@@ -315,6 +360,8 @@ namespace MyProject
 
 The demo config provided only includes the basics to make Gaspar work; here is a full list of the options available (feel free to have a look in the `Models/Configuration.cs` file):
 
+The full specification is published to [schemastore.org](https://schemastore.org); the demo config includes the reference.
+
 ### At the root level
 
 You must supply either Models or Controllers, but you don't need both; all other parameters are optional.
@@ -323,11 +370,53 @@ You must supply either Models or Controllers, but you don't need both; all other
 
 **Controllers**    `ConfigurationType`    Options for outputting service communication contracts for Controllers
 
-**CustomTypeTranslations**    `Array of string pairs: [{"X": "Y"}, {"A": "B"}]`    For TypeScript and Angular, you can override type names to objects TypeScript will understand.  e.g. `{ "IMyInterface": "Object" }`
+**GlobalTypeTranslations**    `Array of string pairs: [{"X": "Y"}, {"A": "B"}]`    Used by TypeScript, Angular, Swift, Kotlin and Proto.  This allows you to override type names to objects the target language will understand.  e.g. `{ "IMyInterface": "Object" }`.  As this applies the same conversion to every language, it use is limited.
+
+**TypeTranslations**    `Object. Keys are Output types.  Value is Array of string pairs: [{"X": "Y"}, {"A": "B"}]`    Used by TypeScript, Angular, Swift, Kotlin and Proto. For each exported language type, you can specify override type names the target language will understand. e.g. `{ "IMyInterface": "Object" }`.  For example:
+
+```json
+"TypeTranslations": {
+    "TypeScript": {
+        "IMyInterface": "any",
+    },
+    "Swift": {
+        "IMyInterface": "AnyObject",
+    },
+}
+```
 
 **IgnoreMissingOutputLocations**    `bool: default false`    If the file output location cannot be found, you will get a build error; add `"IgnoreMissingOutputLocations": true` to skip the error.  This is useful when you need to build in an environment where the output may not be available (e.g. docker); although it would usually be preferable to use `dotnet build /p:RunGaspar=False` in your scripts.
 
 **IgnoreAnnotations**    `bool: default false`    Set this to true to export all objects irrespective if they have `[ExportFor]` or not.
+
+**GroupTypes**    `Object (see example)`   When using `[ExportFor]` you must specify one of the built-in export types (e.g. `GasparType.TypeScript`, or `.All`), however if you routinely export to several services at once you can create a group type to export to.  An example configuration might look like:
+
+```json
+"GroupTypes": {
+    "FrontEnd": [ "TypeScript", "Angular", "Ocelot" ],
+    "App": [ "Swift", "Kotlin" ]
+}
+```
+
+*`FrontEnd` and `App` are examples, use any name you like.*
+
+Now when using `[ExportFor]`, you can use `FrontEnd` to output TypeScript, Angular and Ocelot in one go, or use `App` to export both Swift and Kotlin in one go!
+
+Your attribute can simply use a string: `[ExportFor("App")]`, but this is prone to error (miss-spelling, etc), so to use a strongly typed object, like you do with the native types (`GasparType.Swift`), you need to create a static class with the names as properties.
+
+For the above example, add the following somewhere in your code:
+
+```csharp
+public static class GasparGroupType
+{
+    public const int FrontEnd = 1 << 1000;
+    public const int App = 1 << 1001;
+}
+```
+
+You can now use `[ExportFor(GasparGroupType.App)]` to export Swift and Kotlin together.
+
+*Start numbering at 1000 for bitwise safety.  The class name above (`GasparGroupType`) is just an example, the actual name is unimportant.*
 
 ### ConfigurationType
 
@@ -339,9 +428,9 @@ You must supply either Models or Controllers, but you don't need both; all other
 
 For Models:
 
-- **UseEnumValue**    `bool: default true`    Enums will be written with thier value, either set directly or from an Atrribute (e.g. `[EnumMember(Value = "name")]`).
+- **UseEnumValue**    `bool: default true`    Enums will be written with their value, either set directly or from an Attribute (e.g. `[EnumMember(Value = "name")]`).
 
-- **StringLiteralTypesInsteadOfEnums**    `bool: default false`    For TypeScript, if true will export enums as types instead of TS enums.
+- **StringLiteralTypesInsteadOfEnums**    `bool: default false`    For TypeScript, if true will export enums as types instead of TypeScript enums.
 
 For Controllers:
 
@@ -353,7 +442,11 @@ For Controllers:
 
 ### ConfigurationTypeOutput
 
-**Type**    `specific string`    Required.  Must be one of: `"CSharp"`, `"Angular"`, `"Ocelot"` or `"TypeScript"`
+**Type**    `specific string`    Required.  Must be one of:
+
+- For models: `"TypeScript"`, `"Angular"`, `"Swift"`, `"Kotlin"`, `"Proto"`
+
+- For controllers: `"TypeScript"`, `"Angular"`, `"CSharp"`, `"Ocelot"` or `"Python"`
 
 **Location**    `string`    Required.  The location to output the translated file to (relative to the project root).  For controllers, can include `{ServiceName}`, `{ServiceHost}` or `{ServicePort}` to have those placeholders replaced (see the demo file).
 
@@ -397,21 +490,21 @@ For CSharp controllers (all optional):
   
   *make sure to include the namespace to your class in the config (see below)*
 
-- **ModelNamespaces**    `Array of strings`    List of namespaces to include at the top of your exported Service Communication class.  This would inculde the namespaces to custom types in the export, or your serializer and logging tools
+- **ModelNamespaces**    `Array of strings`    List of namespaces to include at the top of your exported Service Communication class.  This would include the namespaces to custom types in the export, or your serializer and logging tools
 
 For TypeScript and Angular models and controllers (all optional)
 
-- **AddInferredNullables**    `boolean`    Property types that are explicitly nullable (e.g. `int?`) will always be outputed with `null` types (e.g. `number | null`).  Set this property to true to add null types to C# types that could be null if unset.
+- **AddInferredNullables**    `bool: default false`    Property types that are explicitly nullable (e.g. `int?`) will always be outputed with `null` types (e.g. `number | null`).  Set this property to true to add null types to C# types that could be null if unset.
   
   In short, if your C# project doesn't enable "nullable annotation context", set this to true.
 
-- **NullablesAlsoUndefinded**    `boolean`    If set to true, all nullable properties (those exported with `| null`) will additional have `| undefined` added to the type.
+- **NullablesAlsoUndefinded**    `bool: default false`    If set to true, all nullable properties (those exported with `| null`) will additional have `| undefined` added to the type.
 
 For TypeScript and Angular controllers (all optional):
 
-- **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests.  This is the name of the file that should be exported.  If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
+- **ModelPath**    `string`    Path to a file containing definitions for any custom types used in your service communications (excluding the extension, as is usual for TypeScript includes). Ideally, this is the file exported by the model export part of this application.
 
-- **ModelPath**    `string`    Path to a file containing definitions for any custom types used in your service communications (excluding the extension, as is usual for TypeScript includes).  Ideally, this is the file exported by the model export part of this application.
+- **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests.  This is the name of the file that should be exported.  If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
 
 - **ErrorHandlerPath**    `string`    If an error is received from the requested endpoint, it will be absorbed (although it will always be seen in the browser console).  The response will include the error details if you want to handle it from the calling class, but if you always want to show a message to the user (e.g. using a SnackBar), you can provide an error handler, as below:
   
@@ -486,14 +579,19 @@ For Ocelot controllers (all optional):
 
 - **ExcludeScopes**    `bool`    If true, the "AllowedScopes" section of the Ocelot config will not be outputted.
 
-For Proto Models (required)
+For Kotlin and Proto Models (required)
 
-- **PackageNamespace**    `string`    Namespace to be used when generating .proto file outputs. For example, the PackageNamespace value of 'com.wckdzr' produces the following header for .proto files:
+- **PackageNamespace**    `string`    Namespace to be used when generating `.kt` and `.proto` file outputs. For example, the PackageNamespace value of 'com.wckdzr' produces the following header:
+  
+  ```kotlin
+  //kotlin file
+  package com.wckdrzr;
+  ```
   
   ```protobuf
+  //proto file
   syntax = "proto3";
   package com.wckdrzr;
-  // ... proto definitions
   ```
 
 ## C# Extension Methods
@@ -501,14 +599,16 @@ For Proto Models (required)
 Provided for convenience when using Gaspar tagged data:
 
 ```csharp
-bool ExportsFor(this TypeInfo member, GasparType type, bool includeParent = true, bool anyChildrenMatch = false)
-bool ExportsFor(this Type member, GasparType type, bool includeParent = true, bool anyChildrenMatch = false)
-bool ExportsFor(this MemberInfo member, GasparType type, bool includeParent = true, bool anyChildrenMatch = false)
+bool ExportsFor(this TypeInfo member, int type, bool includeParent = true, bool anyChildrenMatch = false)
+bool ExportsFor(this Type member, int type, bool includeParent = true, bool anyChildrenMatch = false)
+bool ExportsFor(this MemberInfo member, int type, bool includeParent = true, bool anyChildrenMatch = false)
 ```
 
 These methods will let you know if it the object (TypeInfo, System.Type or MemberInfo) is tagged with a given GasparType.
 
-For example `myclass.ExportsFor(GasparType.FrontEnd)` will return true if the myclass has the `[ExportsFor(GasparType.FrontEnd)]` attribute
+*the type parameter is an `int`, but you should use one of the properties in the static `GasparType` class (e.g. `GasparType.TypeScript`)*
+
+For example `myclass.ExportsFor(GasparType.Swift)` will return true if the myclass class has the `[ExportsFor(GasparType.Swift)]` attribute
 
 Set `includeParent` to false to only look at the passed object, and not it's parent
 
@@ -517,5 +617,9 @@ Set `anyChildrenMatch` to true to return true if any of the child members have t
 ## Issues and Contributions
 
 Please raise any issues or pull requests in GitHub. We will try and incorporate any changes as promptly as possible.
+
+## Thanks
+
+Gaspar was originally based on [Jonathan Svenheden's C# models to TypeScript project](https://github.com/svenheden/csharp-models-to-typescript) (written in C# and JavaScript).  There is still a little of Jonathan's code there, but we have moved on significantly.  Thanks for the inspiration!
 
 © [Wckd Rzr](https://github.com/wckdrzr)

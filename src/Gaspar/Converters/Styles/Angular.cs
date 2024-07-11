@@ -82,9 +82,9 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("    type: string,");
             lines.Add("}");
             lines.Add("export enum ServiceErrorMessage {");
-            lines.Add($"    {AngularServiceErrorMessage.None},");
-            lines.Add($"    {AngularServiceErrorMessage.Generic},");
-            lines.Add($"    {AngularServiceErrorMessage.ServerResponse},");
+            lines.Add($"    {TypeScriptServiceErrorMessage.None},");
+            lines.Add($"    {TypeScriptServiceErrorMessage.Generic},");
+            lines.Add($"    {TypeScriptServiceErrorMessage.ServerResponse},");
             lines.Add("}");
             lines.Add("");
             lines.Add("@Injectable({ providedIn: 'root' })");

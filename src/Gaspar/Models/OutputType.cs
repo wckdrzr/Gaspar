@@ -8,61 +8,46 @@ using WCKDRZR.Gaspar.Extensions;
 
 namespace WCKDRZR.Gaspar.Models
 {
-    internal class OutputTypeGroupAttribute : Attribute
-    {
-        public GasparType Types { get; set; }
-        public OutputTypeGroupAttribute(GasparType types)
-        {
-            Types = types;
-        }
-    }
-
+    // Internal version of GasparType
+    // Kept separate to keep as Enum where GasparType needs to be an int so it can be extended with custom groups
+    // and GasparType has and All flag that isn't appropriate here
     [Flags]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     internal enum OutputType
     {
-        [OutputTypeGroup(GasparType.All | GasparType.CSharp)]
         CSharp = 1 << 0,
-
-        [OutputTypeGroup(GasparType.All | GasparType.FrontEnd | GasparType.Angular)]
         Angular = 1 << 1,
-
-        [OutputTypeGroup(GasparType.All | GasparType.FrontEnd | GasparType.Ocelot)]
         Ocelot = 1 << 2,
-
-        [OutputTypeGroup(GasparType.All | GasparType.FrontEnd | GasparType.TypeScript)]
         TypeScript = 1 << 3,
-
-        [OutputTypeGroup(GasparType.All | GasparType.Proto)]
         Proto = 1 << 4,
-
-        [OutputTypeGroup(GasparType.All | GasparType.Python)]
         Python = 1 << 5,
+        Swift = 1 << 6,
+        Kotlin = 1 << 7,
     }
 
     internal static class OutputTypeConverter
     {
-        public static OutputType GetExportType(this ParameterSyntax node, OutputType parentTypes = 0)
+        public static OutputType GetExportType(this ParameterSyntax node, Configuration config, OutputType parentTypes = 0)
         {
             OutputType types = 0;
             if (node.Parent != null && node.Parent.GetType() == typeof(ClassDeclarationSyntax))
             {
-                types = ((ClassDeclarationSyntax)node.Parent).GetParentExportTypes();
+                types = ((ClassDeclarationSyntax)node.Parent).GetParentExportTypes(config);
             }
-            return node.AttributeLists.GetExportType(types);
+            return node.AttributeLists.GetExportType(config, types);
         }
 
-        public static OutputType GetExportType(this MemberDeclarationSyntax node, OutputType parentTypes = 0)
+        public static OutputType GetExportType(this MemberDeclarationSyntax node, Configuration config, OutputType parentTypes = 0)
         {
             OutputType types = 0;
             if (node.Parent != null && node.Parent.GetType() == typeof(ClassDeclarationSyntax))
             {
-                types = ((ClassDeclarationSyntax)node.Parent).GetParentExportTypes();
+                types = ((ClassDeclarationSyntax)node.Parent).GetParentExportTypes(config);
             }
-            return node.AttributeLists.GetExportType(types);
+            return node.AttributeLists.GetExportType(config, types);
         }
 
-        private static OutputType GetParentExportTypes(this ClassDeclarationSyntax node)
+        private static OutputType GetParentExportTypes(this ClassDeclarationSyntax node, Configuration config)
         {
             Stack<ClassDeclarationSyntax> classHierarchy = new();
             classHierarchy.Push(node);
@@ -84,44 +69,50 @@ namespace WCKDRZR.Gaspar.Models
             OutputType types = 0;
             while (classHierarchy.Count > 0)
             {
-                types = classHierarchy.Pop().AttributeLists.GetExportType(types);
+                types = classHierarchy.Pop().AttributeLists.GetExportType(config, types);
             }
 
             return types;
         }
 
-        private static OutputType GetExportType(this SyntaxList<AttributeListSyntax> attributes, OutputType parentTypes = 0)
+        private static OutputType GetExportType(this SyntaxList<AttributeListSyntax> attributes, Configuration config, OutputType parentTypes = 0)
         {
             OutputType exportForTypes = parentTypes;
 
             string? exportForArgument = attributes.GetAttribute("ExportFor")?.ArgumentList?.Arguments[0].ToString();
             if (exportForArgument != null)
             {
-                foreach (string type in Regex.Split(exportForArgument, "[|&]"))
+                foreach (string argPart in Regex.Split(exportForArgument, "[|&]"))
                 {
-                    bool not = type.Trim().StartsWith("~");
+                    string type = argPart.Trim();
+
+                    if (type.StartsWith('"') && type.EndsWith('"')) { type = $"GasparType.{type[1..^1]}"; }
+
+                    bool not = type.StartsWith("~");
+                    if (not) { type = type[1..]; }
+                    
                     int pos = type.IndexOf(".");
                     if (pos >= 0)
                     {
-                        if (Enum.TryParse<GasparType>(type.Substring(pos + 1).Trim(), out GasparType parsedEnum))
+                        type = type[(pos + 1)..];
+                        foreach (OutputType outputType in Enum.GetValues(typeof(OutputType)))
                         {
-                            foreach (OutputType outputType in Enum.GetValues(typeof(OutputType)))
-                            {
-                                if (outputType.GetAttributeOfType<OutputTypeGroupAttribute>()?.Types.HasFlag(parsedEnum) == true)
+                            if (type == nameof(GasparType.All) 
+                                || (config.GroupTypes != null && config.GroupTypes.ContainsKey(type) && config.GroupTypes[type].Contains(outputType.ToString()))
+                                || outputType.ToString() == type
+                            ) {
+                                if (not)
                                 {
-                                    if (not)
+                                    if (exportForTypes.HasFlag(outputType))
                                     {
-                                        if (exportForTypes.HasFlag(outputType))
-                                        {
-                                            exportForTypes ^= outputType;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        exportForTypes |= outputType;
+                                        exportForTypes ^= outputType;
                                     }
                                 }
-                            }  
+                                else
+                                {
+                                    exportForTypes |= outputType;
+                                }
+                            }
                         }
                     }
                 }

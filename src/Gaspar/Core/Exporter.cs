@@ -15,7 +15,7 @@ namespace WCKDRZR.Gaspar.Core
 {
     internal class Exporter
 	{
-		public static void Export(string? configFile)
+        public static void Export(string? configFile)
 		{
             Configuration config = ConfigReader.Read(configFile);
             Converter converter = new Converter(config);

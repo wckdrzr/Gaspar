@@ -30,7 +30,8 @@ namespace WCKDRZR.Gaspar.Converters
             { "ulong", "uint64" },
             { "bool", "bool" }
         };
-        public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(Config.CustomTypeTranslations ?? new()).ToDictionary(k => k.Key, v => v.Value);
+        public Dictionary<string, string> ProtoTypeTranslations => Config.TypeTranslations != null && Config.TypeTranslations.ContainsKey(OutputType.Proto.ToString()) ? Config.TypeTranslations[OutputType.Proto.ToString()] : new();
+        public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(ProtoTypeTranslations).Union(Config.GlobalTypeTranslations ?? new()).ToDictionary(k => k.Key, v => v.Value);
         public string ConvertType(string type) => TypeTranslations.ContainsKey(type) ? TypeTranslations[type] : type;
 
         // [StringSyntax(StringSyntaxAttribute.Regex)]

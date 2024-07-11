@@ -30,6 +30,7 @@ namespace WCKDRZR.Gaspar.Models
     {
         public required string Identifier { get; set; }
         public string? Type { get; set; }
+        public string? DefaultValue { get; set; }
         public string? JsonPropertyName { get; set; }
         public OutputType ExportFor { get; set; }
     }

@@ -69,6 +69,8 @@ namespace WCKDRZR.Gaspar.Converters
                 case OutputType.TypeScript: return new TypeScriptConverter(_config, _allModels);
                 case OutputType.Proto: return new ProtoConverter(_config);
                 case OutputType.Python: return new PythonConverter(_config);
+                case OutputType.Swift: return new SwiftConverter(_config);
+                case OutputType.Kotlin: return new KotlinConverter(_config);
                 default: throw new NotImplementedException();
             }
         }
@@ -79,9 +81,9 @@ namespace WCKDRZR.Gaspar.Converters
 
             IConverter converter = GetConverter(outputConfig);
             converter.PreProcess(files);
-            List<string> lines = converter.ModelHeader(outputConfig);
 
-            lines.AddRange(OutputHeader.Models(converter, outputConfig, outputConfig.Location));
+            List<string> lines = OutputHeader.Models(converter, outputConfig, outputConfig.Location);
+            lines.AddRange(converter.ModelHeader(outputConfig));
 
             int modelCount = 0;
             foreach (CSharpFile file in files)

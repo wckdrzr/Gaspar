@@ -12,11 +12,11 @@ namespace WCKDRZR.Gaspar.ClassWalkers
     internal class ModelWalker : CSharpSyntaxWalker
     {
         public readonly List<Model> Models = new List<Model>();
-        private readonly Configuration Config;
+        private readonly Configuration _config;
 
         public ModelWalker(Configuration config)
         {
-            Config = config;
+            _config = config;
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
@@ -41,11 +41,11 @@ namespace WCKDRZR.Gaspar.ClassWalkers
         {
             if (node.IsPublic())
             {
-                OutputType nodeOutputType = node.GetExportType();
+                OutputType nodeOutputType = node.GetExportType(_config);
 
                 Models.Add(new()
                 {
-                    ModelName = $"{node.Identifier.ToString()}{node.TypeParameterList?.ToString()}",
+                    ModelName = $"{node.Identifier}{node.TypeParameterList?.ToString()}",
                     Fields = node.ParameterList?.Parameters
                             .Where(field => field.Modifiers.IsAccessible())
                             .Where(property => !property.AttributeLists.JsonIgnore())
@@ -53,7 +53,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                             {
                                 Identifier = field.Identifier.ToString(),
                                 Type = field.Type?.ToString(),
-                                ExportFor = field.GetExportType(nodeOutputType),
+                                ExportFor = field.GetExportType(_config, nodeOutputType),
                             }).ToList() ?? new(),
                     Properties = node.Members.OfType<PropertyDeclarationSyntax>()
                             .Where(property => property.Modifiers.IsAccessible())
@@ -63,7 +63,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                 Identifier = p.Identifier.ToString(),
                                 Type = p.Type.ToString(),
                                 JsonPropertyName = p.AttributeLists.StringValueOfAttribute("JsonPropertyName"),
-                                ExportFor = p.GetExportType(nodeOutputType),
+                                ExportFor = p.GetExportType(_config, nodeOutputType),
                             }).ToList(),
                     ParentClasses = new(),
                     BaseClasses = new List<string>(),
@@ -73,14 +73,14 @@ namespace WCKDRZR.Gaspar.ClassWalkers
             foreach (MemberDeclarationSyntax m in node.Members) { Visit(m); }
         }
 
-        private static bool ShouldCreate(TypeDeclarationSyntax node)
+        private bool ShouldCreate(TypeDeclarationSyntax node)
         {
             List<string> baseClasses = node.BaseList?.Types.Select(s => s.ToString()).ToList() ?? new();
             return node.IsPublic()
                 && !baseClasses.Any(s => s.StartsWith("Controller"));
         }
 
-        private static Model CreateModel(TypeDeclarationSyntax node)
+        private Model CreateModel(TypeDeclarationSyntax node)
         {
             ExportOptionsAttribute options = new ExportOptionsAttribute();
             bool noBase = node.AttributeLists.HasAttribute(nameof(ExportWithoutInheritance)) || node.AttributeLists.BoolAttributeValue(nameof(options.NoInheritance));
@@ -101,7 +101,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                 }
             }
 
-            OutputType nodeOutputType = node.GetExportType();
+            OutputType nodeOutputType = node.GetExportType(_config);
 
             return new Model()
             {
@@ -113,7 +113,8 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                 {
                                     Identifier = f.Declaration.Variables.First().GetText().ToString(),
                                     Type = f.Declaration.Type.ToString(),
-                                    ExportFor = f.GetExportType(nodeOutputType),
+                                    JsonPropertyName = f.AttributeLists.StringValueOfAttribute("JsonPropertyName"),
+                                    ExportFor = f.GetExportType(_config, nodeOutputType),
                                 }).ToList(),
                 Properties = node.Members.OfType<PropertyDeclarationSyntax>()
                                 .Where(property => property.Modifiers.IsAccessible())
@@ -122,8 +123,9 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                 {
                                     Identifier = p.Identifier.ToString(),
                                     Type = p.Type.ToString(),
+                                    DefaultValue = p.Initializer?.Value.ToString(),
                                     JsonPropertyName = p.AttributeLists.StringValueOfAttribute("JsonPropertyName"),
-                                    ExportFor = p.GetExportType(nodeOutputType),
+                                    ExportFor = p.GetExportType(_config, nodeOutputType),
                                 }).ToList(),
                 BaseClasses = baseClasses ?? new(),
                 ParentClasses = parentClasses,

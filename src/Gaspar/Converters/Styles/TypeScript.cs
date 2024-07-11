@@ -48,7 +48,8 @@ namespace WCKDRZR.Gaspar.Converters
             { "JsonResult", "object" },
             { "IFormFile", "File" },
         };
-        public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(Config.CustomTypeTranslations ?? new()).ToDictionary(k => k.Key, v => v.Value);
+        public Dictionary<string, string> TypeScriptTypeTranslations => Config.TypeTranslations != null && Config.TypeTranslations.ContainsKey(OutputType.TypeScript.ToString()) ? Config.TypeTranslations[OutputType.TypeScript.ToString()] : new();
+        public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(TypeScriptTypeTranslations).Union(Config.GlobalTypeTranslations ?? new()).ToDictionary(k => k.Key, v => v.Value);
         public string ConvertType(string type) => TypeTranslations.ContainsKey(type) ? TypeTranslations[type] : type;
 
         public string arrayRegex = /*language=regex*/ @"^(.+)\[\]$";
@@ -141,7 +142,6 @@ namespace WCKDRZR.Gaspar.Converters
             if (model.Enumerations.Count > 0)
             {
                 lines.AddRange(ConvertEnum(new EnumModel { Identifier = model.ModelName, Values = model.Enumerations }, outputConfig, file));
-                model.ModelName += "_Properties";
                 if (model.BaseClasses.Count > 0)
                 {
                     int enumBaseIndex = model.BaseClasses.IndexOf("Enumeration");
@@ -161,7 +161,7 @@ namespace WCKDRZR.Gaspar.Converters
             }
             string baseClasses = model.BaseClasses.Count > 0 ? $" extends {string.Join(", ", model.BaseClasses)}" : "";
 
-            lines.Add($"{Indent()}export interface {model.ModelName}{baseClasses} {{");
+            lines.Add($"{Indent()}export interface {model.ModelName}{(model.Enumerations.Count > 0 ? "_Properties" : "")}{baseClasses} {{");
 
             if (model.Enumerations.Count > 0)
             {
@@ -239,9 +239,7 @@ namespace WCKDRZR.Gaspar.Converters
         public List<string> ModelFooter()
         {
             List<string> lines = new();
-
-            Console.WriteLine(currentNamespace.Count);
-
+            
             for (int i = 0; i < currentNamespace.Count(); i++)
             {
                 lines.Add($"{Indent(-1)}}}\n");
@@ -281,9 +279,9 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("    type: string,");
             lines.Add("}");
             lines.Add("export enum ServiceErrorMessage {");
-            lines.Add("    None,");
-            lines.Add("    Generic,");
-            lines.Add("    ServerResponse,");
+            lines.Add($"    {TypeScriptServiceErrorMessage.None},");
+            lines.Add($"    {TypeScriptServiceErrorMessage.Generic},");
+            lines.Add($"    {TypeScriptServiceErrorMessage.ServerResponse},");
             lines.Add("}");
             lines.Add("export type JsonProperyKeyMap = Record<string, { k: string, m?: JsonProperyKeyMap }>;");
 
@@ -564,31 +562,31 @@ namespace WCKDRZR.Gaspar.Converters
             return $"[key: {ConvertType(dictionary.At(1))}]: {ConvertType(propType)}";
         }
 
-        public string ConvertRecord(string record, ConfigurationTypeOutput outputConfig)
+        public string ConvertDictionary(string dictionary, ConfigurationTypeOutput outputConfig)
         {
-            MatchCollection dictionary = Regex.Matches(record, dictionaryRegex);
-            MatchCollection simpleDictionary = Regex.Matches(record, simpleDictionaryRegex);
+            MatchCollection d = Regex.Matches(dictionary, dictionaryRegex);
+            MatchCollection simpleDictionary = Regex.Matches(dictionary, simpleDictionaryRegex);
 
             string propType = "";
             if (simpleDictionary.HasMatch())
             {
-                propType = ConvertType(dictionary.At(2));
+                propType = ConvertType(d.At(2));
                 if (IsOptional(propType, outputConfig)) { propType += NullSuffix(outputConfig); }
             }
             else
             {
-                propType = ConvertType(ParseType(dictionary.At(2), outputConfig));
+                propType = ConvertType(ParseType(d.At(2), outputConfig));
             }
 
             
 
-            return $"Record<{ConvertType(dictionary.At(1))}, {propType}>";
+            return $"Record<{ConvertType(d.At(1))}, {propType}>";
         }
 
-        public string ConvertKeyValue(string record)
+        public string ConvertKeyValue(string keyValue)
         {
-            MatchCollection keyValue = Regex.Matches(record, keyValuePairRegex);
-            return $"{{ key: {ConvertType(keyValue.At(1))}, value: {ConvertType(keyValue.At(2))} }}";
+            MatchCollection kv = Regex.Matches(keyValue, keyValuePairRegex);
+            return $"{{ key: {ConvertType(kv.At(1))}, value: {ConvertType(kv.At(2))} }}";
         }
 
         public string ConvertIdentifier(string identifier) => JsonNamingPolicy.CamelCase.ConvertName(identifier);
@@ -623,12 +621,12 @@ namespace WCKDRZR.Gaspar.Converters
             if (collection.HasMatch())
             {
                 MatchCollection simpleCollection = Regex.Matches(propType, simpleCollectionRegex);
-                propType = simpleCollection.HasMatch() ? collection.At(1) : ParseType(collection.At(1), outputConfig, allowAddNull: false);
-                type = $"{ConvertType(propType)}[]";
+                string tmpType = simpleCollection.HasMatch() ? collection.At(1) : ParseType(collection.At(1), outputConfig, allowAddNull: false);
+                type = $"{ConvertType(tmpType)}[]";
             }
             else if (dictionary.HasMatch())
             {
-                type = $"{ConvertRecord(propType, outputConfig)}";
+                type = $"{ConvertDictionary(propType, outputConfig)}";
             }
             else if (keyvalue.HasMatch())
             {
