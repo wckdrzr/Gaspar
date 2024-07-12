@@ -58,14 +58,16 @@ namespace WCKDRZR.Gaspar
 
     public static class GasparType
     {
-        public const int All = 1 << 0;
+        public const int All =
+            Angular | CSharp | Ocelot | TypeScript | Proto | Python | Swift | Kotlin
+        ;
 
-        public const int Angular = 1 << 1;
-        public const int CSharp = 1 << 2;
-        public const int Ocelot = 1 << 3;
-        public const int TypeScript = 1 << 4;
-        public const int Proto = 1 << 5;
-        public const int Python = 1 << 6;
+        public const int Angular = 1 << 0;
+        public const int CSharp = 1 << 1;
+        public const int Ocelot = 1 << 2;
+        public const int TypeScript = 1 << 3;
+        public const int Proto = 1 << 4;
+        public const int Python = 1 << 5;
         public const int Swift = 1 << 6;
         public const int Kotlin = 1 << 7;
     }

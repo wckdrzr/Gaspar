@@ -64,11 +64,13 @@ Version 3 breaks some existing functionally; if you're upgrading consider the fo
   ```csharp
   public static class GasparGroupType
   {
-      public const int FrontEnd = 1 << 1000;
+      public const int FrontEnd = GasparType.TypeScript | GasparType.Angular | GasparType.Ocelot;
   }
   ```
   
   *If you don't want to add the class above, you can now use the type name as a string instead; i.e. `[ExportFor("FrontEnd")]`*
+
+- The `ExportsFor()` function (which is now more reliable) no longer has `includeParent` or `anyChildrenMatch` parameters.  IncludeParent (which defaulted to true) made little sense.  Without the parentage you cannot to correctly see if an object would be exported or not; so this is always on now.  If you were using `anyChildrenMatch`, this has been moved a separate function to avoid confusion.  Use `AnyChildExportsFor()` instead.
 
 ### Older versions
 
@@ -404,19 +406,19 @@ Now when using `[ExportFor]`, you can use `FrontEnd` to output TypeScript, Angul
 
 Your attribute can simply use a string: `[ExportFor("App")]`, but this is prone to error (miss-spelling, etc), so to use a strongly typed object, like you do with the native types (`GasparType.Swift`), you need to create a static class with the names as properties.
 
-For the above example, add the following somewhere in your code:
+For the above example, add the following somewhere in your code and you then use, for example, `[ExportFor(GasparGroupType.App)]` to export Swift and Kotlin together.:
 
 ```csharp
 public static class GasparGroupType
 {
-    public const int FrontEnd = 1 << 1000;
-    public const int App = 1 << 1001;
+    public const int FrontEnd = GasparType.TypeScript | GasparType.Angular | GasparType.Ocelot;
+    public const int App = GasparType.Swift | GasparType.Kotlin;
 }
 ```
 
-You can now use `[ExportFor(GasparGroupType.App)]` to export Swift and Kotlin together.
+The values shown in the above example (e.g. `GasparType.Swift | GasparType.Kotlin`) repeat the `GasparType` properties in the config.  The actual values have no bearing on the export process (you could just set to `0`).  However if you would like to use these group types in any of the `ExportsFor` functions you must set up the groups as above.  It is therefore recommended to do this, incase you might use `ExportsFor` in the future.
 
-*Start numbering at 1000 for bitwise safety.  The class name above (`GasparGroupType`) is just an example, the actual name is unimportant.*
+*The class name above (`GasparGroupType`) is just an example, the actual name is unimportant.*
 
 ### ConfigurationType
 
@@ -594,29 +596,155 @@ For Kotlin and Proto Models (required)
   package com.wckdrzr;
   ```
 
-## C# Extension Methods
+## ExportsFor
 
-Provided for convenience when using Gaspar tagged data:
+If your data is decorated with `[ExportFor]` attributes, it might sometimes be useful to see that in your code using Reflection.  There are a few functions built into Gaspar to allow this.
+
+### ExportsFor
+
+`ExportsFor` lets you know if it the object will export for the given `gasparType`.
 
 ```csharp
-bool ExportsFor(this TypeInfo member, int type, bool includeParent = true, bool anyChildrenMatch = false)
-bool ExportsFor(this Type member, int type, bool includeParent = true, bool anyChildrenMatch = false)
-bool ExportsFor(this MemberInfo member, int type, bool includeParent = true, bool anyChildrenMatch = false)
+bool ExportsFor(this MemberInfo member, int gasparType)
 ```
 
-These methods will let you know if it the object (TypeInfo, System.Type or MemberInfo) is tagged with a given GasparType.
+*The `gasparType` parameter is an `int`, but you should use one of the properties in the static `GasparType` class (e.g. `GasparType.TypeScript`), or your group type class.*
 
-*the type parameter is an `int`, but you should use one of the properties in the static `GasparType` class (e.g. `GasparType.TypeScript`)*
+For example `myObj.ExportsFor(GasparType.Swift)` will return true if the `myObj` class will export to Swift, via a direct attribute or it's parents.
 
-For example `myclass.ExportsFor(GasparType.Swift)` will return true if the myclass class has the `[ExportsFor(GasparType.Swift)]` attribute
+There are a number of convenience overrides for this, you will see the `ExportsFor` function on the following types: `Type`, `TypeInfo`, `ICustomAttributeProvider`, from `Newtonsoft.Json`; `JsonProperty`, and from `System.Text`; `JsonPropertyInfo` and `JsonTypeInfo`. *(let me know if we should add others!)*
 
-Set `includeParent` to false to only look at the passed object, and not it's parent
+### AnyChildExportsFor
 
-Set `anyChildrenMatch` to true to return true if any of the child members have the ExportFor attribute.
+Similar to `ExportsFor` this will let you know if the object or any of it's child properties will export for the given `gasparType`.
+
+```csharp
+bool AnyChildExportsFor(this MemberInfo member, int gasparType, bool includeThis = true)
+```
+
+*The `gasparType` parameter is an `int`, but you should use one of the properties in the static `GasparType` class (e.g. `GasparType.TypeScript`), or your group type class.*
+
+For example `myObj.AnyChildExportsFor(GasparType.Swift)` will return true if the `myObj` class or any of it's child properties will export to Swift, via a direct attribute or it's parents.
+
+If you don't want to match the target class (`myObj`), only the children; set `includeThis` to false.
+
+There are a number of convenience overrides for this, you will see the `ExportsFor` function on the following types: `Type`, `TypeInfo`, `ICustomAttributeProvider`, from `Newtonsoft.Json`; `JsonProperty`, and from `System.Text`; `JsonPropertyInfo` and `JsonTypeInfo`. *(let me know if we should add others!)*
+
+### Json Serialization
+
+This is where the power of `ExportsFor` really kicks in!
+
+If you only export some of your model to a given platform, or exclude properties from the export, the model will only contain what you select (of course), however your actually exported data will include the values.  So you target language won't be able to access the properties, but they can be read by anyone looking at the api.  For example, take this class:
+
+```csharp
+[ExportFor(GasparType.TypeScript)]
+public class User
+{
+    public string name { get; set; }
+
+    [ExportFor(~GasparType.TypeScript)]    
+    public string password { get; set; }
+
+    //... etc
+}
+```
+
+In the above `password` will not be available in TypeScript, but it will be in the API data.
+
+**So, use `SerializeIfExportsFor`.**
+
+There are lot of options here, and depends on if you use Newtonsoft or System.Text
+
+#### System.Text.Json
+
+When using System.Text, you should add the following `using` statement:
+
+```csharp
+using WCKDRZR.Gaspar.GasparSystemJson;
+```
+
+To export only a given type, you need to use the `IfExportsForModifer` modifier, as follows:
+
+```csharp
+string json = JsonSerializer.Serialize(
+    myObject,
+    new JsonSerializerOptions() {
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver() {
+            Modifiers = {
+                GasparJson.IfExportsForModifer(GasparType.TypeScript)
+            }
+        }
+    }
+);
+```
+
+If you only have this one resolver; you can simplify your code by using the `IfExportsForResolver` resolver, as follows:
+
+```csharp
+string json = JsonSerializer.Serialize(
+    myObject,
+    new JsonSerializerOptions() {
+        TypeInfoResolver = GasparJson.IfExportsForResolver(GasparType.TypeScript)
+    }
+);
+```
+
+If this is the only serialisation option you are setting, you can simplify your code by using the `IfExportsForJsonSerializerOptions` option, as follows:
+
+```csharp
+string json = JsonSerializer.Serialize(
+    myObject,
+    GasparJson.IfExportsForJsonSerializerOptions(GasparType.TypeScript)
+);
+```
+
+...or simply:
+
+```csharp
+string json = GasparJson.SerializeIfExportsFor(myObject, GasparType.TypeScript);
+```
+
+#### Newtonsoft.Json
+
+When using Newtonsoft, you should add the following `using` statement:
+
+```csharp
+using WCKDRZR.Gaspar.GasparNewtonsoftJson;
+```
+
+To export only a given type, you need to use the `IfExportsForResolver` resolver, as follows:
+
+```csharp
+string json = JsonConvert.SerializeObject(
+    myObject,
+    new JsonSerializerSettings() {
+        ContractResolver = new GasparJson.IfExportsForResolver(GasparType.TypeScript)
+    }
+);
+```
+
+If this is the only serialisation setting you are using, you can simplify your code by using the `IfExportsForJsonSerializerSettings` setting, as follows:
+
+```csharp
+string json = JsonConvert.SerializeObject(
+    myObject,
+    GasparJson.IfExportsForJsonSerializerSettings(GasparType.TypeScript)
+);
+```
+
+...or simply:
+
+```csharp
+string json = GasparJson.SerializeIfExportsFor(myObject, GasparType.TypeScript);
+```
+
+
 
 ## Issues and Contributions
 
 Please raise any issues or pull requests in GitHub. We will try and incorporate any changes as promptly as possible.
+
+
 
 ## Thanks
 
