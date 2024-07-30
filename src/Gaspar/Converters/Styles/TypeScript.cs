@@ -531,7 +531,7 @@ namespace WCKDRZR.Gaspar.Converters
                     lines.AddRange(parameterKeyMaps.Select(m => $"            {m}"));
                     lines.AddRange(formParams.Select(f => $"            {f}"));
                     lines.AddRange(headerParams.Select(f => $"            {f}"));
-                    lines.Add($"            return new GasparServiceHelper().fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}, {returnTypeIsString}, {returnKeyMap}, showError);");
+                    lines.Add($"            return new GasparServiceHelper().fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}, {returnTypeIsString}, {returnKeyMap}, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")});");
                     lines.Add($"        }}");
                 }
             }
