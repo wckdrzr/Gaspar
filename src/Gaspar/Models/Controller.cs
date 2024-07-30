@@ -46,6 +46,7 @@ namespace WCKDRZR.Gaspar.Models
 
         public string[]? Scopes { get; set; }
         public string[]? AdditionalScopes { get; set; }
+        public string[]? Headers { get; set; }
 
         public long? Timeout { get; set; }
 

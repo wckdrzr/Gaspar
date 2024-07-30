@@ -44,6 +44,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                 string? nodeClassCustomSerializer = nodeClass.AttributeLists.StringAttributeValue(nameof(options.Serializer));
                 string[]? nodeClassScopes = nodeClass.AttributeLists.StringArrayAttributeValue(nameof(options.Scopes));
                 string[]? nodeClassAdditionalScopes = nodeClass.AttributeLists.StringArrayAttributeValue(nameof(options.AdditionalScopes));
+                string[]? nodeClassHeaders = nodeClass.AttributeLists.StringArrayAttributeValue(nameof(options.Headers));
                 long? nodeClassTimeout = nodeClass.AttributeLists.IntAttributeValue(nameof(options.Timeout));
 
                 if (nodeClass.IsController() && node.IsPublic())
@@ -96,6 +97,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
 
                     action.Scopes = node.AttributeLists.StringArrayAttributeValue(nameof(options.Scopes)) ?? nodeClassScopes;
                     action.AdditionalScopes = node.AttributeLists.StringArrayAttributeValue(nameof(options.AdditionalScopes)) ?? nodeClassAdditionalScopes;
+                    action.Headers = node.AttributeLists.StringArrayAttributeValue(nameof(options.Headers)) ?? nodeClassHeaders;
                     action.Timeout = node.AttributeLists.IntAttributeValue(nameof(options.Timeout)) ?? nodeClassTimeout;
 
                     List<string> routeParameters = Regex.Matches(action.Route, "{(.*?)}").Cast<Match>().Select(m => m.Groups[1].Value).ToList();

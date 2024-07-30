@@ -465,6 +465,17 @@ namespace WCKDRZR.Gaspar.Converters
                         parameterKeyMaps.Add($"{parameter.Identifier} = JsonProperyKeys.toJson({parameter.Identifier}, {parameterKeyMap})");
                     }
                 }
+                if (action.Headers != null)
+                {
+                    if (action.Headers.Length == 0)
+                    {
+                        parameters.Add("headers: Record<string, string>");
+                    }
+                    else
+                    {
+                        parameters.Add($"headers: {{ {string.Join(", ", action.Headers.Select(h => $"{h}: string"))} }}");
+                    }
+                }
                 if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
                 {
                     parameters.Add($"showError = ServiceErrorMessage.{outputConfig.DefaultErrorMessage}");
@@ -511,13 +522,13 @@ namespace WCKDRZR.Gaspar.Converters
                         }
                     }
                     IEnumerable<Parameter> headerParameters = action.Parameters.Where(p => p.Source == ParameterSource.Header);
-                    if (headerParameters.Any())
+                    if (headerParameters.Any() || action.Headers != null)
                     {
-                        headerParams.Add("let headers: Record<string, string> = {}");
-                        bodyParam += ", headers: headers";
+                        headerParams.Add($"let headersToSend: Record<string, string> = {(action.Headers == null ? "{}" : "headers")}");
+                        bodyParam += ", headers: headersToSend";
                         foreach (Parameter parameter in headerParameters)
                         {
-                            headerParams.Add($"if ({parameter.Identifier}) {{ headers['{parameter.Identifier}'] = {parameter.Identifier}.toString(); }}");
+                            headerParams.Add($"if ({parameter.Identifier}) {{ headersToSend['{parameter.Identifier}'] = {parameter.Identifier}.toString(); }}");
                         }
                     }
 

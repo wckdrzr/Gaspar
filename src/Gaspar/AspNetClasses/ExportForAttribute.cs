@@ -1,5 +1,4 @@
 ﻿using System;
-using WCKDRZR.Gaspar.Models;
 
 namespace WCKDRZR.Gaspar
 {
@@ -50,6 +49,11 @@ namespace WCKDRZR.Gaspar
         /// For Ocelot, this allows you to provide a QoS Timeout value in the configuration.
         /// </summary>
         public long Timeout { get; set; }
+
+        /// <summary>
+        /// Specify headers that will be sent with the request.  Specifying an empty array will add a `Dictionary<string, string>` property (or equivalent) to allow any number of name/values pairs, defined when calling.  Specify a list of strings for these to be required as header name properties, for which you will add string values.
+        /// </summary>
+        public string[]? Headers { get; set; }
     }
 
     public class ExportWithoutInheritance : Attribute

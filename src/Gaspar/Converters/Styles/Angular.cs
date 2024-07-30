@@ -199,6 +199,17 @@ namespace WCKDRZR.Gaspar.Converters
                     }
                     parameters.Add(newParam);
                 }
+                if (action.Headers != null)
+                {
+                    if (action.Headers.Length == 0)
+                    {
+                        parameters.Add("headers: Record<string, string>");
+                    }
+                    else
+                    {
+                        parameters.Add($"headers: {{ {string.Join(", ", action.Headers.Select(h => $"{h}: string"))} }}");
+                    }
+                }
                 if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
                 {
                     parameters.Add($"showError = ServiceErrorMessage.{outputConfig.DefaultErrorMessage}");
@@ -247,22 +258,26 @@ namespace WCKDRZR.Gaspar.Converters
                         }
                     }                    
                     IEnumerable<Parameter> headerParameters = action.Parameters.Where(p => p.Source == ParameterSource.Header);
-                    if (headerParameters.Any())
+                    if (headerParameters.Any() || action.Headers != null)
                     {
-                        headerParams.Add("let headers: Record<string, string> = {}");
+                        headerParams.Add($"let headersToSend: Record<string, string> = {(action.Headers == null ? "{}" : "headers")}");
                         foreach (Parameter parameter in headerParameters)
                         {
-                            headerParams.Add($"if ({parameter.Identifier}) {{ headers['{parameter.Identifier}'] = {parameter.Identifier}.toString(); }}");
+                            headerParams.Add($"if ({parameter.Identifier}) {{ headersToSend['{parameter.Identifier}'] = {parameter.Identifier}.toString(); }}");
                         }
+                    }
+                    if (httpMethod == "get" && headerParams.Any())
+                    {
+                        bodyParam += $", {{ headers: headersToSend }}";
                     }
                     if (httpMethod == "post" || httpMethod == "put")
                     {
                         bodyParam = $", {bodyParam}";
-                        if (headerParams.Any()) { bodyParam += $", {{ headers: headers }}"; }
+                        if (headerParams.Any()) { bodyParam += $", {{ headers: headersToSend }}"; }
                     }
                     if (httpMethod == "delete")
                     {
-                        bodyParam = (bodyParam != "null" || headerParams.Any()) ? $", {{ {(bodyParam != "null" ? $"body: {bodyParam}" : "")}{(headerParams.Any() ? ", headers: headers" : "")} }}" : "";
+                        bodyParam = (bodyParam != "null" || headerParams.Any()) ? $", {{ {(bodyParam != "null" ? $"body: {bodyParam}" : "")}{(headerParams.Any() ? ", headers: headersToSend" : "")} }}" : "";
                     }
 
                     string returnType = TypeScriptConverter.ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);

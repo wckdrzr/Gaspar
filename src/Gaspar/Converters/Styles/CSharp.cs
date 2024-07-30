@@ -125,6 +125,19 @@ namespace WCKDRZR.Gaspar.Converters
                     if (returnTypeString == "<ContentResult>") { returnTypeString = "<string>"; }
                     if (returnTypeString == "<JsonResult>") { returnTypeString = "<object>"; }
 
+
+                    if (action.Headers != null)
+                    {
+                        if (action.Headers.Length == 0)
+                        {
+                            parameters.Add("Dictionary<string, string> headers");
+                        }
+                        else
+                        {
+                            parameters.Add($"({string.Join(", ", action.Headers.Select(h => $"string {h}"))}) headers");
+                        }
+                    }
+
                     string defaultTimeout = "";
                     if (action.Timeout != null)
                     {
@@ -155,13 +168,17 @@ namespace WCKDRZR.Gaspar.Converters
                     List<string> headerParamBuilder = new();
                     string headersParam = "new()";
                     IEnumerable<Parameter> headerParameters = action.Parameters.Where(p => p.Source == ParameterSource.Header);
-                    if (headerParameters.Any())
+                    if (headerParameters.Any() || action.Headers != null)
                     {
-                        headerParamBuilder.Add("Dictionary<string, string> headers = new();");
-                        headersParam = "headers";
+                        headerParamBuilder.Add($"Dictionary<string, string> headersToSend = new();");
+                        headersParam = "headersToSend";
+                        foreach (string header in action.Headers)
+                        {
+                            headerParamBuilder.Add($"headersToSend.Add(\"{header}\", headers.{header});");
+                        }
                         foreach (Parameter parameter in headerParameters)
                         {
-                            headerParamBuilder.Add($"headers.Add(\"{parameter.Identifier}\", {parameter.Identifier}.ToString());");
+                            headerParamBuilder.Add($"headersToSend.Add(\"{parameter.Identifier}\", {parameter.Identifier}.ToString());");
                         }
                     }
 

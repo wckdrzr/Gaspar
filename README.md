@@ -152,6 +152,12 @@ The class provided must implement a generic `Deserialize<T>` method that returns
 
 - `[ExportFor(GasparType.Angular, ReturnTypeOverride = "MyType"]`
 
+**Headers**    `Array of strings`    For controller actions, this allows you to specify headers that will be sent with the request.  You can already use `[FromHeader]`, but this can report missing headers back to the user.  The `Headers` options keeps header properties hidden from users calling the endpoint incorrectly; whist allowing you to see and specify the values from your calling code.
+
+Specifying an empty array will add a `Dictionary<string, string>` property (or equivalent) to allow any number of name/values pairs, defined when calling.
+
+Specify a list of strings for these to be required as header name properties, for which you will add string values.
+
 **Timeout**    `long (milliseconds)`    For C# Service Communications this provides a default timeout value for calls made to this controller/action.  This can easily be overridden on any individual call.
 
 For Ocelot, this allows you to provide a QoS Timeout value in the configuration.
@@ -738,13 +744,9 @@ string json = JsonConvert.SerializeObject(
 string json = GasparJson.SerializeIfExportsFor(myObject, GasparType.TypeScript);
 ```
 
-
-
 ## Issues and Contributions
 
 Please raise any issues or pull requests in GitHub. We will try and incorporate any changes as promptly as possible.
-
-
 
 ## Thanks
 
