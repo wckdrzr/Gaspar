@@ -478,7 +478,7 @@ namespace WCKDRZR.Gaspar.Converters
                 }
                 else
                 {
-                    string url = $"{outputConfig.UrlPrefix}{(outputConfig.UrlPrefix?.EndsWith("/") == false && !action.Route.StartsWith("/") ? "/" : "")}{action.Route.Replace("{", "${")}";
+                    string url = outputConfig.AddUrlPrefix(action.Route.Replace("{", "${"));
                     url += action.Parameters.QueryString(OutputType.TypeScript, "$");
 
                     string bodyParam = "";

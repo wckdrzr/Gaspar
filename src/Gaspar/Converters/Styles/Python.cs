@@ -160,7 +160,7 @@ namespace WCKDRZR.Gaspar.Converters
                 }
                 else
                 {
-                    string url = $"{outputConfig.UrlPrefix}{(outputConfig.UrlPrefix?.EndsWith("/") == false && !action.Route.StartsWith("/") ? "/" : "")}{action.Route.Replace("{", "${")}";
+                    string url = outputConfig.AddUrlPrefix(action.Route);
                     url += action.Parameters.QueryString(OutputType.Python);
                     lines.Add($"    def {action.ActionName}(self, {string.Join(", ", parameters)}):");
                     lines.Add($"        response = requests.{httpMethod}(f'{url}'{bodyParam})");

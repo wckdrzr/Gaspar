@@ -95,7 +95,7 @@ namespace WCKDRZR.Gaspar.Converters
                 {
                     string httpMethod = action.HttpMethod.ToProper();
 
-                    string url = $"{outputConfig.UrlPrefix}{(outputConfig.UrlPrefix?.EndsWith("/") == false && !action.Route.StartsWith("/") ? "/" : "")}{action.Route.Replace("{", "${")}";
+                    string url = outputConfig.AddUrlPrefix(action.Route);
                     url += action.Parameters.QueryString(OutputType.CSharp);
 
                     string urlHandler = "";
