@@ -84,6 +84,8 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 "import Foundation",
                 "",
+                "class BaseCodable: Codable {}",
+                "",
             };
         }
 
@@ -150,7 +152,7 @@ namespace WCKDRZR.Gaspar.Converters
                     model.BaseClasses[i] = ConvertType(model.BaseClasses[i]);
                 }
             }
-            string baseClasses = model.BaseClasses.Count > 0 ? $": {string.Join(", ", model.BaseClasses)}" : ": Codable";
+            string baseClasses = model.BaseClasses.Count > 0 ? $": {string.Join(", ", model.BaseClasses)}" : ": BaseCodable";
 
             lines.Add($"{Indent()}class {model.ModelName}{(model.Enumerations.Count > 0 ? "_Properties" : "")}{baseClasses} {{");
 
@@ -166,24 +168,50 @@ namespace WCKDRZR.Gaspar.Converters
             }
 
             List<string> codingKeys = new();
+            List<string> initDecodeLines = new();
+            List<string> encodeLines = new();
 
             foreach (Property member in model.Fields.Concat(model.Properties))
             {
-                if (member.JsonPropertyName != null)
-                {
-                    codingKeys.Add($"{ConvertIdentifier(member.Identifier.Split(' ')[0])} = \"{member.JsonPropertyName}\"");
-                }
-                
-                string property = ConvertProperty(member, outputConfig);
-                string defaultValue = property.EndsWith('?') ? "nil" : DefaultValue(member, outputConfig);
+                string identifier = ConvertIdentifier(member.Identifier.Split(' ')[0]);
+                string? type = member.Type != null ? ParseType(member.Type, outputConfig) : "";
+                string defaultValue = type.EndsWith('?') ? "nil" : DefaultValue(member, outputConfig);
                 if (defaultValue != "") { defaultValue = $" = {defaultValue}"; }
 
-                lines.Add($"{Indent(1)}var {property}{defaultValue}");
+                codingKeys.Add(member.JsonPropertyName == null ? identifier : $"{identifier} = \"{member.JsonPropertyName}\"");
+                initDecodeLines.Add($"{identifier} = try values.decode({type}.self, forKey: .{identifier})");
+                encodeLines.Add($"try container.encode({identifier}, forKey: .{identifier})");
+                lines.Add($"{Indent(1)}var {identifier}: {type}{defaultValue}");
             }
 
             if (codingKeys.Any())
             {
                 lines.Add($"{Indent(1)}");
+            }
+            lines.Add($"{Indent(1)}override init() {{");
+            lines.Add($"{Indent(1)}    super.init()");
+            lines.Add($"{Indent(1)}}}");
+
+            lines.Add($"{Indent(1)}required init(from decoder: Decoder) throws {{");
+            lines.Add($"{Indent(1)}    try super.init(from: decoder)");
+            if (codingKeys.Any())
+            {
+                lines.Add($"{Indent(1)}    let values = try decoder.container(keyedBy: CodingKeys.self)");
+                lines.AddRange(initDecodeLines.Select(line => $"{Indent(2)}{line}"));
+            }
+            lines.Add($"{Indent(1)}}}");
+
+            lines.Add($"{Indent(1)}override func encode(to encoder: Encoder) throws {{");
+            lines.Add($"{Indent(1)}    try super.encode(to: encoder)");
+            if (codingKeys.Any())
+            {
+                lines.Add($"{Indent(1)}    var container = encoder.container(keyedBy: CodingKeys.self)");
+                lines.AddRange(encodeLines.Select(line => $"{Indent(2)}{line}"));
+            }
+            lines.Add($"{Indent(1)}}}");
+
+            if (codingKeys.Any())
+            {
                 lines.Add($"{Indent(1)}private enum CodingKeys: String, CodingKey {{");
                 lines.Add($"{Indent(1)}    case {string.Join(", ", codingKeys)}");
                 lines.Add($"{Indent(1)}}}");
@@ -263,14 +291,6 @@ namespace WCKDRZR.Gaspar.Converters
         }
 
 
-
-        public string ConvertProperty(Property property, ConfigurationTypeOutput outputConfig)
-        {
-            string identifier = ConvertIdentifier(property.Identifier.Split(' ')[0]);
-            string? type = property.Type != null ? ParseType(property.Type, outputConfig) : null;
-
-            return $"{identifier}: {type}";
-        }
 
         public string ConvertIndexType(string indexType, ConfigurationTypeOutput outputConfig)
         {
@@ -356,13 +376,17 @@ namespace WCKDRZR.Gaspar.Converters
 
         private string DefaultValue(Property property, ConfigurationTypeOutput outputConfig)
         {
-            if (property.DefaultValue != null && !property.DefaultValue.StartsWith("new") && property.DefaultValue != "[]" && !property.DefaultValue.EndsWith("()"))
+            string type = property.Type != null ? ParseType(property.Type, outputConfig) : "";
+            bool nullable = type.EndsWith("?");
+
+            if (property.DefaultValue != null && !nullable && !type.StartsWith("["))
             {
-                if (property.DefaultValue == "null") { return "nil"; }
-                return property.DefaultValue;
+                if (!property.DefaultValue.StartsWith("new") && !property.DefaultValue.EndsWith("()"))
+                {
+                    return property.DefaultValue;
+                }
             }
 
-            string? type = property.Type != null ? ParseType(property.Type, outputConfig) : null;
             switch (type)
             {
                 case "String": return "\"\"";
@@ -376,12 +400,17 @@ namespace WCKDRZR.Gaspar.Converters
                 case "UInt16": return "0";
                 case "Bool": return "false";
             }
-            if (type != null && type.StartsWith('[') && type.EndsWith(']'))
+            if (type.StartsWith('[') && type.EndsWith(']'))
             {
                 if (type.Contains(':')) { return "[:]"; }
                 return "[]";   
             }
-            return "";
+            if (nullable)
+            {
+                return "nil";
+            }
+
+            return $"{type}()";
         }
 
         private bool IsOptional(string propertyName, ConfigurationTypeOutput outputConfig)
