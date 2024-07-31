@@ -172,7 +172,7 @@ namespace WCKDRZR.Gaspar.Converters
                     {
                         headerParamBuilder.Add($"Dictionary<string, string> headersToSend = new();");
                         headersParam = "headersToSend";
-                        foreach (string header in action.Headers)
+                        foreach (string header in action.Headers?.ToList() ?? new())
                         {
                             headerParamBuilder.Add($"headersToSend.Add(\"{header}\", headers.{header});");
                         }

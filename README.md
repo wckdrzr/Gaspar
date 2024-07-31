@@ -462,9 +462,11 @@ For controllers (optional):
 
 **UrlPrefix**    `string`    When building the service contract, you can prefix the url with this value; e.g. `"http://myservice.com:81"`. The service url will be built from this followed by `/` then the action route.  Can include `{ServiceName}`, `{ServiceHost}` or `{ServicePort}` to have those placeholders replaced (see the demo file).
 
-For CSharp controllers (all optional):
+For CSharp, TypeScript and Angular controllers (optional):
 
-- **UrlHandlerFunction**    `string`    If you would like to run your url through a function to ensure it is correct, you can provide the function name here.  Your code will need to provide a static string extension method; as follows:
+- **UrlHandlerFunction**    `string`    If you would like to run your url through a function to ensure it is correct, or apply environmental prefixes;  You can provide the function name here.
+  
+  For CSharp, your code will need to provide a static string extension method; as follows:
   
   ```csharp
   internal static class StringExtensions
@@ -477,8 +479,19 @@ For CSharp controllers (all optional):
   }
   ```
   
-  In the above example, you will add `"UrlHandlerFunction": "MyUrlHelper"` to the config.
-  *make sure to include the namespace to your function in the config (see below)*
+  For Typescript and Angular, your code will need to provide an exported function; as follows:
+  
+  ```typescript
+  export function MyUrlHelper(s: string): string {
+      //manipulate s...
+      return s;
+  }
+  ```
+  
+  In both the above examples, you will add `"UrlHandlerFunction": "MyUrlHelper"` to the config.
+  *make sure to include the namespace/import to your function in the config (see below)*
+
+For CSharp controllers (all optional):
 
 - **LoggingReceiver**    `string`    When using your exported service communication endpoint, if there's an error receiving the response or deserializing it, the error will be logged to the console (using `Console.WriteLine`).  If you would like the error to be absorbed by your own logging system you can provide a static logging class name here, for example:
   

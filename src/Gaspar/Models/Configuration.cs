@@ -60,8 +60,10 @@ namespace WCKDRZR.Gaspar.Models
         public string? ErrorHandlerPath { get; set; }
         public TypeScriptServiceErrorMessage DefaultErrorMessage { get; set; } = TypeScriptServiceErrorMessage.None;
 
-        //For CSharp Controllers
+        //For CSharp/TypeScript/Angular Controllers
         public string? UrlHandlerFunction { get; set; }
+        
+        //For CSharp Controllers
         public string? LoggingReceiver { get; set; }
         public List<string> ModelNamespaces { get; set; } = new();
 

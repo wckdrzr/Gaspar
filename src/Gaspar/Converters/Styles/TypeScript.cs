@@ -491,6 +491,13 @@ namespace WCKDRZR.Gaspar.Converters
                 {
                     string url = outputConfig.AddUrlPrefix(action.Route.Replace("{", "${"));
                     url += action.Parameters.QueryString(OutputType.TypeScript, "$");
+                    if (!string.IsNullOrEmpty(outputConfig.UrlHandlerFunction))
+                    {
+                        url = $"{outputConfig.UrlHandlerFunction}(`{url}`)";
+                    }
+                    else {
+                        url = $"`{url}`";
+                    }
 
                     string bodyParam = "";
                     List<string> formParams = new();
@@ -542,7 +549,7 @@ namespace WCKDRZR.Gaspar.Converters
                     lines.AddRange(parameterKeyMaps.Select(m => $"            {m}"));
                     lines.AddRange(formParams.Select(f => $"            {f}"));
                     lines.AddRange(headerParams.Select(f => $"            {f}"));
-                    lines.Add($"            return new GasparServiceHelper().fetch(`{url}`, {{ method: '{httpMethod}'{bodyParam} }}, {returnTypeIsString}, {returnKeyMap}, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")});");
+                    lines.Add($"            return new GasparServiceHelper().fetch({url}, {{ method: '{httpMethod}'{bodyParam} }}, {returnTypeIsString}, {returnKeyMap}, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")});");
                     lines.Add($"        }}");
                 }
             }

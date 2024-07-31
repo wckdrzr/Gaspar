@@ -225,6 +225,13 @@ namespace WCKDRZR.Gaspar.Converters
                 {
                     string url = outputConfig.AddUrlPrefix(action.Route.Replace("{", "${"));
                     url += action.Parameters.QueryString(OutputType.Angular, "$");
+                    if (!string.IsNullOrEmpty(outputConfig.UrlHandlerFunction))
+                    {
+                        url = $"{outputConfig.UrlHandlerFunction}(`{url}`)";
+                    }
+                    else {
+                        url = $"`{url}`";
+                    }
 
                     string bodyParam = "";
                     List<string> formParams = new();
@@ -285,7 +292,7 @@ namespace WCKDRZR.Gaspar.Converters
                     lines.Add($"        {actionName}({string.Join(", ", parameters)}): Observable<ServiceResponse<{returnType}>> {{");
                     lines.AddRange(formParams.Select(f => $"            {f}"));
                     lines.AddRange(headerParams.Select(f => $"            {f}"));
-                    lines.Add($"            return this.http.{httpMethod}<{returnType}>(`{url}`{bodyParam}).pipe(");
+                    lines.Add($"            return this.http.{httpMethod}<{returnType}>({url}{bodyParam}).pipe(");
                     lines.Add($"                map(data => new ServiceResponse(data, null)),");
                     lines.Add($"                catchError(error => this.errorHelper.handler<{returnType}>(error, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")}))");
                     lines.Add($"            );");
