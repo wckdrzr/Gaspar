@@ -768,6 +768,34 @@ string json = JsonConvert.SerializeObject(
 string json = GasparJson.SerializeIfExportsFor(myObject, GasparType.TypeScript);
 ```
 
+## Service Helpers Methods
+
+Gaspar provides easy to use endpoints for your controllers in various output languages.  In order to do this, significant effort has be employed to provide a reliable way of calling the http endpoint and representing it as the correct object, while catching errors in a standard and user friendly way.  Without Gaspar there is a significant amount of boilerplate code needed.
+
+While languages are always getting better (for example JavaScript's `fetch` and C#'s `HttpClient.GetAsync`) you can still end up writing lots of code to catch the correct error in the correct way.
+
+Gaspar provides a `ServiceResponse` object with a `Data` and an `Error` value, covering all scenarios.
+
+### Using Gaspar's Service Helpers
+
+If you would like to make an http call in your code, but don't have the endpoint exported (e.g. a third party api); you can make use of Gaspar's service helpers to provide you a quick and easy way to get the data.
+
+You might end up installing Gaspar without using the export just for this!  If you do, make sure to disable the build processing (see above).
+
+#### In C#
+
+```csharp
+GasparService.GetAsync<Model>("https://example.com/api");
+```
+
+There are lots of methods available in `GasparService` for `Get`, `Post`, `Put` and `Delete`.  There are `Sync` and `Async` versions and `Try` methods that return the response data in an `out` parameter.
+
+We will not document all the endpoints here, hopefully they are straightforward to use, any issues let us know.
+
+#### Other Languages
+
+Other languages may be documented here in the future (for example when more convenience endpoints are added), but for now have a look at the generated code when controllers are exported for an example of how to use.
+
 ## Issues and Contributions
 
 Please raise any issues or pull requests in GitHub. We will try and incorporate any changes as promptly as possible.
