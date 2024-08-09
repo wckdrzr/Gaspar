@@ -244,6 +244,17 @@ ServiceResponse has the following convenience methods that you can use:
 
 - **HasError**    `bool`    True if there was an error
 
+In C# these methods are fully annotated for nullable projects; for example:
+
+```csharp
+ServiceResponse<string> response = new();
+string data = response.Data; //warning here - Data may be null here
+if (response.Success)
+{
+    data = response.Data; //Data not null here
+}
+```
+
 ### Usage Examples
 
 Lets take this controller action, exported for all environments:
