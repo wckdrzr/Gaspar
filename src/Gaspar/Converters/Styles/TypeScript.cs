@@ -283,15 +283,15 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add($"    {TypeScriptServiceErrorMessage.Generic},");
             lines.Add($"    {TypeScriptServiceErrorMessage.ServerResponse},");
             lines.Add("}");
-            lines.Add("export type JsonProperyKeyMap = Record<string, { k: string, m?: JsonProperyKeyMap }>;");
+            lines.Add("export type JsonPropertyKeyMap = Record<string, { k: string, m?: JsonPropertyKeyMap }>;");
 
             lines.Add("export class GasparServiceHelper {");
-            lines.Add("    async fetch<T>(url: string, options: RequestInit, responseIsString: boolean, returnKeyMap: JsonProperyKeyMap | null, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
+            lines.Add("    async fetch<T>(url: string, options: RequestInit, responseIsString: boolean, returnKeyMap: JsonPropertyKeyMap | null, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
             lines.Add("        return fetch(url, options).then(async response => {");
             lines.Add("            if (response.ok) {");
             lines.Add("                try {");
             lines.Add("                    let data = await (responseIsString ? (response.status == 200 ? response.text() : null) : response.json());");
-            lines.Add("                    if (returnKeyMap) { data = JsonProperyKeys.fromJson(data, returnKeyMap); }");
+            lines.Add("                    if (returnKeyMap) { data = JsonPropertyKeys.fromJson(data, returnKeyMap); }");
             lines.Add("                    return new ServiceResponse<T>(data, null);");
             lines.Add("                } catch {}");
             lines.Add("            }");
@@ -327,14 +327,14 @@ namespace WCKDRZR.Gaspar.Converters
 
             if (_jsonPropertyKeys.Any())
             {
-                lines.Add("export namespace JsonProperyKeys {");
+                lines.Add("export namespace JsonPropertyKeys {");
                 foreach (var propertyKey in _jsonPropertyKeys)
                 {
-                    string keys = string.Join(", ", propertyKey.Value.Select(k => $"'{ConvertIdentifier(k.Key)}': {{ k: '{k.Value.k}'{(k.Value.m != null ? $", m: JsonProperyKeys.{k.Value.m}()" : "")} }}"));
-                    lines.Add($"    export function {propertyKey.Key.Replace(".", "_")}(): JsonProperyKeyMap {{ return {{ {keys} }} }}");
+                    string keys = string.Join(", ", propertyKey.Value.Select(k => $"'{ConvertIdentifier(k.Key)}': {{ k: '{k.Value.k}'{(k.Value.m != null ? $", m: JsonPropertyKeys.{k.Value.m}()" : "")} }}"));
+                    lines.Add($"    export function {propertyKey.Key.Replace(".", "_")}(): JsonPropertyKeyMap {{ return {{ {keys} }} }}");
                 }
                 lines.Add("");
-                lines.Add("    export function toJson<T>(obj: T, map: JsonProperyKeyMap): T {");
+                lines.Add("    export function toJson<T>(obj: T, map: JsonPropertyKeyMap): T {");
                 lines.Add("        if (obj === null) {");
                 lines.Add("            return obj");
                 lines.Add("        }");
@@ -357,7 +357,7 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("            return workingObj");
                 lines.Add("        }");
                 lines.Add("    }");
-                lines.Add("    export function fromJson<T>(obj: T, map: JsonProperyKeyMap): T {");
+                lines.Add("    export function fromJson<T>(obj: T, map: JsonPropertyKeyMap): T {");
                 lines.Add("        if (obj === null) {");
                 lines.Add("            return obj");
                 lines.Add("        }");
@@ -462,7 +462,7 @@ namespace WCKDRZR.Gaspar.Converters
                     string? parameterKeyMap = KeyMapForProperty(type);
                     if (parameterKeyMap != null)
                     {
-                        parameterKeyMaps.Add($"{parameter.Identifier} = JsonProperyKeys.toJson({parameter.Identifier}, {parameterKeyMap})");
+                        parameterKeyMaps.Add($"{parameter.Identifier} = JsonPropertyKeys.toJson({parameter.Identifier}, {parameterKeyMap})");
                     }
                 }
                 if (action.Headers != null)
@@ -669,7 +669,7 @@ namespace WCKDRZR.Gaspar.Converters
         private string NullSuffix(ConfigurationTypeOutput outputConfig)
         {
             string prefix = " | null";
-            if (outputConfig.NullablesAlsoUndefinded)
+            if (outputConfig.NullablesAlsoUndefined)
             {
                 prefix += " | undefined";
             }
@@ -713,8 +713,8 @@ namespace WCKDRZR.Gaspar.Converters
                     string key = _jsonPropertyKeys[mapKey][propertyKey].k;
                     string? type = _jsonPropertyKeys[mapKey][propertyKey].m;
 
-                    string qualifitedType = string.Join('.', mapKey.Split('.')[..^1]) + '.' + type;
-                    string? matchingJsonKey = _jsonPropertyKeys.FirstOrDefault(k => k.Key == qualifitedType).Key;
+                    string qualifiedType = string.Join('.', mapKey.Split('.')[..^1]) + '.' + type;
+                    string? matchingJsonKey = _jsonPropertyKeys.FirstOrDefault(k => k.Key == qualifiedType).Key;
                     if (matchingJsonKey == null)
                     {
                         matchingJsonKey = _jsonPropertyKeys.FirstOrDefault(k => k.Key == mapKey + '.' + type).Key;
@@ -736,11 +736,11 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 if (_jsonPropertyKeys.TryGetValue(propertyName, out _))
                 {
-                    return $"JsonProperyKeys.{propertyName.Replace('.', '_')}()";
+                    return $"JsonPropertyKeys.{propertyName.Replace('.', '_')}()";
                 }
                 else if (_jsonPropertyKeys.TryGetValue(propertyName[..^2], out _))
                 {
-                    return $"JsonProperyKeys.{propertyName[..^2].Replace('.', '_')}()";
+                    return $"JsonPropertyKeys.{propertyName[..^2].Replace('.', '_')}()";
                 }
             }
             return null;

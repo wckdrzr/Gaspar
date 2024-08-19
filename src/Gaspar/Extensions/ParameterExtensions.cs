@@ -2,7 +2,6 @@
 using System.Linq;
 using WCKDRZR.Gaspar.Models;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WCKDRZR.Gaspar.Extensions
 {

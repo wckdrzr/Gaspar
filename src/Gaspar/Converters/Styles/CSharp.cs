@@ -52,7 +52,7 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add($"using {ns};");
             }
             lines.Add("");
-            lines.Add($"namespace WCKDRZR.Gaspar.ServiceCommunciation.{Config.Controllers?.ServiceName.CapitaliseFirst()}Service");
+            lines.Add($"namespace WCKDRZR.Gaspar.ServiceCommunication.{Config.Controllers?.ServiceName.CapitaliseFirst()}Service");
             lines.Add($"{{");
             currentIndent++;
             return lines;

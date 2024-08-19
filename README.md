@@ -339,7 +339,7 @@ export class MyAngularPage {
 
 ```csharp
 using WCKDRZR.Gaspar.Models;
-using WCKDRZR.Gaspar.ServiceCommunciation.Service; //Service will be prefixed with ServiceName from config
+using WCKDRZR.Gaspar.ServiceCommunication.Service; //Service will be prefixed with ServiceName from config
 
 namespace MyProject
 {
@@ -693,7 +693,7 @@ When using System.Text, you should add the following `using` statement:
 using WCKDRZR.Gaspar.GasparSystemJson;
 ```
 
-To export only a given type, you need to use the `IfExportsForModifer` modifier, as follows:
+To export only a given type, you need to use the `IfExportsForModifier` modifier, as follows:
 
 ```csharp
 string json = JsonSerializer.Serialize(
@@ -701,7 +701,7 @@ string json = JsonSerializer.Serialize(
     new JsonSerializerOptions() {
         TypeInfoResolver = new DefaultJsonTypeInfoResolver() {
             Modifiers = {
-                GasparJson.IfExportsForModifer(GasparType.TypeScript)
+                GasparJson.IfExportsForModifier(GasparType.TypeScript)
             }
         }
     }

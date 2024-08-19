@@ -80,7 +80,7 @@ namespace WCKDRZR.Gaspar.Models
         public bool AddInferredNullables { get; set; } = false;
 
         //For Typescript/Angular Models and Controllers
-        public bool NullablesAlsoUndefinded { get; set; } = false;
+        public bool NullablesAlsoUndefined { get; set; } = false;
 
         //For Kotlin/Proto Models
         public string? PackageNamespace { get; set; }

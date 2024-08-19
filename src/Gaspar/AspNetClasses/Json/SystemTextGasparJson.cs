@@ -23,11 +23,11 @@ namespace WCKDRZR.Gaspar.GasparSystemJson
         {
             return new DefaultJsonTypeInfoResolver
                 {
-                    Modifiers = { IfExportsForModifer(gasparType) }
+                    Modifiers = { IfExportsForModifier(gasparType) }
                 };
         }
 
-        public static Action<JsonTypeInfo> IfExportsForModifer(int gasparTypes)
+        public static Action<JsonTypeInfo> IfExportsForModifier(int gasparTypes)
         {
             return (JsonTypeInfo typeInfo) => {
                 for (int i = 0; i < typeInfo.Properties.Count; i++)

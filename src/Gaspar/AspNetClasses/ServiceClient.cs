@@ -92,9 +92,9 @@ namespace WCKDRZR.Gaspar
             }
             catch (Exception e)
             {
-                Log($"Gaspar: Unable to deserialize sucessful response from {url}\n{e.Message}", logReceiver);
+                Log($"Gaspar: Unable to deserialize successful response from {url}\n{e.Message}", logReceiver);
 
-                return Error<T>($"Gaspar: Unable to deserialize sucessful response from {url}", e.Message, 0);
+                return Error<T>($"Gaspar: Unable to deserialize successful response from {url}", e.Message, 0);
             }
         }
 
@@ -152,13 +152,13 @@ namespace WCKDRZR.Gaspar
                     }
                     else
                     {
-                        Console.WriteLine($"Gaspar: Cannot use your LoggingReceiver ({logReceiver.Name}): no GasparError method found.  Communicaiton error below.");
+                        Console.WriteLine($"Gaspar: Cannot use your LoggingReceiver ({logReceiver.Name}): no GasparError method found.  Communication error below.");
                     }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Gaspar: Error trying to use your LoggingReceiver ({logReceiver.Name}): {e.Message}  Communicaiton error below.");
+                Console.WriteLine($"Gaspar: Error trying to use your LoggingReceiver ({logReceiver.Name}): {e.Message}  Communication error below.");
             }
             Console.WriteLine("Gaspar: " + message);
         }

@@ -60,7 +60,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     }
                     if (action.HttpMethod == null)
                     {
-                        action.BadMethodReason = "HTTP Method not spcified";
+                        action.BadMethodReason = "HTTP Method not specified";
                     }
 
                     if (routeAttribute != null || httpAttribute?.ArgumentList?.Arguments[0] != null)

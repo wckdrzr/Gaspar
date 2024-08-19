@@ -72,8 +72,8 @@ namespace WCKDRZR.Gaspar.Converters
                 newAction.AdditionalScopes = action.AdditionalScopes;
                 newAction.Timeout = action.Timeout;
 
-                int routeParamaterIndex = action.Route.IndexOf("{");
-                newAction.Route = routeParamaterIndex >= 0 ? action.Route[..routeParamaterIndex] + "{url}" : action.Route;
+                int routeParameterIndex = action.Route.IndexOf("{");
+                newAction.Route = routeParameterIndex >= 0 ? action.Route[..routeParameterIndex] + "{url}" : action.Route;
 
                 if (uniqueOcelotActions.SingleOrDefault(a => a.Route == newAction.Route && a.HttpMethod == newAction.HttpMethod) == null)
                 {
