@@ -179,8 +179,8 @@ namespace WCKDRZR.Gaspar.Converters
                 if (defaultValue != "") { defaultValue = $" = {defaultValue}"; }
 
                 codingKeys.Add(member.JsonPropertyName == null ? identifier : $"{identifier} = \"{member.JsonPropertyName}\"");
-                initDecodeLines.Add($"{identifier} = try values.decode({type}.self, forKey: .{identifier})");
-                encodeLines.Add($"try container.encode({identifier}, forKey: .{identifier})");
+                initDecodeLines.Add($"{identifier} = try values.decode{(type.EndsWith("?") ? "IfPresent" : "")}({(type.EndsWith("?") ? type[..^1] : type)}.self, forKey: .{identifier})");
+                encodeLines.Add($"try container.encodeIfPresent({identifier}, forKey: .{identifier})");
                 lines.Add($"{Indent(1)}var {identifier}: {type}{defaultValue}");
             }
 
