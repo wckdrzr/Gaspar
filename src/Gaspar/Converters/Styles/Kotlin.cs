@@ -185,7 +185,7 @@ namespace WCKDRZR.Gaspar.Converters
                     if (defaultValue != "") { defaultValue = $" = {defaultValue}"; }
                 }
 
-                lines.Add($"{Indent(1)}{(lateinit ? "lateinit var" : "val")} {property}{defaultValue}");
+                lines.Add($"{Indent(1)}{(lateinit ? "lateinit var" : "var")} {property}{defaultValue}");
             }
 
             previousModelClass = model.FullName;
