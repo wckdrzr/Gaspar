@@ -249,8 +249,18 @@ namespace WCKDRZR.Gaspar.Converters
             lines.AddRange(ModelNamespace(enumModel.ParentClasses));
             lines.AddRange(FileComment(outputConfig, file));
 
-            lines.Add($"enum {enumModel.Identifier}: Codable {{");
-            lines.Add($"    case {string.Join(", ", enumModel.Values.Select(v => ConvertIdentifier(v.Key)))}");
+            if (enumModel.Values.Any(e => e.Value != null))
+            {
+                bool numeric = enumModel.Values.Any(e => double.TryParse(e.Value?.ToString(), out _));
+                lines.Add($"enum {enumModel.Identifier}: {(numeric ? "Double" : "String")}, Codable, CaseIterable {{");
+                lines.Add($"    case {string.Join(", ", enumModel.Values.Select(v => ConvertIdentifier(v.Key) + $" = {(double.TryParse(v.Value?.ToString(), out double num) ? num : $"\"{v.Value}\"")}"))}");
+            }
+            else
+            {
+                lines.Add($"enum {enumModel.Identifier}: Codable {{");
+                lines.Add($"    case {string.Join(", ", enumModel.Values.Select(v => ConvertIdentifier(v.Key)))}");
+            }
+
             lines.Add("}");
             lines.Add("");
 

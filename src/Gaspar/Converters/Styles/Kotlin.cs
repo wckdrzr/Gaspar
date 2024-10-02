@@ -219,12 +219,22 @@ namespace WCKDRZR.Gaspar.Converters
 
             lines.AddRange(ModelNamespace(enumModel.ParentClasses));
             lines.AddRange(FileComment(outputConfig, file));
+            
+            bool withValues = enumModel.Values.Any(e => e.Value != null);
+            bool numeric = enumModel.Values.Any(e => double.TryParse(e.Value?.ToString(), out _));
 
-            lines.Add($"enum class {enumModel.Identifier} {{");
+            lines.Add($"enum class {enumModel.Identifier}{(withValues ? $"(val value: {(numeric ? "Float" : "String")})" : "")} {{");
 
             foreach (KeyValuePair<string, object?> value in enumModel.Values)
             {
-                lines.Add($"    {value.Key},");
+                if (withValues)
+                {
+                    lines.Add($"    {value.Key}({(numeric ? $"{value.Value}f" : $"\"{value.Value}\"")}),");
+                }
+                else
+                {
+                    lines.Add($"    {value.Key},");
+                }
             }
             lines.Add("}");
             lines.Add("");
