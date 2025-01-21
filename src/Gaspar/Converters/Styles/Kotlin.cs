@@ -220,14 +220,18 @@ namespace WCKDRZR.Gaspar.Converters
             lines.AddRange(ModelNamespace(enumModel.ParentClasses));
             lines.AddRange(FileComment(outputConfig, file));
             
-            bool withValues = enumModel.Values.Any(e => e.Value != null);
             bool numeric = enumModel.Values.Any(e => double.TryParse(e.Value?.ToString(), out _));
+            string? valueType = enumModel.Values.Any(e => e.Value != null) ? (numeric ? "Float" : "String") : null;
 
-            lines.Add($"enum class {enumModel.Identifier}{(withValues ? $"(val value: {(numeric ? "Float" : "String")})" : "")} {{");
+            if (valueType != null)
+            {
+                lines.Add($"@Serializable(with = {enumModel.Identifier}Serializer::class)");
+            }
+            lines.Add($"enum class {enumModel.Identifier}{(valueType != null ? $"(val value: {valueType})" : "")} {{");
 
             foreach (KeyValuePair<string, object?> value in enumModel.Values)
             {
-                if (withValues)
+                if (valueType != null)
                 {
                     lines.Add($"    {value.Key}({(numeric ? $"{value.Value}f" : $"\"{value.Value}\"")}),");
                 }
@@ -237,6 +241,19 @@ namespace WCKDRZR.Gaspar.Converters
                 }
             }
             lines.Add("}");
+
+            if (valueType != null)
+            {
+                lines.Add($"object {enumModel.Identifier}Serializer : kotlinx.serialization.KSerializer<{enumModel.Identifier}> {{");
+                lines.Add($"    override val descriptor: kotlinx.serialization.descriptors.SerialDescriptor = kotlinx.serialization.descriptors.PrimitiveSerialDescriptor(\"{enumModel.Identifier}Serializer\", kotlinx.serialization.descriptors.PrimitiveKind.{valueType.ToUpper()})");
+                lines.Add($"    override fun deserialize(decoder: kotlinx.serialization.encoding.Decoder): {enumModel.Identifier} {{");
+                lines.Add($"        val v = decoder.decode{valueType}()");
+                lines.Add($"        return {enumModel.Identifier}.entries.first {{ it.value == v }}");
+                lines.Add($"    }}");
+                lines.Add($"    override fun serialize(encoder: kotlinx.serialization.encoding.Encoder, value: {enumModel.Identifier}) {{ return encoder.encodeString(value.name) }}");
+                lines.Add($"}}");
+            }
+
             lines.Add("");
 
             return lines;
