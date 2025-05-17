@@ -734,6 +734,8 @@ namespace WCKDRZR.Gaspar.Converters
         {
             if (propertyName != null)
             {
+                if (propertyName.EndsWith(" | null")) { propertyName = propertyName[..^7]; }
+
                 if (_jsonPropertyKeys.TryGetValue(propertyName, out _))
                 {
                     return $"JsonPropertyKeys.{propertyName.Replace('.', '_')}()";
