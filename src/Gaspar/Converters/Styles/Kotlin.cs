@@ -250,7 +250,7 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add($"        val v = decoder.decode{valueType}()");
                 lines.Add($"        return {enumModel.Identifier}.entries.first {{ it.value == v }}");
                 lines.Add($"    }}");
-                lines.Add($"    override fun serialize(encoder: kotlinx.serialization.encoding.Encoder, value: {enumModel.Identifier}) {{ return encoder.encodeString(value.name) }}");
+                lines.Add($"    override fun serialize(encoder: kotlinx.serialization.encoding.Encoder, value: {enumModel.Identifier}) {{ return encoder.encode{valueType}(value.value) }}");
                 lines.Add($"}}");
             }
 
