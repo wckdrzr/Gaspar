@@ -129,6 +129,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                 }).ToList(),
                 BaseClasses = baseClasses ?? new(),
                 ParentClasses = parentClasses,
+                ChildClasses = node.Members.OfType<ClassDeclarationSyntax>().ToList(),
                 Enumerations = baseClasses != null && baseClasses.Contains("Enumeration")
                                 ? node.Members.OfType<FieldDeclarationSyntax>()
                                     .Where(property => !property.AttributeLists.JsonIgnore()).ConvertEnumerations()

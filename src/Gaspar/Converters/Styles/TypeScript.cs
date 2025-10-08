@@ -208,7 +208,7 @@ namespace WCKDRZR.Gaspar.Converters
 
             foreach (Property member in model.Fields.Concat(model.Properties))
             {
-                lines.Add($"{Indent(1)}{ConvertProperty(member, outputConfig)};");
+                lines.Add($"{Indent(1)}{ConvertProperty(member, model, outputConfig)};");
             }
 
             lines.Add($"{Indent()}}}\n");
@@ -630,10 +630,16 @@ namespace WCKDRZR.Gaspar.Converters
 
 
 
-        public string ConvertProperty(Property property, ConfigurationTypeOutput outputConfig)
+        public string ConvertProperty(Property property, Model model, ConfigurationTypeOutput outputConfig)
         {
             string identifier = ConvertIdentifier(property.Identifier.Split(' ')[0]);
             string? type = property.Type != null ? ParseType(property.Type, outputConfig) : null;
+
+            string typeForChildMatch = property.Type?.EndsWith("?") == true ? property.Type[..^1] : property.Type ?? "";
+            if (model.ChildClasses.Any(c => c.Identifier.ToString() == typeForChildMatch))
+            {
+                type = $"{model.ModelName}.{type}";
+            }
 
             return $"{identifier}: {type}";
         }

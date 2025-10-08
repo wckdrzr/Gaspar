@@ -11,6 +11,7 @@ namespace WCKDRZR.Gaspar.Models
         public List<Property> Properties { get; set; } = new();
         public List<string> BaseClasses { get; set; } = new();
         public List<ClassDeclarationSyntax> ParentClasses { get; set; } = new();
+        public List<ClassDeclarationSyntax> ChildClasses { get; set; } = new();
         public Dictionary<string, object?> Enumerations { get; set; } = new();
         public bool IsInterface { get; set; } = false;
         public OutputType ExportFor { get; set; }
