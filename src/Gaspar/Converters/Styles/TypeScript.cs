@@ -7,13 +7,12 @@ using System.Text.RegularExpressions;
 using WCKDRZR.Gaspar.Extensions;
 using WCKDRZR.Gaspar.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Drawing;
 using WCKDRZR.Gaspar.Helpers;
 using WCKDRZR.Gaspar.Core;
 
 namespace WCKDRZR.Gaspar.Converters
 {
-    using KeyMap = Dictionary<string, (string k, string? m)>;
+    using KeyMap = Dictionary<string, (string? k, string? m)>;
     
     internal class TypeScriptConverter : IConverter
 	{
@@ -286,6 +285,8 @@ namespace WCKDRZR.Gaspar.Converters
         {
             List<string> lines = new();
 
+            bool hasJsonKeys = _jsonPropertyKeys.SelectMany(k => k.Value).Any();
+
             if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
             {
                 lines.Add($"import {{ ServiceErrorHandler }} from \"{outputConfig.ErrorHandlerPath}\";");
@@ -316,15 +317,20 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add($"    {TypeScriptServiceErrorMessage.Generic},");
             lines.Add($"    {TypeScriptServiceErrorMessage.ServerResponse},");
             lines.Add("}");
-            lines.Add("export type JsonPropertyKeyMap = Record<string, { k: string, m?: JsonPropertyKeyMap }>;");
+            if (hasJsonKeys) {
+                lines.Add("export type JsonPropertyKeyMap = Record<string, { k?: string, m?: JsonPropertyKeyMap }>;");
+            }
 
+            string returnKeyMapParameter = hasJsonKeys ? "returnKeyMap: JsonPropertyKeyMap | null" : "_: null";
             lines.Add("export class GasparServiceHelper {");
-            lines.Add("    async fetch<T>(url: string, options: RequestInit, responseIsString: boolean, returnKeyMap: JsonPropertyKeyMap | null, showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
+            lines.Add("    async fetch<T>(url: string, options: RequestInit, responseIsString: boolean, " + returnKeyMapParameter + ", showError: ServiceErrorMessage): Promise<ServiceResponse<T>> {");
             lines.Add("        return fetch(url, options).then(async response => {");
             lines.Add("            if (response.ok) {");
             lines.Add("                try {");
             lines.Add("                    let data = await (responseIsString ? (response.status == 200 ? response.text() : null) : response.json());");
-            lines.Add("                    if (returnKeyMap) { data = JsonPropertyKeys.fromJson(data, returnKeyMap); }");
+            if (hasJsonKeys) {
+                lines.Add("                    if (returnKeyMap) { data = JsonPropertyKeys.fromJson(data, returnKeyMap); }");
+            }
             lines.Add("                    return new ServiceResponse<T>(data, null);");
             lines.Add("                } catch {}");
             lines.Add("            }");
@@ -358,12 +364,12 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("    }");
             lines.Add("}");
 
-            if (_jsonPropertyKeys.Any())
+            if (hasJsonKeys)
             {
                 lines.Add("export namespace JsonPropertyKeys {");
                 foreach (var propertyKey in _jsonPropertyKeys)
                 {
-                    string keys = string.Join(", ", propertyKey.Value.Select(k => $"'{ConvertIdentifier(k.Key)}': {{ k: '{k.Value.k}'{(k.Value.m != null ? $", m: JsonPropertyKeys.{k.Value.m}()" : "")} }}"));
+                    string keys = string.Join(", ", propertyKey.Value.Select(k => $"'{ConvertIdentifier(k.Key)}': {{ {(k.Value.k != null ? $"k: '{k.Value.k}'" : "")}{(k.Value.k != null && k.Value.m != null ? ", " : "")}{(k.Value.m != null ? $"m: JsonPropertyKeys.{k.Value.m}()" : "")} }}"));
                     lines.Add($"    export function {propertyKey.Key.Replace(".", "_")}(): JsonPropertyKeyMap {{ return {{ {keys} }} }}");
                 }
                 lines.Add("");
@@ -381,8 +387,8 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("            let workingObj = {...obj} as any");
                 lines.Add("            Object.keys(map).forEach(key => {");
                 lines.Add("                if (workingObj[key] !== undefined) {");
-                lines.Add("                    workingObj[map[key].k] = map[key].m ? toJson(workingObj[key], map[key].m!) : workingObj[key]");
-                lines.Add("                    if (key != map[key].k) {");
+                lines.Add("                    workingObj[map[key].k ?? key] = map[key].m ? toJson(workingObj[key], map[key].m!) : workingObj[key]");
+                lines.Add("                    if (map[key].k && key != map[key].k) {");
                 lines.Add("                        delete workingObj[key]");
                 lines.Add("                    }");
                 lines.Add("                }");
@@ -403,10 +409,10 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add("        } else {");
                 lines.Add("            let workingObj = {...obj} as any");
                 lines.Add("            Object.keys(map).forEach(key => {");
-                lines.Add("                if (workingObj[map[key].k] !== undefined) {");
-                lines.Add("                    workingObj[key] = map[key].m ? fromJson(workingObj[map[key].k], map[key].m!) : workingObj[map[key].k]");
-                lines.Add("                    if (key != map[key].k) {");
-                lines.Add("                        delete workingObj[map[key].k]");
+                lines.Add("                if (workingObj[map[key].k ?? key] !== undefined) {");
+                lines.Add("                    workingObj[key] = map[key].m ? fromJson(workingObj[map[key].k ?? key], map[key].m!) : workingObj[map[key].k ?? key]");
+                lines.Add("                    if (map[key].k && key != map[key].k) {");
+                lines.Add("                        delete workingObj[map[key].k ?? key]");
                 lines.Add("                    }");
                 lines.Add("                }");
                 lines.Add("            })");
@@ -747,21 +753,21 @@ namespace WCKDRZR.Gaspar.Converters
 
         private void GetJsonPropertyKeys(Model model, List<Model> allModels, ConfigurationTypeOutput outputConfig, ref KeyMap jsonKeys)
         {
-            foreach (Property property in model.Properties)
+            if (model.ExportFor.HasFlag(OutputType.TypeScript))
             {
-                if (property.JsonPropertyName != null)
+                foreach (Property property in model.Properties)
                 {
                     string type = ParseType(property.Type?.ToString() ?? "", outputConfig, false);
                     if (type.EndsWith("[]")) { type = type[..^2]; }
-                    jsonKeys.Add(property.Identifier, ( property.JsonPropertyName, type ));
+                    jsonKeys.TryAdd(property.Identifier, ( property.JsonPropertyName, type ));
                 }
-            }
-            foreach (string baseClass in model.BaseClasses)
-            {
-                Model? baseClassModel = allModels.FirstOrDefault(m => m.FullName == baseClass);
-                if (baseClassModel != null)
+                foreach (string baseClass in model.BaseClasses)
                 {
-                    GetJsonPropertyKeys(baseClassModel, allModels, outputConfig, ref jsonKeys);
+                    Model? baseClassModel = allModels.FirstOrDefault(m => m.FullName == baseClass);
+                    if (baseClassModel != null)
+                    {
+                        GetJsonPropertyKeys(baseClassModel, allModels, outputConfig, ref jsonKeys);
+                    }
                 }
             }
         }
@@ -772,7 +778,7 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 foreach (string propertyKey in _jsonPropertyKeys[mapKey].Keys)
                 {
-                    string key = _jsonPropertyKeys[mapKey][propertyKey].k;
+                    string? key = _jsonPropertyKeys[mapKey][propertyKey].k;
                     string? type = _jsonPropertyKeys[mapKey][propertyKey].m;
 
                     string qualifiedType = string.Join('.', mapKey.Split('.')[..^1]) + '.' + type;
@@ -788,6 +794,21 @@ namespace WCKDRZR.Gaspar.Converters
                     if (matchingJsonKey != null) { matchingJsonKey = matchingJsonKey.Replace(".", "_"); }
                     
                     _jsonPropertyKeys[mapKey][propertyKey] = (key, matchingJsonKey);
+                }
+            }
+
+            //Remove keys that have a matching name and no type
+            foreach (string mapKey in _jsonPropertyKeys.Keys)
+            {
+                foreach (string propertyKey in _jsonPropertyKeys[mapKey].Keys)
+                {
+                    string? key = _jsonPropertyKeys[mapKey][propertyKey].k;
+                    string? type = _jsonPropertyKeys[mapKey][propertyKey].m;
+
+                    if (key == null && type == null)
+                    {
+                        _jsonPropertyKeys[mapKey].Remove(propertyKey);
+                    }
                 }
             }
         }
