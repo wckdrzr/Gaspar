@@ -165,7 +165,7 @@ namespace WCKDRZR.Gaspar.Converters
             return lines;
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file, CSharpFiles allFiles)
         {
             List<string> lines = new();
 

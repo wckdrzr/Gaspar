@@ -207,7 +207,7 @@ namespace WCKDRZR.Gaspar.Converters
             throw new NotImplementedException();
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file, CSharpFiles allFiles)
         {
             throw new NotImplementedException();
         }

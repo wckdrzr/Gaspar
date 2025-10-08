@@ -10,6 +10,8 @@ namespace WCKDRZR.Gaspar.Models
     {
         List<CSharpFile> Files { get; set; }
 
+        public List<EnumModel> EnumsForType(OutputType type) => Files.SelectMany(f => f.Enums.Where(a => a.ExportFor.HasFlag(type))).ToList();
+
         public CSharpFiles()
         {
             Files = new();

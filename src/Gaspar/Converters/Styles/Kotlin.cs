@@ -126,12 +126,14 @@ namespace WCKDRZR.Gaspar.Converters
             return lines;
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file, CSharpFiles allFiles)
         {
             List<string> lines = new();
 
             lines.AddRange(ModelNamespace(model.ParentClasses));
             lines.AddRange(FileComment(outputConfig, file));
+
+            List<EnumModel> allEnums = allFiles.EnumsForType(OutputType.Kotlin);
 
             if (model.Enumerations.Count > 0)
             {
@@ -177,11 +179,11 @@ namespace WCKDRZR.Gaspar.Converters
                 }
                 
                 string property = ConvertProperty(member, outputConfig);
-                bool lateinit = LateInit(member, outputConfig);
+                bool lateinit = LateInit(member, outputConfig, allEnums);
                 string defaultValue = "";
                 if (!lateinit || member.DefaultValue != null)
                 {
-                    defaultValue = property.EndsWith('?') ? "null" : DefaultValue(member, outputConfig);
+                    defaultValue = property.EndsWith('?') ? "null" : DefaultValue(member, outputConfig, allEnums);
                     if (defaultValue != "") { defaultValue = $" = {defaultValue}"; }
                 }
 
@@ -384,7 +386,7 @@ namespace WCKDRZR.Gaspar.Converters
             return type;
         }
 
-        private bool LateInit(Property property, ConfigurationTypeOutput outputConfig)
+        private bool LateInit(Property property, ConfigurationTypeOutput outputConfig, List<EnumModel> allEnums)
         {
             if (property.DefaultValue != null && !property.DefaultValue.StartsWith("new") && property.DefaultValue != "[]")
             {
@@ -400,17 +402,27 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 return false;
             }
+            if (allEnums.FirstOrDefault(e => e.Identifier == type) != null)
+            {
+                return false;
+            }
             return true;
         }
 
-        private string DefaultValue(Property property, ConfigurationTypeOutput outputConfig)
+        private string DefaultValue(Property property, ConfigurationTypeOutput outputConfig, List<EnumModel> allEnums)
         {
+            string? type = property.Type != null ? ParseType(property.Type, outputConfig) : "";
             if (property.DefaultValue != null && !property.DefaultValue.StartsWith("new") && property.DefaultValue != "[]" && !property.DefaultValue.EndsWith("()"))
             {
                 return property.DefaultValue;
             }
 
-            string? type = property.Type != null ? ParseType(property.Type, outputConfig) : null;
+            EnumModel? matchingEnum = allEnums.FirstOrDefault(e => e.Identifier == type);
+            if (matchingEnum != null && matchingEnum.Values.Count > 0)
+            {
+                return $"{matchingEnum.Identifier}.{matchingEnum.Values.First().Key}";
+            }
+
             switch (type)
             {
                 case "String": return "\"\"";

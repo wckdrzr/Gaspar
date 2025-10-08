@@ -39,9 +39,9 @@ namespace WCKDRZR.Gaspar.Converters
             return new();
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file, CSharpFiles allFiles)
         {
-            return TypeScriptConverter.ConvertModel(model, outputConfig, file);
+            return TypeScriptConverter.ConvertModel(model, outputConfig, file, allFiles);
         }
 
         public List<string> ConvertEnum(EnumModel enumModel, ConfigurationTypeOutput outputConfig, CSharpFile file)

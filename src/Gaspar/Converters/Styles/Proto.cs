@@ -85,19 +85,19 @@ namespace WCKDRZR.Gaspar.Converters
             return new();
         }
 
-        public List<string> ConvertModels(List<Model> models, ConfigurationTypeOutput outputConfig, CSharpFile file)
+        public List<string> ConvertModels(List<Model> models, ConfigurationTypeOutput outputConfig, CSharpFile file, CSharpFiles allFiles)
         {
             // lines to return for building the .proto file
             List<string> lines = new List<string>();
 
             foreach (Model model in models)
             {
-                lines.AddRange(ConvertModel(model, outputConfig, file));
+                lines.AddRange(ConvertModel(model, outputConfig, file, allFiles));
             }
             return lines;
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file, CSharpFiles allFiles)
         {
             List<string> lines = new();
 

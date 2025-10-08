@@ -125,12 +125,14 @@ namespace WCKDRZR.Gaspar.Converters
             return lines;
         }
 
-        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file)
+        public List<string> ConvertModel(Model model, ConfigurationTypeOutput outputConfig, CSharpFile file, CSharpFiles allFiles)
         {
             List<string> lines = new();
 
             lines.AddRange(ModelNamespace(model.ParentClasses));
             lines.AddRange(FileComment(outputConfig, file));
+
+            List<EnumModel> allEnums = allFiles.EnumsForType(OutputType.Swift);
 
             if (model.Enumerations.Count > 0)
             {
@@ -175,7 +177,7 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 string identifier = ConvertIdentifier(member.Identifier.Split(' ')[0]);
                 string? type = member.Type != null ? ParseType(member.Type, outputConfig) : "";
-                string defaultValue = type.EndsWith('?') ? "nil" : DefaultValue(member, outputConfig);
+                string defaultValue = type.EndsWith('?') ? "nil" : DefaultValue(member, outputConfig, allEnums);
                 if (defaultValue != "") { defaultValue = $" = {defaultValue}"; }
 
                 codingKeys.Add(member.JsonPropertyName == null ? identifier : $"{identifier} = \"{member.JsonPropertyName}\"");
@@ -384,7 +386,7 @@ namespace WCKDRZR.Gaspar.Converters
             return type;
         }
 
-        private string DefaultValue(Property property, ConfigurationTypeOutput outputConfig)
+        private string DefaultValue(Property property, ConfigurationTypeOutput outputConfig, List<EnumModel> allEnums)
         {
             string type = property.Type != null ? ParseType(property.Type, outputConfig) : "";
             bool nullable = type.EndsWith("?");
@@ -395,6 +397,12 @@ namespace WCKDRZR.Gaspar.Converters
                 {
                     return property.DefaultValue;
                 }
+            }
+
+            EnumModel? matchingEnum = allEnums.FirstOrDefault(e => e.Identifier == type);
+            if (matchingEnum != null && matchingEnum.Values.Count > 0)
+            {
+                return $"{matchingEnum.Identifier}.{ConvertIdentifier(matchingEnum.Values.First().Key)}";
             }
 
             switch (type)
