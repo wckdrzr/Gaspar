@@ -551,7 +551,7 @@ namespace WCKDRZR.Gaspar.Converters
                         url = $"`{url}`";
                     }
 
-                    Dictionary<string, string> requestOptions = [];
+                    Dictionary<string, string> requestOptions = new();
                     List<string> formParams = new();
                     List<string> headerParams = new();
 
@@ -596,7 +596,7 @@ namespace WCKDRZR.Gaspar.Converters
 
                     foreach (KeyValuePair<string, string> requestOption in outputConfig.FetchRequestOptions)
                     {
-                        List<string> noneStringValues = ["true", "false", "null"];
+                        List<string> noneStringValues = new() { "true", "false", "null" };
                         string value = noneStringValues.Contains(requestOption.Value) || requestOption.Value.StartsWith("{") ? requestOption.Value : $"'{requestOption.Value}'";
                         requestOptions.Add(requestOption.Key, value);
                     }
