@@ -72,6 +72,7 @@ namespace WCKDRZR.Gaspar.Models
 
         //For TypeScript Controllers
         public Dictionary<string, string> SharedModelFiles { get; set; } = new();
+        public Dictionary<string, string> FetchRequestOptions { get; set; } = new();
 
         //For Ocelot Controllers
         public List<string> DefaultScopes { get; set; } = new();

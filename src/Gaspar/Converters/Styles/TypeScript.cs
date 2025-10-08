@@ -551,23 +551,26 @@ namespace WCKDRZR.Gaspar.Converters
                         url = $"`{url}`";
                     }
 
-                    string bodyParam = "";
+                    Dictionary<string, string> requestOptions = [];
                     List<string> formParams = new();
                     List<string> headerParams = new();
 
                     string httpMethod = action.HttpMethod.ToUpper();
+                    requestOptions.Add("method", $"'{httpMethod}'");
+
                     if (httpMethod == "POST" || httpMethod == "PUT" || httpMethod == "DELETE")
                     {
                         Parameter? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body);
                         if (bodyParameter != null)
                         {
-                            bodyParam = $", body: JSON.stringify({bodyParameter.Identifier}), headers: {{ 'Content-Type': 'application/json' }}";
+                            requestOptions.Add("body", $"JSON.stringify({bodyParameter.Identifier})");
+                            requestOptions.Add("headers", "{ 'Content-Type': 'application/json' }");
                         }
                         IEnumerable<Parameter> formParameters = action.Parameters.Where(p => p.Source == ParameterSource.Form);
                         if (formParameters.Any())
                         {
                             formParams.Add("let data = new FormData()");
-                            bodyParam = ", body: data";
+                            requestOptions.Add("body", "data");
                             foreach (Parameter parameter in formParameters)
                             {
                                 string value = $"JSON.stringify({parameter.Identifier})";
@@ -584,13 +587,20 @@ namespace WCKDRZR.Gaspar.Converters
                     if (headerParameters.Any() || action.Headers != null)
                     {
                         headerParams.Add($"let headersToSend: Record<string, string> = {(action.Headers == null ? "{}" : "headers")}");
-                        bodyParam += ", headers: headersToSend";
+                        requestOptions.Add("headers", "headersToSend");
                         foreach (Parameter parameter in headerParameters)
                         {
                             headerParams.Add($"if ({parameter.Identifier}) {{ headersToSend['{parameter.Identifier}'] = {parameter.Identifier}.toString(); }}");
                         }
                     }
 
+                    foreach (KeyValuePair<string, string> requestOption in outputConfig.FetchRequestOptions)
+                    {
+                        List<string> noneStringValues = ["true", "false", "null"];
+                        string value = noneStringValues.Contains(requestOption.Value) || requestOption.Value.StartsWith("{") ? requestOption.Value : $"'{requestOption.Value}'";
+                        requestOptions.Add(requestOption.Key, value);
+                    }
+                    
                     string returnType = ParseType(action.ReturnTypeOverride ?? action.ReturnType?.ToString() ?? "null", outputConfig);
 
                     string returnTypeIsString = returnType == "string" || returnType.StartsWith("string |") ? "true" : "false";
@@ -601,7 +611,7 @@ namespace WCKDRZR.Gaspar.Converters
                     lines.AddRange(parameterKeyMaps.Select(m => $"            {m}"));
                     lines.AddRange(formParams.Select(f => $"            {f}"));
                     lines.AddRange(headerParams.Select(f => $"            {f}"));
-                    lines.Add($"            return new GasparServiceHelper().fetch({url}, {{ method: '{httpMethod}'{bodyParam} }}, {returnTypeIsString}, {returnKeyMap}, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")});");
+                    lines.Add($"            return new GasparServiceHelper().fetch({url}, {{ {string.Join(", ", requestOptions.Select(kvp => $"{kvp.Key}: {kvp.Value}"))} }}, {returnTypeIsString}, {returnKeyMap}, {(string.IsNullOrEmpty(outputConfig.ErrorHandlerPath) ? "ServiceErrorMessage.None" : "showError")});");
                     lines.Add($"        }}");
                 }
             }

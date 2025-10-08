@@ -592,6 +592,15 @@ For TypeScript Controllers
   }
   ```
 
+- **FetchRequestOptions**    `Dictionary<string, string>`    A list values to add to the fetch options.  Any values of `RequestInit`, for example:
+  
+  ```json
+  "FetchRequestOptions": {
+      "credentials": "include",
+      "keepAlive": "true"
+  }
+  ```
+
 For Python Controllers
 
 - **Imports**    `Dictionary<string, string>`    List of imports to include at the top of your exported Service Communication class.  Will be written in the form
