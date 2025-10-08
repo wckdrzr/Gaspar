@@ -70,6 +70,9 @@ namespace WCKDRZR.Gaspar.Models
         //For TypeScript/Angular/Python Controllers
         public Dictionary<string, string> Imports { get; set; } = new();
 
+        //For TypeScript Controllers
+        public Dictionary<string, string> SharedModelFiles { get; set; } = new();
+
         //For Ocelot Controllers
         public List<string> DefaultScopes { get; set; } = new();
         public Dictionary<string, string[]> ScopesByHttpMethod { get; set; } = new();

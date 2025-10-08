@@ -84,7 +84,24 @@ namespace WCKDRZR.Gaspar.Models
             }
         }
 
-        public List<string> CustomTypes(OutputType forOutputType, bool allTypes)
+        public List<string> CustomModelTypes()
+        {
+            List<string> types = new();
+
+            foreach (CSharpFile file in Files)
+            {
+                file.Models.ForEach(m => AddUniqueCustomType(ref types, m.FullName));
+                foreach (var model in file.Models)
+                {
+                    model.Properties.ForEach(p => AddUniqueCustomType(ref types, p.Type));
+                    model.Fields.ForEach(f => AddUniqueCustomType(ref types, f.Type));
+                }
+            }
+
+            return types;
+        }
+
+        public List<string> CustomControllerTypes(OutputType forOutputType, bool allTypes)
         {
             List<string> types = new();
 

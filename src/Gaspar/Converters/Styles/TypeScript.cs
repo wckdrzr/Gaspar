@@ -9,6 +9,7 @@ using WCKDRZR.Gaspar.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Drawing;
 using WCKDRZR.Gaspar.Helpers;
+using WCKDRZR.Gaspar.Core;
 
 namespace WCKDRZR.Gaspar.Converters
 {
@@ -18,6 +19,8 @@ namespace WCKDRZR.Gaspar.Converters
 	{
         public Configuration Config { get; set; }
         public string CurrentFile { get; set; } = "";
+
+        private Dictionary<string, List<string>> _sharedModelFiles = new();
         
         private List<string> currentNamespace = new();
         private int currentIndent = 0;
@@ -66,16 +69,34 @@ namespace WCKDRZR.Gaspar.Converters
         {
             Config = config;
 
-            if (config.Models != null)
+            ConfigurationTypeOutput modelOutputConfig = config.Models == null
+                ? new() { Type = OutputType.TypeScript, Location = "" }
+                : config.Models.Output.FirstOrDefault(c => c.Type == OutputType.TypeScript) ?? config.Models.Output[0];
+            ConfigurationTypeOutput controllerOutputConfig = config.Controllers == null
+                ? new() { Type = OutputType.TypeScript, Location = "" }
+                : config.Controllers.Output.FirstOrDefault(c => c.Type == OutputType.TypeScript) ?? config.Controllers.Output[0];
+            
+            foreach (KeyValuePair<string, string> sharedModel in controllerOutputConfig.SharedModelFiles)
             {
-                foreach (Model model in allModels)
+                List<string> modelFiles = FileHelper.ExpandGlobPatterns(new() { sharedModel.Key });
+                CSharpFiles files = new();
+                foreach (string fileName in modelFiles)
                 {
-                    KeyMap jsonKeys = new();
-                    GetJsonPropertyKeys(model, allModels, config.Models.Output.FirstOrDefault(c => c.Type == OutputType.TypeScript) ?? config.Models.Output[0], ref jsonKeys);
-                    if (jsonKeys.Any()) { _jsonPropertyKeys.Add(model.FullName, jsonKeys); }
+                    files.Add(Exporter.ParseModels(fileName, config));
+                    Exporter.FullyQualifyNestedClassTypes(ref files);
                 }
-                AddPropertyMapsToJsonPropertyKeys();
+                
+                _sharedModelFiles.Add(sharedModel.Value, files.CustomModelTypes());
+                allModels = allModels.Concat(files.ToList().SelectMany(f => f.Models).ToList()).ToList();
             }
+            
+            foreach (Model model in allModels)
+            {
+                KeyMap jsonKeys = new();
+                GetJsonPropertyKeys(model, allModels, modelOutputConfig, ref jsonKeys);
+                if (jsonKeys.Any()) { _jsonPropertyKeys.Add(model.FullName, jsonKeys); }
+            }
+            AddPropertyMapsToJsonPropertyKeys();
         }
 
         public string Comment(string comment, int followingBlankLines = 0)
@@ -96,7 +117,18 @@ namespace WCKDRZR.Gaspar.Converters
 
         public List<string> ModelHeader(ConfigurationTypeOutput outputConfig)
         {
-            return new();
+            List<string> lines = new();
+
+            foreach (string key in outputConfig.Imports.Keys)
+            {
+                lines.Add($"import {{ {key} }} from \"{outputConfig.Imports[key]}\";");
+            }
+            if (lines.Count > 0)
+            {
+                lines.Add("");
+            }
+
+            return lines;
         }
 
         public List<string> ModelNamespace(List<ClassDeclarationSyntax> parentClasses)
@@ -394,15 +426,27 @@ namespace WCKDRZR.Gaspar.Converters
             List<string> parsedCustomTypes = new();
             foreach (string type in customTypes)
             {
-                List<string> disallowList = new() { "string", "object", "any", "File" };
+                List<string> disallowList = new() { "string", "object", "any", "File", "number" };
+                List<string> disallowStartsList = new() { "Record<" };
                 string parsed = ParseType(type, outputConfig, allowAddNull: false);
-                if (!parsedCustomTypes.Contains(parsed) && !disallowList.Contains(parsed))
+                if (!parsedCustomTypes.Contains(parsed) && !disallowList.Contains(parsed) && !disallowStartsList.Any(p => parsed.StartsWith(p)))
                 {
                     parsedCustomTypes.Add(parsed);
                 }
             }
 
-            lines.Add($"import {{ {string.Join(", ", parsedCustomTypes.Except(outputConfig.Imports.Keys))} }} from \"{outputConfig.ModelPath}\";");
+            List<string> importedKeys = outputConfig.Imports.Keys.SelectMany(k => k.Split(",")).Select(k => k.Trim()).ToList();
+
+            List<string> sharedModelTypes = new();
+            foreach (KeyValuePair<string, List<string>> file in _sharedModelFiles)
+            {   
+                List<string> parsedSharedTypes = parsedCustomTypes.Where(t => file.Value.Contains(t)).Except(importedKeys).ToList();
+                lines.Add($"import {{ {string.Join(", ", parsedSharedTypes)} }} from \"{file.Key}\";");
+
+                sharedModelTypes.AddRange(parsedSharedTypes);
+            }
+            
+            lines.Add($"import {{ {string.Join(", ", parsedCustomTypes.Except(importedKeys).Except(sharedModelTypes))} }} from \"{outputConfig.ModelPath}\";");
             foreach (string key in outputConfig.Imports.Keys)
             {
                 lines.Add($"import {{ {key} }} from \"{outputConfig.Imports[key]}\";");

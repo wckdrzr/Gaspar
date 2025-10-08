@@ -582,9 +582,17 @@ For TypeScript and Angular controllers (all optional):
   import { key } from "value";
   ```
 
-For Python controllers (all optional):
+For TypeScript Controllers
 
-- **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests. This is the name of the file that should be exported. If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
+- **SharedModelFiles**    `Dictionary<string, string>`    A list of additional model directories required to support the exported controllers.  If you have a shared library with exported models, not exported from the current project, you can add them here.  Added as a list of glob file directories and path to exported TypeScript file.  Add them as follows:
+  
+  ```json
+  "SharedModelFiles": {
+      "./MyLibrary/**/*.cs": "../shared_scripts/CSharpModels.gaspar"
+  }
+  ```
+
+For Python Controllers
 
 - **Imports**    `Dictionary<string, string>`    List of imports to include at the top of your exported Service Communication class.  Will be written in the form
   
@@ -664,7 +672,7 @@ There are a number of convenience overrides for this, you will see the `ExportsF
 
 This is where the power of `ExportsFor` really kicks in!
 
-If you only export some of your model to a given platform, or exclude properties from the export, the model will only contain what you select (of course), however your actually exported data will include the values.  So you target language won't be able to access the properties, but they can be read by anyone looking at the api.  For example, take this class:
+If you only export some of your model to a given platform, or exclude properties from the export, the model will only contain what you select (of course), however your actually exported data will include the values.  So your target language won't be able to access the properties, but they can be read by anyone looking at the api.  For example, take this class:
 
 ```csharp
 [ExportFor(GasparType.TypeScript)]

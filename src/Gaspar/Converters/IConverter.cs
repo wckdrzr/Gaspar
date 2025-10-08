@@ -139,7 +139,7 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.AddRange(OutputHeader.Controllers(converter, outputConfig, outputConfig.Location));
 
                 files.DeDuplicateControllerAndActionNames(outputConfig.Type, _allTypes, _config.Controllers.ServiceName);
-                lines.AddRange(converter.ControllerHeader(outputConfig, files.CustomTypes(outputConfig.Type, _allTypes)));
+                lines.AddRange(converter.ControllerHeader(outputConfig, files.CustomControllerTypes(outputConfig.Type, _allTypes)));
 
                 int actionCount = 0;
                 int fileIterator = 0;

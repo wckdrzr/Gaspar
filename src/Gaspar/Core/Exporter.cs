@@ -39,21 +39,7 @@ namespace WCKDRZR.Gaspar.Core
                 {
                     files.Add(ParseModels(fileName, config));
                 }
-
-                //Fully qualify nested class types
-                foreach (CSharpFile file in files) { foreach (Model model in file.Models) { foreach (Property property in model.Properties)
-                {
-                    if (!property.Identifier.Contains('.'))
-                    {
-                        foreach (CSharpFile innerFile in files) { foreach (Model innerModel in innerFile.Models)
-                        {
-                                if ($"{model.FullName}.{property.Type}" == innerModel.FullName)
-                                {
-                                    property.Type = $"{model.FullName}.{property.Type}";
-                                }
-                        } }
-                    }
-                } } }
+                FullyQualifyNestedClassTypes(ref files);
 
                 foreach (ConfigurationTypeOutput output in config.Models.Output)
                 {
@@ -96,7 +82,7 @@ namespace WCKDRZR.Gaspar.Core
             }
         }
 
-        private static CSharpFile ParseModels(string path, Configuration config)
+        public static CSharpFile ParseModels(string path, Configuration config)
         {
             CompilationUnitSyntax root = RootAtPath(path);
 
@@ -113,6 +99,23 @@ namespace WCKDRZR.Gaspar.Core
                 Enums = enumCollector.Enums,
                 Controllers = new()
             };
+        }
+
+        public static void FullyQualifyNestedClassTypes(ref CSharpFiles files)
+        {
+            foreach (CSharpFile file in files) { foreach (Model model in file.Models) { foreach (Property property in model.Properties)
+            {
+                if (!property.Identifier.Contains('.'))
+                {
+                    foreach (CSharpFile innerFile in files) { foreach (Model innerModel in innerFile.Models)
+                    {
+                            if ($"{model.FullName}.{property.Type}" == innerModel.FullName)
+                            {
+                                property.Type = $"{model.FullName}.{property.Type}";
+                            }
+                    } }
+                }
+            } } }
         }
 
         private static CSharpFile ParseControllers(string path, Configuration config)
