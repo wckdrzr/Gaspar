@@ -50,6 +50,7 @@ namespace WCKDRZR.Gaspar.Converters
             { "ContentResult", "string" },
             { "JsonResult", "object" },
             { "IFormFile", "File" },
+            { "RouteValueDictionary", "string" },
         };
         public Dictionary<string, string> TypeScriptTypeTranslations => Config.TypeTranslations != null && Config.TypeTranslations.ContainsKey(OutputType.TypeScript.ToString()) ? Config.TypeTranslations[OutputType.TypeScript.ToString()] : new();
         public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(TypeScriptTypeTranslations).Union(Config.GlobalTypeTranslations ?? new()).ToDictionary(k => k.Key, v => v.Value);
@@ -441,12 +442,19 @@ namespace WCKDRZR.Gaspar.Converters
             foreach (KeyValuePair<string, List<string>> file in _sharedModelFiles)
             {   
                 List<string> parsedSharedTypes = parsedCustomTypes.Where(t => file.Value.Contains(t)).Except(importedKeys).ToList();
-                lines.Add($"import {{ {string.Join(", ", parsedSharedTypes)} }} from \"{file.Key}\";");
+                if (parsedSharedTypes.Count > 0)
+                {
+                    lines.Add($"import {{ {string.Join(", ", parsedSharedTypes)} }} from \"{file.Key}\";");
+                }
 
                 sharedModelTypes.AddRange(parsedSharedTypes);
             }
             
-            lines.Add($"import {{ {string.Join(", ", parsedCustomTypes.Except(importedKeys).Except(sharedModelTypes))} }} from \"{outputConfig.ModelPath}\";");
+            List<string> localTypes = parsedCustomTypes.Except(importedKeys).Except(sharedModelTypes).ToList();
+            if (localTypes.Count > 0)
+            {
+                lines.Add($"import {{ {string.Join(", ", localTypes)} }} from \"{outputConfig.ModelPath}\";");
+            }
             foreach (string key in outputConfig.Imports.Keys)
             {
                 lines.Add($"import {{ {key} }} from \"{outputConfig.Imports[key]}\";");

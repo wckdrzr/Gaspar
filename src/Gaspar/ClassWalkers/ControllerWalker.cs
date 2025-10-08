@@ -69,9 +69,10 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                         if (argument != null)
                         {
                             action.Route = argument.ToString()[1..^1].Replace("?", "");
-                            action.Route = action.Route.Replace(("[controller]"), controller.ControllerName);
-                            action.Route = action.Route.Replace(("[action]"), action.ActionName);
+                            action.Route = action.Route.Replace("[controller]", controller.ControllerName);
+                            action.Route = action.Route.Replace("[action]", action.ActionName);
                             action.Route = Regex.Replace(action.Route, "({.*?)(:.*?)}", "$1}");
+                            action.Route = Regex.Replace(action.Route, "{[*]{1,2}", "{");
                         }
                     }
                     if (action.Route == null)
@@ -101,6 +102,9 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     action.Timeout = node.AttributeLists.IntAttributeValue(nameof(options.Timeout)) ?? nodeClassTimeout;
 
                     List<string> routeParameters = Regex.Matches(action.Route, "{(.*?)}").Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+                    if (routeParameters.LastOrDefault()?.StartsWith("**") == true) { routeParameters[routeParameters.Count - 1] = routeParameters.Last()[2..]; }
+                    if (routeParameters.LastOrDefault()?.StartsWith("*") == true) { routeParameters[routeParameters.Count - 1] = routeParameters.Last()[1..]; }
+
                     foreach (ParameterSyntax parameter in node.ParameterList.Parameters)
                     {
                         ParameterSource source = parameter.AttributeLists.GetParameterSource();
