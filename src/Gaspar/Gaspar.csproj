@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
 
     <Title>Gaspar</Title>
     <Authors>Ben Robinson</Authors>
     <Description>Consumes your C# domain models, types and controllers and exports them for other services and languages to consume</Description>
     <PackageId>WckdRzr.Gaspar</PackageId>
-    <Version>3.4.4</Version>
+    <Version>3.4.5</Version>
 
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
