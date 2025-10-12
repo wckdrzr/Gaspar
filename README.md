@@ -530,7 +530,7 @@ For TypeScript and Angular models and controllers (all optional)
   
   In short, if your C# project doesn't enable "nullable annotation context", set this to true.
 
-- **NullablesAlsoUndefinded**    `bool: default false`    If set to true, all nullable properties (those exported with `| null`) will additional have `| undefined` added to the type.
+- **NullablesAlsoUndefined**    `bool: default false`    If set to true, all nullable properties (those exported with `| null`) will additional have `| undefined` added to the type.
 
 For TypeScript and Angular controllers (all optional):
 
