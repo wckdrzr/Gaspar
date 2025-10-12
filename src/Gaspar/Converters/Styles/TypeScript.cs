@@ -372,7 +372,7 @@ namespace WCKDRZR.Gaspar.Converters
                     string keys = string.Join(", ", propertyKey.Value.Select(k => $"'{ConvertIdentifier(k.Key)}': {{ {(k.Value.k != null ? $"k: '{k.Value.k}'" : "")}{(k.Value.k != null && k.Value.m != null ? ", " : "")}{(k.Value.m != null ? $"m: JsonPropertyKeys.{k.Value.m}()" : "")} }}"));
                     lines.Add($"    export function {propertyKey.Key.Replace(".", "_")}(): JsonPropertyKeyMap {{ return {{ {keys} }} }}");
                 }
-                lines.Add("");
+                lines.Add("    ");
                 lines.Add("    export function toJson<T>(obj: T, map: JsonPropertyKeyMap): T {");
                 lines.Add("        if (obj === null) {");
                 lines.Add("            return obj");
@@ -797,6 +797,10 @@ namespace WCKDRZR.Gaspar.Converters
                     {
                         matchingJsonKey = _jsonPropertyKeys.FirstOrDefault(k => k.Key == type).Key;
                     }
+                    if (matchingJsonKey == null)
+                    {
+                        matchingJsonKey = _jsonPropertyKeys.FirstOrDefault(k => k.Key == type?.Replace("_", ".")).Key;
+                    }
                     if (matchingJsonKey != null) { matchingJsonKey = matchingJsonKey.Replace(".", "_"); }
                     
                     _jsonPropertyKeys[mapKey][propertyKey] = (key, matchingJsonKey);
@@ -816,6 +820,16 @@ namespace WCKDRZR.Gaspar.Converters
                         _jsonPropertyKeys[mapKey].Remove(propertyKey);
                     }
                 }
+            }
+
+            var emptyKeys = _jsonPropertyKeys.Where(v => v.Value.Count == 0);
+            if (emptyKeys.Count() > 0)
+            {
+                foreach (var key in emptyKeys)
+                {
+                    _jsonPropertyKeys.Remove(key.Key);
+                }
+                AddPropertyMapsToJsonPropertyKeys();
             }
         }
 
