@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -12,12 +11,12 @@ namespace WCKDRZR.Gaspar
 {
     public static class ServiceClient
     {
-        public static async Task<ServiceResponse> FetchVoidAsync(HttpMethod method, string url, dynamic body, Dictionary<string, string> headers, TimeSpan? timeout, Type logReceiver, Type serializer)
+        public static async Task<ServiceResponse> FetchVoidAsync(HttpMethod method, string url, dynamic? body, Dictionary<string, string>? headers, TimeSpan? timeout, Type? logReceiver, Type? serializer)
         {
             return await FetchAsync<VoidObject>(method, url, body, headers, timeout, logReceiver, serializer);
         }
 
-        public static async Task<ServiceResponse<T>> FetchAsync<T>(HttpMethod method, string url, dynamic body, Dictionary<string, string> headers, TimeSpan? timeout, Type logReceiver, Type serializer)
+        public static async Task<ServiceResponse<T>> FetchAsync<T>(HttpMethod method, string url, dynamic? body, Dictionary<string, string>? headers, TimeSpan? timeout, Type? logReceiver, Type? serializer)
         {
             try
             {
@@ -59,7 +58,7 @@ namespace WCKDRZR.Gaspar
             return await httpClient.SendAsync(request);
         }
 
-        private static ServiceResponse<T> Success<T>(HttpResponseMessage httpResponse, Type serializer, string url, Type logReceiver)
+        private static ServiceResponse<T> Success<T>(HttpResponseMessage httpResponse, Type? serializer, string url, Type? logReceiver)
         {
             try
             {
@@ -98,9 +97,9 @@ namespace WCKDRZR.Gaspar
             }
         }
 
-        private static ServiceResponse<T> ServerError<T>(HttpResponseMessage httpResponse, string url, Type logReceiver)
+        private static ServiceResponse<T> ServerError<T>(HttpResponseMessage httpResponse, string url, Type? logReceiver)
         {
-            ServiceResponse<T> response = new ServiceResponse<T> { Data = default(T) };
+            ServiceResponse<T> response = new ServiceResponse<T> { Data = default };
             try
             {
                 response.Error = httpResponse.Content.ReadFromJsonAsync<ActionResultError>().Result;
@@ -116,7 +115,7 @@ namespace WCKDRZR.Gaspar
             return response;
         }
 
-        private static ServiceResponse<T> LoadException<T>(Exception exception, string url, Type logReceiver)
+        private static ServiceResponse<T> LoadException<T>(Exception exception, string url, Type? logReceiver)
         {
             string message = exception.Message;
             if (exception.InnerException is TimeoutException)
@@ -138,7 +137,7 @@ namespace WCKDRZR.Gaspar
             };
         }
 
-        private static void Log(string message, Type logReceiver)
+        private static void Log(string message, Type? logReceiver)
         {
             try
             {
@@ -158,7 +157,7 @@ namespace WCKDRZR.Gaspar
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Gaspar: Error trying to use your LoggingReceiver ({logReceiver.Name}): {e.Message}  Communication error below.");
+                Console.WriteLine($"Gaspar: Error trying to use your LoggingReceiver ({logReceiver?.Name}): {e.Message}  Communication error below.");
             }
             Console.WriteLine("Gaspar: " + message);
         }
