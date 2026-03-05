@@ -74,7 +74,9 @@ Version 3 breaks some existing functionally; if you're upgrading consider the fo
 
 ### Older versions
 
-The latest version of Gaspar requires .net7.0, to use with an older project you will need to use an older version of Gaspar (which may have unresolved bugs):
+The latest version of Gaspar requires .net8.0, to use with an older project you will need to use an older version of Gaspar (which may have unresolved bugs):
+
+- For .net7.0 use version 3.4.12
 
 - For .net6.0 use version 2.6.3
 
