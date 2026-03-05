@@ -30,9 +30,9 @@ namespace WCKDRZR.Gaspar.Models
         public static OutputType GetExportType(this ParameterSyntax node, Configuration config, OutputType parentTypes = 0)
         {
             OutputType types = 0;
-            if (node.Parent != null && node.Parent.GetType() == typeof(ClassDeclarationSyntax))
+            if (node.Parent != null && node.Parent.GetType().IsAssignableTo(typeof(TypeDeclarationSyntax)))
             {
-                types = ((ClassDeclarationSyntax)node.Parent).GetParentExportTypes(config);
+                types = ((TypeDeclarationSyntax)node.Parent).GetParentExportTypes(config);
             }
             return node.AttributeLists.GetExportType(config, types);
         }
@@ -40,24 +40,24 @@ namespace WCKDRZR.Gaspar.Models
         public static OutputType GetExportType(this MemberDeclarationSyntax node, Configuration config, OutputType parentTypes = 0)
         {
             OutputType types = 0;
-            if (node.Parent != null && node.Parent.GetType() == typeof(ClassDeclarationSyntax))
+            if (node.Parent != null && node.Parent.GetType().IsAssignableTo(typeof(TypeDeclarationSyntax)))
             {
-                types = ((ClassDeclarationSyntax)node.Parent).GetParentExportTypes(config);
+                types = ((TypeDeclarationSyntax)node.Parent).GetParentExportTypes(config);
             }
             return node.AttributeLists.GetExportType(config, types);
         }
 
-        private static OutputType GetParentExportTypes(this ClassDeclarationSyntax node, Configuration config)
+        private static OutputType GetParentExportTypes(this TypeDeclarationSyntax node, Configuration config)
         {
-            Stack<ClassDeclarationSyntax> classHierarchy = new();
+            Stack<TypeDeclarationSyntax> classHierarchy = new();
             classHierarchy.Push(node);
 
             SyntaxNode? parent = node.Parent;
             while (parent != null)
             {
-                if (parent.GetType() == typeof(ClassDeclarationSyntax))
+                if (parent.GetType().IsAssignableTo(typeof(TypeDeclarationSyntax)))
                 {
-                    classHierarchy.Push((ClassDeclarationSyntax)parent);
+                    classHierarchy.Push((TypeDeclarationSyntax)parent);
                     parent = parent.Parent;
                 }
                 else

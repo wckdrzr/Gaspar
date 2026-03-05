@@ -35,9 +35,9 @@ namespace WCKDRZR.Gaspar.ClassWalkers
 
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
-            if (node.Parent is ClassDeclarationSyntax)
+            if (node.Parent?.GetType().IsAssignableTo(typeof(TypeDeclarationSyntax)) == true)
             {
-                ClassDeclarationSyntax nodeClass = (ClassDeclarationSyntax)node.Parent;
+                TypeDeclarationSyntax nodeClass = (TypeDeclarationSyntax)node.Parent;
 
                 ExportOptionsAttribute options = new ExportOptionsAttribute();
                 string? nodeClassReturnTypeOverrider = nodeClass.AttributeLists.StringAttributeValue(nameof(options.ReturnTypeOverride));

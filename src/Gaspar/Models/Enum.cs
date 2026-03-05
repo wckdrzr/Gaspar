@@ -7,7 +7,7 @@ namespace WCKDRZR.Gaspar.Models
     {
         public required string Identifier { get; set; }
         public required Dictionary<string, object?> Values { get; set; }
-        public List<ClassDeclarationSyntax> ParentClasses { get; set; } = new();
+        public List<TypeDeclarationSyntax> ParentClasses { get; set; } = new();
 
         public OutputType ExportFor { get; set; }
     }

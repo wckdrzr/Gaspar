@@ -164,7 +164,7 @@ namespace WCKDRZR.Gaspar.Converters
             throw new NotImplementedException();
         }
 
-        public List<string> ModelNamespace(List<ClassDeclarationSyntax> parentClasses)
+        public List<string> ModelNamespace(List<TypeDeclarationSyntax> parentClasses)
         {
             throw new NotImplementedException();
         }

@@ -89,7 +89,7 @@ namespace WCKDRZR.Gaspar.Converters
             };
         }
 
-        public List<string> ModelNamespace(List<ClassDeclarationSyntax> parentClasses)
+        public List<string> ModelNamespace(List<TypeDeclarationSyntax> parentClasses)
         {
             List<string> lines = new();
 

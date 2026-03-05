@@ -329,7 +329,7 @@ namespace WCKDRZR.Gaspar.Converters
             return new();
         }
 
-        public List<string> ModelNamespace(List<ClassDeclarationSyntax> parentClasses)
+        public List<string> ModelNamespace(List<TypeDeclarationSyntax> parentClasses)
         {
             return new();
         }

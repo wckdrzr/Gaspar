@@ -86,13 +86,13 @@ namespace WCKDRZR.Gaspar.ClassWalkers
             bool noBase = node.AttributeLists.HasAttribute(nameof(ExportWithoutInheritance)) || node.AttributeLists.BoolAttributeValue(nameof(options.NoInheritance));
             List<string> baseClasses = noBase ? new() : node.BaseList?.Types.Select(s => s.ToString()).ToList() ?? new();
 
-            List<ClassDeclarationSyntax> parentClasses = new();
+            List<TypeDeclarationSyntax> parentClasses = new();
             SyntaxNode? parent = node.Parent;
             while (parent != null)
             {
-                if (parent.GetType() == typeof(ClassDeclarationSyntax))
+                if (parent.GetType().IsAssignableTo(typeof(TypeDeclarationSyntax)))
                 {
-                    parentClasses.Add((ClassDeclarationSyntax)parent);
+                    parentClasses.Add((TypeDeclarationSyntax)parent);
                     parent = parent.Parent;
                 }
                 else
@@ -129,7 +129,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                 }).ToList(),
                 BaseClasses = baseClasses ?? new(),
                 ParentClasses = parentClasses,
-                ChildClasses = node.Members.OfType<ClassDeclarationSyntax>().ToList(),
+                ChildClasses = node.Members.OfType<TypeDeclarationSyntax>().ToList(),
                 Enumerations = baseClasses != null && baseClasses.Contains("Enumeration")
                                 ? node.Members.OfType<FieldDeclarationSyntax>()
                                     .Where(property => !property.AttributeLists.JsonIgnore()).ConvertEnumerations()

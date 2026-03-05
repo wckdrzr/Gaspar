@@ -15,7 +15,7 @@ namespace WCKDRZR.Gaspar.Models
         public List<ControllerAction> Actions { get; set; }
         public List<ControllerAction> ActionsForType(OutputType type) => Actions.Where(a => a.ExportFor.HasFlag(type)).ToList();
 
-        public Controller(ClassDeclarationSyntax controllerNode)
+        public Controller(TypeDeclarationSyntax controllerNode)
         {
             ControllerName = controllerNode.Identifier.ToString();
             if (ControllerName.EndsWith("Controller"))

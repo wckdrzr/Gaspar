@@ -24,13 +24,13 @@ namespace WCKDRZR.Gaspar.ClassWalkers
             {
                 var values = new Dictionary<string, object?>();
 
-                List<ClassDeclarationSyntax> parentClasses = new();
+                List<TypeDeclarationSyntax> parentClasses = new();
                 SyntaxNode? parent = node.Parent;
                 while (parent != null)
                 {
-                    if (parent.GetType() == typeof(ClassDeclarationSyntax))
+                    if (parent.GetType().IsAssignableTo(typeof(TypeDeclarationSyntax)))
                     {
-                        parentClasses.Add((ClassDeclarationSyntax)parent);
+                        parentClasses.Add((TypeDeclarationSyntax)parent);
                         parent = parent.Parent;
                     }
                     else
