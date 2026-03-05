@@ -134,6 +134,7 @@ namespace WCKDRZR.Gaspar.Converters
             lines.AddRange(FileComment(outputConfig, file));
 
             List<EnumModel> allEnums = allFiles.EnumsForType(OutputType.Kotlin);
+            List<Model> allInterfaces = allFiles.InterfacesForType(OutputType.Kotlin);
 
             if (model.Enumerations.Count > 0)
             {
@@ -146,19 +147,29 @@ namespace WCKDRZR.Gaspar.Converters
             }
 
             string? indexSignature = null;
+            List<string> baseClassStrings = [];
+            List<string> classInterfaceMembers = [];
             if (model.BaseClasses.Count > 0)
             {
                 indexSignature = model.BaseClasses.FirstOrDefault(type => Regex.Matches(type, dictionaryRegex).HasMatch());
                 model.BaseClasses = model.BaseClasses.Where(type => !Regex.Matches(type, dictionaryRegex).HasMatch()).ToList();
                 for (int i = 0; i < model.BaseClasses.Count; i++)
                 {
-                    model.BaseClasses[i] = ConvertType(model.BaseClasses[i]);
+                    string type = ConvertType(model.BaseClasses[i]);
+                    Model? interfaceModel = allInterfaces.FirstOrDefault(m => ConvertType(m.FullName) == type);
+                    baseClassStrings.Add($"{type}{(interfaceModel != null ? "" : "()")}");
+
+                    if (interfaceModel != null)
+                    {
+                        classInterfaceMembers.AddRange(interfaceModel.Properties.Select(p => ConvertProperty(p, outputConfig)));
+                    }
                 }
             }
-            string baseClasses = model.BaseClasses.Count > 0 ? $": {string.Join(", ", model.BaseClasses)}()" : "";
+            string baseClasses = baseClassStrings.Count > 0 ? $": {string.Join(", ", baseClassStrings)}" : "";
 
-            lines.Add($"{Indent()}@Serializable");
-            lines.Add($"{Indent()}open class {model.ModelName}{(model.Enumerations.Count > 0 ? "_Properties" : "")}{baseClasses} {{");
+            string classType = model.IsInterface ? "interface" : "open class";
+            if (!model.IsInterface) { lines.Add($"{Indent()}@Serializable"); }
+            lines.Add($"{Indent()}{classType} {model.ModelName}{(model.Enumerations.Count > 0 ? "_Properties" : "")}{baseClasses} {{");
 
             if (model.Enumerations.Count > 0)
             {
@@ -179,15 +190,16 @@ namespace WCKDRZR.Gaspar.Converters
                 }
                 
                 string property = ConvertProperty(member, outputConfig);
-                bool lateinit = LateInit(member, outputConfig, allEnums);
+                bool lateinit = !model.IsInterface && LateInit(member, outputConfig, allEnums);
                 string defaultValue = "";
-                if (!lateinit || member.DefaultValue != null)
+                if (!model.IsInterface && (!lateinit || member.DefaultValue != null))
                 {
                     defaultValue = property.EndsWith('?') ? "null" : DefaultValue(member, outputConfig, allEnums);
                     if (defaultValue != "") { defaultValue = $" = {defaultValue}"; }
                 }
 
-                lines.Add($"{Indent(1)}{(lateinit ? "lateinit var" : "var")} {property}{defaultValue}");
+                string @override = classInterfaceMembers.Contains(property) ? "override " : "";
+                lines.Add($"{Indent(1)}{@override}{(lateinit ? "lateinit var" : "var")} {property}{defaultValue}");
             }
 
             previousModelClass = model.FullName;

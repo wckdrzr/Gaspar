@@ -154,9 +154,10 @@ namespace WCKDRZR.Gaspar.Converters
                     model.BaseClasses[i] = ConvertType(model.BaseClasses[i]);
                 }
             }
-            string baseClasses = model.BaseClasses.Count > 0 ? $": {string.Join(", ", model.BaseClasses)}" : ": BaseCodable";
+            string baseClasses = model.BaseClasses.Count > 0 ? $": {string.Join(", ", model.BaseClasses)}" : (model.IsInterface ? "" : ": BaseCodable");
 
-            lines.Add($"{Indent()}class {model.ModelName}{(model.Enumerations.Count > 0 ? "_Properties" : "")}{baseClasses} {{");
+            string classType = model.IsInterface ? "protocol" : "class";
+            lines.Add($"{Indent()}{classType} {model.ModelName}{(model.Enumerations.Count > 0 ? "_Properties" : "")}{baseClasses} {{");
 
             if (model.Enumerations.Count > 0)
             {
@@ -180,43 +181,51 @@ namespace WCKDRZR.Gaspar.Converters
                 string defaultValue = type.EndsWith('?') ? "nil" : DefaultValue(member, outputConfig, allEnums);
                 if (defaultValue != "") { defaultValue = $" = {defaultValue}"; }
 
+                if (model.IsInterface)
+                {
+                    defaultValue = " { get set }";
+                }
+
                 codingKeys.Add(member.JsonPropertyName == null ? identifier : $"{identifier} = \"{member.JsonPropertyName}\"");
                 initDecodeLines.Add($"{identifier} = try values.decode{(type.EndsWith("?") ? "IfPresent" : "")}({(type.EndsWith("?") ? type[..^1] : type)}.self, forKey: .{identifier})");
                 encodeLines.Add($"try container.encodeIfPresent({identifier}, forKey: .{identifier})");
                 lines.Add($"{Indent(1)}var {identifier}: {type}{defaultValue}");
             }
 
-            if (codingKeys.Any())
+            if (!model.IsInterface)
             {
-                lines.Add($"{Indent(1)}");
-            }
-            lines.Add($"{Indent(1)}override init() {{");
-            lines.Add($"{Indent(1)}    super.init()");
-            lines.Add($"{Indent(1)}}}");
-
-            lines.Add($"{Indent(1)}required init(from decoder: Decoder) throws {{");
-            lines.Add($"{Indent(1)}    try super.init(from: decoder)");
-            if (codingKeys.Any())
-            {
-                lines.Add($"{Indent(1)}    let values = try decoder.container(keyedBy: CodingKeys.self)");
-                lines.AddRange(initDecodeLines.Select(line => $"{Indent(2)}{line}"));
-            }
-            lines.Add($"{Indent(1)}}}");
-
-            lines.Add($"{Indent(1)}override func encode(to encoder: Encoder) throws {{");
-            lines.Add($"{Indent(1)}    try super.encode(to: encoder)");
-            if (codingKeys.Any())
-            {
-                lines.Add($"{Indent(1)}    var container = encoder.container(keyedBy: CodingKeys.self)");
-                lines.AddRange(encodeLines.Select(line => $"{Indent(2)}{line}"));
-            }
-            lines.Add($"{Indent(1)}}}");
-
-            if (codingKeys.Any())
-            {
-                lines.Add($"{Indent(1)}private enum CodingKeys: String, CodingKey {{");
-                lines.Add($"{Indent(1)}    case {string.Join(", ", codingKeys)}");
+                if (codingKeys.Any())
+                {
+                    lines.Add($"{Indent(1)}");
+                }
+                lines.Add($"{Indent(1)}override init() {{");
+                lines.Add($"{Indent(1)}    super.init()");
                 lines.Add($"{Indent(1)}}}");
+
+                lines.Add($"{Indent(1)}required init(from decoder: Decoder) throws {{");
+                lines.Add($"{Indent(1)}    try super.init(from: decoder)");
+                if (codingKeys.Any())
+                {
+                    lines.Add($"{Indent(1)}    let values = try decoder.container(keyedBy: CodingKeys.self)");
+                    lines.AddRange(initDecodeLines.Select(line => $"{Indent(2)}{line}"));
+                }
+                lines.Add($"{Indent(1)}}}");
+
+                lines.Add($"{Indent(1)}override func encode(to encoder: Encoder) throws {{");
+                lines.Add($"{Indent(1)}    try super.encode(to: encoder)");
+                if (codingKeys.Any())
+                {
+                    lines.Add($"{Indent(1)}    var container = encoder.container(keyedBy: CodingKeys.self)");
+                    lines.AddRange(encodeLines.Select(line => $"{Indent(2)}{line}"));
+                }
+                lines.Add($"{Indent(1)}}}");
+
+                if (codingKeys.Any())
+                {
+                    lines.Add($"{Indent(1)}private enum CodingKeys: String, CodingKey {{");
+                    lines.Add($"{Indent(1)}    case {string.Join(", ", codingKeys)}");
+                    lines.Add($"{Indent(1)}}}");
+                }
             }
 
             previousModelClass = model.FullName;
