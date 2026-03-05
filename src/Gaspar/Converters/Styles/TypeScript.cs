@@ -597,7 +597,11 @@ namespace WCKDRZR.Gaspar.Converters
                     if (headerParameters.Any() || action.Headers != null)
                     {
                         headerParams.Add($"let headersToSend: Record<string, string> = {(action.Headers == null ? "{}" : "headers")}");
-                        requestOptions.Add("headers", "headersToSend");
+                        if (requestOptions.ContainsKey("headers"))
+                        {
+                            headerParams.Add($"headersToSend['Content-Type'] = 'application/json");
+                        }
+                        requestOptions["headers"] = "headersToSend";
                         foreach (Parameter parameter in headerParameters)
                         {
                             headerParams.Add($"if ({parameter.Identifier}) {{ headersToSend['{parameter.Identifier}'] = {parameter.Identifier}.toString(); }}");

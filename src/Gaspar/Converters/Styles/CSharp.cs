@@ -138,6 +138,10 @@ namespace WCKDRZR.Gaspar.Converters
                         {
                             parameters.Add("Dictionary<string, string> headers");
                         }
+                        else if (action.Headers.Length == 1)
+                        {
+                            parameters.Add($"string {action.Headers[0]}_header");
+                        }
                         else
                         {
                             parameters.Add($"({string.Join(", ", action.Headers.Select(h => $"string {h}"))}) headers");
@@ -178,9 +182,16 @@ namespace WCKDRZR.Gaspar.Converters
                     {
                         headerParamBuilder.Add($"Dictionary<string, string> headersToSend = new();");
                         headersParam = "headersToSend";
-                        foreach (string header in action.Headers?.ToList() ?? new())
+                        if (action.Headers != null && action.Headers.Length == 1)
                         {
-                            headerParamBuilder.Add($"headersToSend.Add(\"{header}\", headers.{header});");
+                            headerParamBuilder.Add($"headersToSend.Add(\"{action.Headers[0]}\", {action.Headers[0]}_header);");
+                        }
+                        else
+                        {
+                            foreach (string header in action.Headers?.ToList() ?? new())
+                            {
+                                headerParamBuilder.Add($"headersToSend.Add(\"{header}\", headers.{header});");
+                            }
                         }
                         foreach (Parameter parameter in headerParameters)
                         {
