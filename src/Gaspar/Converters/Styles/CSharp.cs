@@ -5,6 +5,7 @@ using WCKDRZR.Gaspar.Extensions;
 using WCKDRZR.Gaspar.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using WCKDRZR.Gaspar.Helpers;
+using System.Text.RegularExpressions;
 
 namespace WCKDRZR.Gaspar.Converters
 {
@@ -84,6 +85,11 @@ namespace WCKDRZR.Gaspar.Converters
                     parameters.Add(newParam);
                 }
 
+                if (outputConfig.UrlPrefix != null)
+                {
+                    parameters.AddRange(Regex.Matches(outputConfig.UrlPrefix, "{param:(.*?)}").Select(m => $"string {m.Groups[1].Value}").ToList());
+                }
+
                 if (action.BadMethodReason != null)
                 {
                     lines.Add($"        [System.Obsolete(\"{action.BadMethodReason}\", true)]");
@@ -95,7 +101,7 @@ namespace WCKDRZR.Gaspar.Converters
                 {
                     string httpMethod = action.HttpMethod.ToProper();
 
-                    string url = outputConfig.AddUrlPrefix(action.Route);
+                    string url = outputConfig.AddUrlPrefix(action.Route).Replace("{param:", "{");;
                     url += action.Parameters.QueryString(OutputType.CSharp);
 
                     string urlHandler = "";

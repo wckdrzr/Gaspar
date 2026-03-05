@@ -534,6 +534,10 @@ namespace WCKDRZR.Gaspar.Converters
                         parameters.Add($"headers: {{ {string.Join(", ", action.Headers.Select(h => $"{h}: string"))} }}");
                     }
                 }
+                if (outputConfig.UrlPrefix != null)
+                {
+                    parameters.AddRange(Regex.Matches(outputConfig.UrlPrefix, "{param:(.*?)}").Select(m => $"{m.Groups[1].Value}: string").ToList());
+                }
                 if (!string.IsNullOrEmpty(outputConfig.ErrorHandlerPath))
                 {
                     parameters.Add($"showError = ServiceErrorMessage.{outputConfig.DefaultErrorMessage}");
@@ -547,7 +551,7 @@ namespace WCKDRZR.Gaspar.Converters
                 }
                 else
                 {
-                    string url = outputConfig.AddUrlPrefix(action.Route.Replace("{", "${"));
+                    string url = outputConfig.AddUrlPrefix(action.Route).Replace("{", "${").Replace("{param:", "{");
                     url += action.Parameters.QueryString(OutputType.TypeScript, "$");
                     if (!string.IsNullOrEmpty(outputConfig.UrlHandlerFunction))
                     {

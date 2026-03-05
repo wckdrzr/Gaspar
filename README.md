@@ -471,7 +471,7 @@ For Controllers:
 
 For controllers (optional):
 
-**UrlPrefix**    `string`    When building the service contract, you can prefix the url with this value; e.g. `"http://myservice.com:81"`. The service url will be built from this followed by `/` then the action route.  Can include `{ServiceName}`, `{ServiceHost}` or `{ServicePort}` to have those placeholders replaced (see the demo file).
+**UrlPrefix**    `string`    When building the service contract, you can prefix the url with this value; e.g. `"http://myservice.com:81"`. The service url will be built from this followed by `/` then the action route.  Can include `{ServiceName}`, `{ServiceHost}` or `{ServicePort}` to have those placeholders replaced (see the demo file).  You can also add `{param:name}` to the url; this will add `name` as a function parameter for substitution into the url.
 
 For CSharp, TypeScript and Angular controllers (optional):
 
