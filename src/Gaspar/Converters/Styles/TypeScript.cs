@@ -86,7 +86,7 @@ namespace WCKDRZR.Gaspar.Converters
                     Exporter.FullyQualifyNestedClassTypes(ref files);
                 }
                 
-                _sharedModelFiles.Add(sharedModel.Value, files.CustomModelTypes());
+                _sharedModelFiles.Add(sharedModel.Value, files.CustomModelAndEnumTypes());
                 allModels = allModels.Concat(files.ToList().SelectMany(f => f.Models).ToList()).ToList();
             }
             

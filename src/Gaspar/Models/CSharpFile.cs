@@ -87,7 +87,7 @@ namespace WCKDRZR.Gaspar.Models
             }
         }
 
-        public List<string> CustomModelTypes()
+        public List<string> CustomModelAndEnumTypes()
         {
             List<string> types = new();
 
@@ -98,6 +98,12 @@ namespace WCKDRZR.Gaspar.Models
                 {
                     model.Properties.ForEach(p => AddUniqueCustomType(ref types, p.Type));
                     model.Fields.ForEach(f => AddUniqueCustomType(ref types, f.Type));
+                }
+
+                file.Enums.ForEach(m => AddUniqueCustomType(ref types, m.Identifier));
+                foreach (var model in file.Enums)
+                {
+                    model.Values.Keys.ToList().ForEach(p => AddUniqueCustomType(ref types, p));
                 }
             }
 
