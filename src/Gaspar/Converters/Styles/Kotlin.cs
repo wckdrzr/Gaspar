@@ -41,7 +41,7 @@ namespace WCKDRZR.Gaspar.Converters
             { "Guid", "String" },
             { "byte[]", "ByteArray" },
             { "ContentResult", "String" },
-            { "IFormFile", "ByteArray" },
+            { "IFormFile", "File" },
             { "dynamic", "kotlin.Any" },
             { "object", "kotlin.Any" },
             { "JsonResult", "kotlin.Any" },
@@ -349,8 +349,8 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("        this.hasError = error != null");
             lines.Add("    }");
             lines.Add("}");
-            lines.Add("@Serializable");
-            lines.Add("class VoidObject");
+            lines.Add("@Serializable class VoidObject");
+            lines.Add("@Serializable class File(val name: String, val data: ByteArray)");
             lines.Add("");
             lines.Add("class GasparServiceHelper {");
             lines.Add("    private val client: OkHttpClient = OkHttpClient.Builder()");
@@ -379,16 +379,17 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("        var bodyData: RequestBody? = null");
             lines.Add("        body?.let { body ->");
             lines.Add("            bodyData = when (body) {");
-            lines.Add("                is String -> Json.encodeToString(body)");
+            lines.Add("                is RequestBody -> body");
+            lines.Add("                is String -> Json.encodeToString(body).toRequestBody(jsonMediaType)");
             lines.Add("                else -> {");
             lines.Add("                    try {");
             lines.Add("                        val bodySerializer = serializer(body::class, emptyList(), false)");
-            lines.Add("                        Json.encodeToString(bodySerializer, body)");
+            lines.Add("                        Json.encodeToString(bodySerializer, body).toRequestBody(jsonMediaType)");
             lines.Add("                    } catch (_: Exception) {");
-            lines.Add("                        body.toString()");
+            lines.Add("                        body.toString().toRequestBody(jsonMediaType)");
             lines.Add("                    }");
             lines.Add("                }");
-            lines.Add("            }.toRequestBody(jsonMediaType)");
+            lines.Add("            }");
             lines.Add("        }");
             lines.Add("        val request = Request.Builder()");
             lines.Add("            .method(method, bodyData)");
@@ -548,9 +549,13 @@ namespace WCKDRZR.Gaspar.Converters
                         foreach (Parameter parameter in formParameters)
                         {
                             string type = ConvertType($"{parameter.Type}");
-                            if (type.StartsWith("byte[]"))
+                            if (type.StartsWith("ByteArray"))
                             {
                                 formParamsBuilder.Add($"    .addFormDataPart(\"{parameter.Identifier}\", \"{parameter.Identifier}\", {parameter.Identifier}.toRequestBody(\"application/octet-stream\".toMediaTypeOrNull()))");
+                            }
+                            else if (type.StartsWith("File"))
+                            {
+                                formParamsBuilder.Add($"    .addFormDataPart(\"{parameter.Identifier}\", {parameter.Identifier}.name, {parameter.Identifier}.data.toRequestBody(\"application/octet-stream\".toMediaTypeOrNull()))");
                             }
                             else
                             {

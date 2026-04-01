@@ -44,7 +44,7 @@ namespace WCKDRZR.Gaspar.Converters
             { "Guid", "String" },
             { "byte[]", "Data" },
             { "ContentResult", "String" },
-            { "IFormFile", "Data" },
+            { "IFormFile", "File" },
         };
         public Dictionary<string, string> SwiftTypeTranslations => Config.TypeTranslations != null && Config.TypeTranslations.ContainsKey(OutputType.Swift.ToString()) ? Config.TypeTranslations[OutputType.Swift.ToString()] : new();
         public Dictionary<string, string> TypeTranslations => DefaultTypeTranslations.Union(SwiftTypeTranslations).Union(Config.GlobalTypeTranslations ?? new()).ToDictionary(k => k.Key, v => v.Value);
@@ -323,6 +323,7 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("    }");
             lines.Add("}");
             lines.Add("struct VoidObject: Codable { }");
+            lines.Add("struct File { let name: String; let data: Data }");
             lines.Add("");
             lines.Add("struct GasparServiceHelper {");
             lines.Add("    public static func fetchVoid(method: String, urlStr: String, body: Encodable? = nil, headers: [String: String]? = nil) async -> ServiceResponse<VoidObject> {");
@@ -514,8 +515,17 @@ namespace WCKDRZR.Gaspar.Converters
                         bodyParameter = "data";
                         foreach (Parameter parameter in formParameters)
                         {
-                            formParamsBuilder.Add($"data.append(\"--\\(boundary)\\r\\nContent-Disposition: form-data; name=\\\"{parameter.Identifier}\\\"; filename=\\\"{parameter.Identifier}\\\"\\r\\nContent-Type: application/octet-stream\\r\\n\\r\\n\".data(using: .utf8)!)");
-                            formParamsBuilder.Add($"data.append({parameter.Identifier})");
+                            string type = ConvertType($"{parameter.Type}");
+                            if (type == "File")
+                            {
+                                formParamsBuilder.Add($"data.append(\"--\\(boundary)\\r\\nContent-Disposition: form-data; name=\\\"{parameter.Identifier}\\\"; filename=\\\"\\({parameter.Identifier}.name)\\\"\\r\\nContent-Type: application/octet-stream\\r\\n\\r\\n\".data(using: .utf8)!)");
+                                formParamsBuilder.Add($"data.append({parameter.Identifier}.data)");
+                            }
+                            else
+                            {
+                                formParamsBuilder.Add($"data.append(\"--\\(boundary)\\r\\nContent-Disposition: form-data; name=\\\"{parameter.Identifier}\\\"; filename=\\\"\\({parameter.Identifier})\\\"\\r\\nContent-Type: application/octet-stream\\r\\n\\r\\n\".data(using: .utf8)!)");
+                                formParamsBuilder.Add($"data.append({parameter.Identifier}.data(using: .utf8) ?? Data())");
+                            }
                             formParamsBuilder.Add("data.append(\"\\r\\n--\\(boundary)--\\r\\n\".data(using: .utf8)!)");
                         }
                     }
