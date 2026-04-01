@@ -348,8 +348,12 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("        var request = URLRequest(url: url)");
             lines.Add("        var bodyData: Data? = nil");
             lines.Add("        if let body {");
-            lines.Add("            bodyData = try JSONEncoder().encode(body)");
-            lines.Add("            request.setValue(\"application/json; charset=utf-8\", forHTTPHeaderField: \"Content-Type\")");
+            lines.Add("            if let rawData = body as? Data {");
+            lines.Add("                bodyData = rawData");
+            lines.Add("            } else {");
+            lines.Add("                bodyData = try JSONEncoder().encode(body)");
+            lines.Add("                request.setValue(\"application/json; charset=utf-8\", forHTTPHeaderField: \"Content-Type\")");
+            lines.Add("            }");
             lines.Add("        }");
             lines.Add("        request.httpMethod = method");
             lines.Add("        request.httpBody = bodyData");
