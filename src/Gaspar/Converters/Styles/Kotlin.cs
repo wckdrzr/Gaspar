@@ -340,13 +340,11 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("class ServiceResponse<T> {");
             lines.Add("    var data: T?");
             lines.Add("    var error: ActionResultError?");
-            lines.Add("    val success: Boolean");
-            lines.Add("    val hasError: Boolean");
+            lines.Add("    val success: Boolean get() { return error == null }");
+            lines.Add("    val hasError: Boolean get() { return error != null }");
             lines.Add("    constructor(data: T?, error: ActionResultError?) {");
             lines.Add("        this.data = data");
             lines.Add("        this.error = error");
-            lines.Add("        this.success = error == null");
-            lines.Add("        this.hasError = error != null");
             lines.Add("    }");
             lines.Add("}");
             lines.Add("@Serializable class VoidObject");

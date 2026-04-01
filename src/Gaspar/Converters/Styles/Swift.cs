@@ -313,13 +313,11 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("struct ServiceResponse<T: Codable>: Codable {");
             lines.Add("    var data: T?");
             lines.Add("    var error: ActionResultError?");
-            lines.Add("    let success: Bool");
-            lines.Add("    let hasError: Bool");
+            lines.Add("    var success: Bool { error == nil }");
+            lines.Add("    var hasError: Bool { error != nil }");
             lines.Add("    init(data: T?, error: ActionResultError?) {");
             lines.Add("        self.data = data");
             lines.Add("        self.error = error");
-            lines.Add("        self.success = error == nil");
-            lines.Add("        self.hasError = error != nil");
             lines.Add("    }");
             lines.Add("}");
             lines.Add("struct VoidObject: Codable { }");
