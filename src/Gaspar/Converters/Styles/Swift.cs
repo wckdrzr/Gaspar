@@ -384,10 +384,10 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("            let decoder = JSONDecoder()");
             lines.Add("            response.error = try decoder.decode(ActionResultError.self, from: data)");
             lines.Add("        } catch {");
-            lines.Add("            response = self.error(title: \"Gaspar: Service call to \\(url) failed to connect\", detail: data.toJsonString(), status: urlResponse?.statusCode ?? 0)");
+            lines.Add("            response = self.error(title: \"Gaspar: Service call to \\(url) failed to connect\", detail: \"\", status: urlResponse?.statusCode ?? 0)");
             lines.Add("        }");
             lines.Add("        log(\"Gaspar: Service call to \\(url) failed with status code \\(urlResponse?.statusCode ?? 0)\" +");
-            lines.Add("            \"\\((response.error != nil && response.error?.detail?.isNotEmpty == true ? \"\\n\\(response.error?.detail ?? \"\")\" : \"\"))\")");
+            lines.Add("            \"\\((response.error != nil && response.error?.detail != \"\" ? \"\\n\\(response.error?.detail ?? \"\")\" : \"\"))\")");
             lines.Add("        return response");
             lines.Add("    }");
             lines.Add("    private static func loadException<T>(exception: Error, url: String) -> ServiceResponse<T> {");
