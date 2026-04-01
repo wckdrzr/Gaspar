@@ -167,7 +167,7 @@ namespace WCKDRZR.Gaspar.Converters
 
             if (indexSignature != null)
             {
-                lines.Add($"{Indent(1)}{ConvertIndexType(indexSignature, outputConfig)};");
+                lines.Add($"{Indent(1)}{ConvertIndexType(indexSignature, outputConfig)}");
             }
 
             List<string> codingKeys = new();
@@ -293,12 +293,133 @@ namespace WCKDRZR.Gaspar.Converters
 
         public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
         {
-            return new();
+            List<string> lines = new();
+            
+            lines.Add("import Foundation");
+            lines.Add("");
+            lines.Add("struct ActionResultError: Codable {");
+            lines.Add("    var detail: String?");
+            lines.Add("    var instance: String? = nil");
+            lines.Add("    var status: Int");
+            lines.Add("    var title: String");
+            lines.Add("    var traceId: String? = nil");
+            lines.Add("    var type: String? = nil");
+            lines.Add("    init(title: String, detail: String?, status: Int) {");
+            lines.Add("        self.title = title");
+            lines.Add("        self.detail = detail");
+            lines.Add("        self.status = status");
+            lines.Add("    }");
+            lines.Add("}");
+            lines.Add("struct ServiceResponse<T: Codable>: Codable {");
+            lines.Add("    var data: T?");
+            lines.Add("    var error: ActionResultError?");
+            lines.Add("    let success: Bool");
+            lines.Add("    let hasError: Bool");
+            lines.Add("    init(data: T?, error: ActionResultError?) {");
+            lines.Add("        self.data = data");
+            lines.Add("        self.error = error");
+            lines.Add("        self.success = error == nil");
+            lines.Add("        self.hasError = error != nil");
+            lines.Add("    }");
+            lines.Add("}");
+            lines.Add("struct VoidObject: Codable { }");
+            lines.Add("");
+            lines.Add("struct GasparServiceHelper {");
+            lines.Add("    public static func fetchVoid(method: String, urlStr: String, body: Encodable? = nil, headers: [String: String]? = nil) async -> ServiceResponse<VoidObject> {");
+            lines.Add("        return await fetch(method: method, urlStr: urlStr, body: body, headers: headers)");
+            lines.Add("    }");
+            lines.Add("    public static func fetch<T>(method: String, urlStr: String, body: Encodable? = nil, headers: [String: String]? = nil) async -> ServiceResponse<T> {");
+            lines.Add("        do {");
+            lines.Add("            guard let url = URL(string: urlStr) else {");
+            lines.Add("                throw URLError(.badURL)");
+            lines.Add("            }");
+            lines.Add("            let (data, response) = try await load(method: method, url: url, body: body, headers: headers)");
+            lines.Add("            if ((response?.statusCode ?? 0) >= 200 && (response?.statusCode ?? 0) < 300) {");
+            lines.Add("                return success(data: data, urlResponse: response, url: url)");
+            lines.Add("            } else {");
+            lines.Add("                return serverError(data: data, urlResponse: response, url: url)");
+            lines.Add("            }");
+            lines.Add("        } catch let e {");
+            lines.Add("            return loadException(exception: e, url: urlStr)");
+            lines.Add("        }");
+            lines.Add("    }");
+            lines.Add("    private static func load(method: String, url: URL, body: Encodable?, headers: [String: String]?) async throws -> (Data, HTTPURLResponse?) {");
+            lines.Add("        var request = URLRequest(url: url)");
+            lines.Add("        var bodyData: Data? = nil");
+            lines.Add("        if let body {");
+            lines.Add("            bodyData = try JSONEncoder().encode(body)");
+            lines.Add("            request.setValue(\"application/json; charset=utf-8\", forHTTPHeaderField: \"Content-Type\")");
+            lines.Add("        }");
+            lines.Add("        request.httpMethod = method");
+            lines.Add("        request.httpBody = bodyData");
+            lines.Add("        for header in headers ?? [:] {");
+            lines.Add("            request.setValue(header.value, forHTTPHeaderField: header.key)");
+            lines.Add("        }");
+            lines.Add("        let (data, response) = try await URLSession.shared.data(for: request)");
+            lines.Add("        return (data, response as? HTTPURLResponse)");
+            lines.Add("    }");
+            lines.Add("    private static func success<T>(data: Data, urlResponse: HTTPURLResponse?, url: URL) -> ServiceResponse<T> {");
+            lines.Add("        do {");
+            lines.Add("            if T.self == String.self {");
+            lines.Add("                let responseString = String(decoding: data, as: UTF8.self)");
+            lines.Add("                return ServiceResponse(data: responseString as? T, error: nil)");
+            lines.Add("            }");
+            lines.Add("            if data.isEmpty {");
+            lines.Add("                return ServiceResponse(data: nil, error: nil)");
+            lines.Add("            }");
+            lines.Add("            let decoder = JSONDecoder()");
+            lines.Add("            let response = try decoder.decode(T.self, from: data)");
+            lines.Add("            return ServiceResponse(");
+            lines.Add("                data: response,");
+            lines.Add("                error: nil");
+            lines.Add("            )");
+            lines.Add("        } catch let e {");
+            lines.Add("            log(\"Gaspar: Unable to deserialize successful response from \\(url)\\n\\(e.localizedDescription)\")");
+            lines.Add("            return error(title: \"Gaspar: Unable to deserialize successful response from \\(url)\", detail: e.localizedDescription, status: 0)");
+            lines.Add("        }");
+            lines.Add("    }");
+            lines.Add("    private static func serverError<T>(data: Data, urlResponse: HTTPURLResponse?, url: URL) -> ServiceResponse<T> {");
+            lines.Add("        var response = ServiceResponse<T>(data: nil, error: nil)");
+            lines.Add("        do {");
+            lines.Add("            let decoder = JSONDecoder()");
+            lines.Add("            response.error = try decoder.decode(ActionResultError.self, from: data)");
+            lines.Add("        } catch {");
+            lines.Add("            response = self.error(title: \"Gaspar: Service call to \\(url) failed to connect\", detail: data.toJsonString(), status: urlResponse?.statusCode ?? 0)");
+            lines.Add("        }");
+            lines.Add("        log(\"Gaspar: Service call to \\(url) failed with status code \\(urlResponse?.statusCode ?? 0)\" +");
+            lines.Add("            \"\\((response.error != nil && response.error?.detail?.isNotEmpty == true ? \"\\n\\(response.error?.detail ?? \"\")\" : \"\"))\")");
+            lines.Add("        return response");
+            lines.Add("    }");
+            lines.Add("    private static func loadException<T>(exception: Error, url: String) -> ServiceResponse<T> {");
+            lines.Add("        let message = exception.localizedDescription");
+            lines.Add("        log(\"Gaspar: Service call to \\(url) failed to connect\\n\\(message)\")");
+            lines.Add("        return error(title: \"Gaspar: Service call to \\(url) failed to connect\", detail: message, status: 0)");
+            lines.Add("    }");
+            lines.Add("    private static func error<T>(title: String, detail: String?, status: Int) -> ServiceResponse<T> {");
+            lines.Add("        return ServiceResponse(");
+            lines.Add("            data: nil,");
+            lines.Add("            error: .init(title: title, detail: detail, status: status)");
+            lines.Add("        )");
+            lines.Add("    }");
+            lines.Add("    private static func log(_ message: String) {");
+            lines.Add("        print(\"Gaspar: \\(message)\")");
+            lines.Add("    }");
+            lines.Add("}");
+
+            lines.Add("");
+            return lines;
         }
 
         public List<string> ControllerHeader(ConfigurationTypeOutput outputConfig, List<string> customTypes)
         {
-            return new();
+            List<string> lines = new();
+
+            if (outputConfig.HelperFile == null)
+            {
+                lines.AddRange(ControllerHelperFile(outputConfig));
+            }
+
+            return lines;
         }
 
         public List<string> ControllerFooter()
@@ -308,7 +429,137 @@ namespace WCKDRZR.Gaspar.Converters
 
         public List<string> ConvertController(List<ControllerAction> actions, string outputClassName, ConfigurationTypeOutput outputConfig, bool lastController)
         {
-            return new();
+            List<string> lines = new();
+
+            lines.Add($"struct {outputClassName}Service {{");
+
+            foreach (ControllerAction action in actions)
+            {
+                List<string> parameters = new();
+                foreach (Parameter parameter in action.Parameters)
+                {
+                    string newParam = $"{parameter.Identifier}: {ConvertType($"{parameter.Type}")}";
+                    if (parameter.DefaultValue != null)
+                    {
+                        newParam += $" = {parameter.DefaultValue}";
+                    }
+                    parameters.Add(newParam);
+                }
+
+                if (outputConfig.UrlPrefix != null)
+                {
+                    parameters.AddRange(Regex.Matches(outputConfig.UrlPrefix, "{param:(.*?)}").Select(m => $"string {m.Groups[1].Value}").ToList());
+                }
+
+                if (action.BadMethodReason != null)
+                {
+                    lines.Add($"    @available(*, deprecated, message: \"{action.BadMethodReason}\")");
+                    lines.Add($"    static func {action.ActionName}({string.Join(", ", parameters)}) {{ }}");
+                }
+                else
+                {
+                    string httpMethod = action.HttpMethod.ToUpper();
+
+                    string url = outputConfig.AddUrlPrefix(action.Route).Replace("{param:", "{");
+                    url += action.Parameters.QueryString(OutputType.CSharp);
+
+                    string returnTypeString = "";
+                    string fetchMethodName = "fetchVoid";
+                    if (action.ReturnTypeOverride != null)
+                    {
+                        returnTypeString = $"<{ConvertType(action.ReturnTypeOverride)}>";
+                        fetchMethodName = "fetch";
+                    }
+                    else if (action.ReturnType != null)
+                    {
+                        returnTypeString = ConvertType(action.ReturnType.ToString());
+                        if ((action.ReturnType is PredefinedTypeSyntax && action.ReturnType is not NullableTypeSyntax && returnTypeString != "string") || returnTypeString == "DateTime")
+                        {
+                            returnTypeString += "?";
+                        }
+                        returnTypeString = $"<{returnTypeString}>";
+                        fetchMethodName = "fetch";
+                    }
+
+                    if (returnTypeString == "<ContentResult>") { returnTypeString = "<String>"; }
+                    if (returnTypeString == "<JsonResult>") { returnTypeString = "<Any>"; }
+
+
+                    if (action.Headers != null)
+                    {
+                        if (action.Headers.Length == 0)
+                        {
+                            parameters.Add("headers: [String: String]");
+                        }
+                        else if (action.Headers.Length == 1)
+                        {
+                            parameters.Add($"{action.Headers[0]}_header: String");
+                        }
+                        else
+                        {
+                            parameters.Add($"headers: ({string.Join(", ", action.Headers.Select(h => $"{h}: String"))})");
+                        }
+                    }
+
+                    string? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body)?.Identifier;
+
+                    List<string> formParamsBuilder = new();
+                    IEnumerable<Parameter> formParameters = action.Parameters.Where(p => p.Source == ParameterSource.Form);
+                    if (formParameters.Any())
+                    {
+                        
+                        formParamsBuilder.Add($"let boundary = UUID().uuidString");
+                        formParamsBuilder.Add($"var data = Data()");
+
+                        bodyParameter = "data";
+                        foreach (Parameter parameter in formParameters)
+                        {
+                            formParamsBuilder.Add($"data.append(\"--\\(boundary)\\r\\nContent-Disposition: form-data; name=\\\"{parameter.Identifier}\\\"; filename=\\\"{parameter.Identifier}\\\"\\r\\nContent-Type: application/octet-stream\\r\\n\\r\\n\".data(using: .utf8)!)");
+                            formParamsBuilder.Add($"data.append({parameter.Identifier})");
+                            formParamsBuilder.Add("data.append(\"\\r\\n--\\(boundary)--\\r\\n\".data(using: .utf8)!)");
+                        }
+                    }
+
+                    List<string> headerParamBuilder = new();
+                    string headersParam = "nil";
+                    IEnumerable<Parameter> headerParameters = action.Parameters.Where(p => p.Source == ParameterSource.Header);
+                    if (headerParameters.Any() || action.Headers != null || formParameters.Any())
+                    {
+                        headersParam = "headersToSend";
+                        headerParamBuilder.Add($"let headersToSend: [String: String] = [");
+                        if (action.Headers != null && action.Headers.Length == 1)
+                        {
+                            headerParamBuilder.Add($"    \"{action.Headers[0]}\": {action.Headers[0]}_header,");
+                        }
+                        else
+                        {
+                            foreach (string header in action.Headers?.ToList() ?? new())
+                            {
+                                headerParamBuilder.Add($"    \"{header}\": headers.{header},");
+                            }
+                        }
+                        foreach (Parameter parameter in headerParameters)
+                        {
+                            headerParamBuilder.Add($"    \"{parameter.Identifier}\": String({parameter.Identifier}),");
+                        }
+                        if (formParameters.Any())
+                        {
+                            headerParamBuilder.Add($"    \"Content-Type\": \"multipart/form-data; boundary=\\(boundary)\"");
+                        }
+                        headerParamBuilder.Add($"]");
+                    }
+
+                    lines.Add($"    static func {action.ActionName}({string.Join(", ", parameters)}) async -> ServiceResponse{returnTypeString} {{");
+                    lines.AddRange(formParamsBuilder.Select(f => $"        {f}"));
+                    lines.AddRange(headerParamBuilder.Select(f => $"        {f}"));
+                    lines.Add($"        return await GasparServiceHelper.{fetchMethodName}(method: \"{httpMethod}\", urlStr: \"{url}\", body: {bodyParameter ?? "nil"}, headers: {headersParam})");
+                    lines.Add($"    }}");
+                }
+            }
+            lines.Add($"}}");
+            lines.Add("");
+
+            return lines;
         }
 
 

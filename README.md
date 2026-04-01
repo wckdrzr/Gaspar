@@ -22,8 +22,8 @@ Using the [Roslyn (the .NET compiler platform)](https://github.com/dotnet/roslyn
 | -------------------------------- |:-------------------:|:--------------:|
 | Export to TypeScript             | ✅                   | ✅              |
 | Export to Angular * <sup>1</sup> | ✅                   | ✅              |
-| Export to Swift                  | ✅                   |                |
-| Export to Kotlin                 | ✅                   |                |
+| Export to Swift                  | ✅                   | ✅              |
+| Export to Kotlin                 | ✅                   | ✅              |
 | Export to C#                     |                     | ✅              |
 | Export to Ocelot Config          |                     | ✅              |
 | Python <sup>† 1</sup>            |                     | ✅              |
@@ -368,6 +368,54 @@ namespace MyProject
 # example to follow
 ```
 
+#### To use in Swift
+
+```swift
+import Foundation
+
+// MyAction method is called as a static async func on MyControllerService
+let response: ServiceResponse<Bool> = await MyControllerService.myAction(id: requestId, obj: requestObj)
+
+if let data = response.data {
+    // use the data
+} else {
+    // handle response.error if appropriate
+}
+```
+
+Swift controller methods are all `async`, so you must call them from an `async` context (e.g. inside a `Task { }` or another `async` function).
+
+#### To use in Kotlin
+
+Each action is exported as two methods — a blocking version and a `suspend` version:
+
+```kotlin
+// Blocking — call from a background thread (e.g. inside Dispatchers.IO)
+CoroutineScope(Dispatchers.IO).launch {
+    val response: ServiceResponse<Boolean> = MyControllerService().myAction(id = requestId, obj = requestObj)
+    // switch back to main thread to update UI
+    withContext(Dispatchers.Main) {
+        if (response.data != null) {
+            // use the data
+        } else {
+            // handle response.error if appropriate
+        }
+    }
+}
+
+// Suspend — call from any coroutine scope; dispatching to IO is handled for you
+CoroutineScope(Dispatchers.Main).launch {
+    val response: ServiceResponse<Boolean> = MyControllerService().myActionAsync(id = requestId, obj = requestObj)
+    if (response.data != null) {
+        // use the data
+    } else {
+        // handle response.error if appropriate
+    }
+}
+```
+
+Kotlin controller calls use OkHttp (ensure `com.squareup.okhttp3:okhttp` and `org.jetbrains.kotlinx:kotlinx-coroutines-android` are installed).
+
 ## Configuration
 
 The demo config provided only includes the basics to make Gaspar work; here is a full list of the options available (feel free to have a look in the `Models/Configuration.cs` file):
@@ -458,7 +506,7 @@ For Controllers:
 
 - For models: `"TypeScript"`, `"Angular"`, `"Swift"`, `"Kotlin"`, `"Proto"`
 
-- For controllers: `"TypeScript"`, `"Angular"`, `"CSharp"`, `"Ocelot"` or `"Python"`
+- For controllers: `"TypeScript"`, `"Angular"`, `"Swift"`, `"Kotlin"`, `"CSharp"`, `"Ocelot"` or `"Python"`
 
 **Location**    `string`    Required.  The location to output the translated file to (relative to the project root).  For controllers, can include `{ServiceName}`, `{ServiceHost}` or `{ServicePort}` to have those placeholders replaced (see the demo file).
 
@@ -525,11 +573,13 @@ For TypeScript and Angular models and controllers (all optional)
 
 - **NullablesAlsoUndefined**    `bool: default false`    If set to true, all nullable properties (those exported with `| null`) will additional have `| undefined` added to the type.
 
-For TypeScript and Angular controllers (all optional):
+For TypeScript, Angular, Swift and Kotlin controllers (all optional):
 
-- **ModelPath**    `string`    Path to a file containing definitions for any custom types used in your service communications (excluding the extension, as is usual for TypeScript includes). Ideally, this is the file exported by the model export part of this application.
+- **ModelPath**    `string`    Path to a file containing definitions for any custom types used in your service communications (excluding the extension, as is usual for TypeScript includes). Ideally, this is the file exported by the model export part of this application. (not used by Swift exporter)
 
 - **HelperFile**    `string`    The service communication export requires some extra code to handle the boilerplate requests.  This is the name of the file that should be exported.  If omitted, the code will be included at the top of the exported service communications file, which may cause issues if you're exporting from multiple projects.
+
+For TypeScript and Angular controllers (all optional):
 
 - **ErrorHandlerPath**    `string`    If an error is received from the requested endpoint, it will be absorbed (although it will always be seen in the browser console).  The response will include the error details if you want to handle it from the calling class, but if you always want to show a message to the user (e.g. using a SnackBar), you can provide an error handler, as below:
   
@@ -621,7 +671,7 @@ For Ocelot controllers (all optional):
 
 - **ExcludeScopes**    `bool`    If true, the "AllowedScopes" section of the Ocelot config will not be outputted.
 
-For Kotlin and Proto Models (required)
+For Kotlin and Proto Models, and Kotlin Controllers (required)
 
 - **PackageNamespace**    `string`    Namespace to be used when generating `.kt` and `.proto` file outputs. For example, the PackageNamespace value of 'com.wckdzr' produces the following header:
   

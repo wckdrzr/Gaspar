@@ -179,7 +179,7 @@ namespace WCKDRZR.Gaspar.Converters
 
             if (indexSignature != null)
             {
-                lines.Add($"{Indent(1)}{ConvertIndexType(indexSignature, outputConfig)};");
+                lines.Add($"{Indent(1)}{ConvertIndexType(indexSignature, outputConfig)}");
             }
 
             foreach (Property member in model.Fields.Concat(model.Properties))
@@ -286,14 +286,184 @@ namespace WCKDRZR.Gaspar.Converters
             return lines;
         }
 
+        private List<string> ControllerPackages(ConfigurationTypeOutput outputConfig)
+        {
+            List<string> lines = [
+                "import android.util.Log",
+                "import kotlinx.serialization.Serializable",
+                "import okhttp3.Headers",
+                "import okhttp3.OkHttpClient",
+                "import okhttp3.Request",
+                "import okhttp3.MultipartBody",
+                "import okhttp3.RequestBody",
+                "import okhttp3.Response",
+                "import okhttp3.MediaType.Companion.toMediaTypeOrNull",
+                "import okhttp3.RequestBody.Companion.toRequestBody",
+                "import java.time.Duration",
+                "import kotlinx.serialization.ExperimentalSerializationApi",
+                "import kotlinx.serialization.json.Json",
+                "import kotlinx.serialization.serializer",
+                "import kotlinx.coroutines.Dispatchers",
+                "import kotlinx.coroutines.withContext",
+                "",
+            ];
+            if (outputConfig.ModelPath != null) {
+                lines.Add($"import {outputConfig.ModelPath}.*");
+            }
+
+            return lines;            
+        }
+
         public List<string> ControllerHelperFile(ConfigurationTypeOutput outputConfig)
         {
-            return new();
+            List<string> lines = [
+                $"package {outputConfig.PackageNamespace}",
+                "",
+                ..ControllerPackages(outputConfig)
+            ];
+            
+            lines.Add("@Serializable");
+            lines.Add("class ActionResultError {");
+            lines.Add("    var detail: String?");
+            lines.Add("    var instance: String? = null");
+            lines.Add("    var status: Int");
+            lines.Add("    var title: String");
+            lines.Add("    var traceId: String? = null");
+            lines.Add("    var type: String? = null");
+            lines.Add("    constructor(title: String, detail: String?, status: Int) {");
+            lines.Add("        this.title = title");
+            lines.Add("        this.detail = detail");
+            lines.Add("        this.status = status");
+            lines.Add("    }");
+            lines.Add("}");
+            lines.Add("@Serializable");
+            lines.Add("class ServiceResponse<T> {");
+            lines.Add("    var data: T?");
+            lines.Add("    var error: ActionResultError?");
+            lines.Add("    val success: Boolean");
+            lines.Add("    val hasError: Boolean");
+            lines.Add("    constructor(data: T?, error: ActionResultError?) {");
+            lines.Add("        this.data = data");
+            lines.Add("        this.error = error");
+            lines.Add("        this.success = error == null");
+            lines.Add("        this.hasError = error != null");
+            lines.Add("    }");
+            lines.Add("}");
+            lines.Add("@Serializable");
+            lines.Add("class VoidObject");
+            lines.Add("");
+            lines.Add("class GasparServiceHelper {");
+            lines.Add("    private val client: OkHttpClient = OkHttpClient.Builder()");
+            lines.Add("        .callTimeout(Duration.ofSeconds(30))");
+            lines.Add("        .build()");
+            lines.Add("    fun fetchVoid(method: String, url: String, body: Any? = null, headers: Headers? = null): ServiceResponse<VoidObject> {");
+            lines.Add("        return fetch<VoidObject>(method, url, body, headers)");
+            lines.Add("    }");
+            lines.Add("    inline fun <reified T> fetch(method: String, url: String, body: Any? = null, headers: Headers? = null): ServiceResponse<T> {");
+            lines.Add("        try {");
+            lines.Add("            val response = load(method, url, body, headers)");
+            lines.Add("            response.use {");
+            lines.Add("                return if (it.code in 200..299) {");
+            lines.Add("                    success(it, url)");
+            lines.Add("                } else {");
+            lines.Add("                    serverError(it, url)");
+            lines.Add("                }");
+            lines.Add("            }");
+            lines.Add("        } catch (e: Exception) {");
+            lines.Add("            return loadException(e, url)");
+            lines.Add("        }");
+            lines.Add("    }");
+            lines.Add("    @OptIn(ExperimentalSerializationApi::class)");
+            lines.Add("    @PublishedApi internal fun load(method: String, url: String, body: Any?, headers: Headers?): Response {");
+            lines.Add("        val jsonMediaType = \"application/json; charset=utf-8\".toMediaTypeOrNull()");
+            lines.Add("        var bodyData: RequestBody? = null");
+            lines.Add("        body?.let { body ->");
+            lines.Add("            bodyData = when (body) {");
+            lines.Add("                is String -> Json.encodeToString(body)");
+            lines.Add("                else -> {");
+            lines.Add("                    try {");
+            lines.Add("                        val bodySerializer = serializer(body::class, emptyList(), false)");
+            lines.Add("                        Json.encodeToString(bodySerializer, body)");
+            lines.Add("                    } catch (_: Exception) {");
+            lines.Add("                        body.toString()");
+            lines.Add("                    }");
+            lines.Add("                }");
+            lines.Add("            }.toRequestBody(jsonMediaType)");
+            lines.Add("        }");
+            lines.Add("        val request = Request.Builder()");
+            lines.Add("            .method(method, bodyData)");
+            lines.Add("            .url(url)");
+            lines.Add("            .headers(headers ?: Headers.Builder().build())");
+            lines.Add("            .build()");
+            lines.Add("        return client.newCall(request).execute()");
+            lines.Add("    }");
+            lines.Add("    @PublishedApi internal inline fun <reified T> success(httpResponse: Response, url: String): ServiceResponse<T> {");
+            lines.Add("        try {");
+            lines.Add("            val responseBody = httpResponse.body.string()");
+            lines.Add("            if (T::class == String::class) {");
+            lines.Add("                return ServiceResponse(responseBody as? T, null)");
+            lines.Add("            }");
+            lines.Add("            if (responseBody.isBlank()) {");
+            lines.Add("                return ServiceResponse(null, null)");
+            lines.Add("            }");
+            lines.Add("            val response = Json.decodeFromString<T>(responseBody)");
+            lines.Add("            return ServiceResponse(");
+            lines.Add("                response,");
+            lines.Add("                null");
+            lines.Add("            )");
+            lines.Add("        } catch (e: Exception) {");
+            lines.Add("            logMessage(\"Gaspar: Unable to deserialize successful response from $url\\n${e.message}\")");
+            lines.Add("            return error(\"Gaspar: Unable to deserialize successful response from $url\", e.message, 0)");
+            lines.Add("        }");
+            lines.Add("    }");
+            lines.Add("    @PublishedApi internal fun <T> serverError(httpResponse: Response, url: String): ServiceResponse<T> {");
+            lines.Add("        var response = ServiceResponse<T>(null, null)");
+            lines.Add("        val responseBody = httpResponse.body.string()");
+            lines.Add("        try {");
+            lines.Add("            response.error = Json.decodeFromString<ActionResultError>(responseBody)");
+            lines.Add("        } catch (_: Exception) {");
+            lines.Add("            response = error(\"Gaspar: Service call to $url failed to connect\", responseBody, httpResponse.code)");
+            lines.Add("        }");
+            lines.Add("        logMessage(\"Gaspar: Service call to $url failed with status code ${httpResponse.code}\" +");
+            lines.Add("            (if (response.error != null && response.error?.detail?.isNotEmpty() == true) \"\\n${response.error?.detail ?: \"\"}\" else \"\"))");
+            lines.Add("        return response");
+            lines.Add("    }");
+            lines.Add("    @PublishedApi internal fun <T> loadException(exception: Exception, url: String): ServiceResponse<T> {");
+            lines.Add("        val message = exception.message");
+            lines.Add("        logMessage(\"Gaspar: Service call to $url failed to connect\\n$message\")");
+            lines.Add("        return error(\"Gaspar: Service call to $url failed to connect\", message, 0)");
+            lines.Add("    }");
+            lines.Add("    @PublishedApi internal fun <T> error(title: String, detail: String?, status: Int): ServiceResponse<T> {");
+            lines.Add("        return ServiceResponse(");
+            lines.Add("            null,");
+            lines.Add("            ActionResultError(title, detail, status)");
+            lines.Add("        )");
+            lines.Add("    }");
+            lines.Add("    @PublishedApi internal fun logMessage(message: String) {");
+            lines.Add("        Log.d(\"Gaspar\", message)");
+            lines.Add("    }");
+            lines.Add("}");
+
+            lines.Add("");
+            return lines;
         }
 
         public List<string> ControllerHeader(ConfigurationTypeOutput outputConfig, List<string> customTypes)
         {
-            return new();
+            List<string> lines = new();
+
+            if (outputConfig.HelperFile == null)
+            {
+                lines.AddRange(ControllerHelperFile(outputConfig));
+            }
+            else
+            {
+                lines.Add($"package {outputConfig.PackageNamespace}");
+                lines.Add("");
+                lines.AddRange(ControllerPackages(outputConfig));
+            }
+
+            return lines;
         }
 
         public List<string> ControllerFooter()
@@ -303,7 +473,139 @@ namespace WCKDRZR.Gaspar.Converters
 
         public List<string> ConvertController(List<ControllerAction> actions, string outputClassName, ConfigurationTypeOutput outputConfig, bool lastController)
         {
-            return new();
+            List<string> lines = new();
+
+            lines.Add($"class {outputClassName}Service {{");
+
+            foreach (ControllerAction action in actions)
+            {
+                List<string> parameters = new();
+                foreach (Parameter parameter in action.Parameters)
+                {
+                    string newParam = $"{parameter.Identifier}: {ConvertType($"{parameter.Type}")}";
+                    if (parameter.DefaultValue != null)
+                    {
+                        newParam += $" = {parameter.DefaultValue}";
+                    }
+                    parameters.Add(newParam);
+                }
+
+                if (outputConfig.UrlPrefix != null)
+                {
+                    parameters.AddRange(Regex.Matches(outputConfig.UrlPrefix, "{param:(.*?)}").Select(m => $"string {m.Groups[1].Value}").ToList());
+                }
+
+                if (action.BadMethodReason != null)
+                {
+                    lines.Add($"    @Deprecated(\"{action.BadMethodReason}\", level = DeprecationLevel.ERROR)");
+                    lines.Add($"    fun {action.ActionName}({string.Join(", ", parameters)}) {{ }}");
+                    lines.Add($"    @Deprecated(\"{action.BadMethodReason}\", level = DeprecationLevel.ERROR)");
+                    lines.Add($"    suspend fun {action.ActionName}Async({string.Join(", ", parameters)}) {{ }}");
+                }
+                else
+                {
+                    string httpMethod = action.HttpMethod.ToUpper();
+
+                    string url = outputConfig.AddUrlPrefix(action.Route).Replace("{param:", "{");
+                    url += action.Parameters.QueryString(OutputType.CSharp);
+
+                    string returnTypeString = "";
+                    string fetchMethodName = "fetchVoid";
+                    if (action.ReturnTypeOverride != null)
+                    {
+                        returnTypeString = $"<{ConvertType(action.ReturnTypeOverride)}>";
+                        fetchMethodName = "fetch";
+                    }
+                    else if (action.ReturnType != null)
+                    {
+                        returnTypeString = ConvertType(action.ReturnType.ToString());
+                        if ((action.ReturnType is PredefinedTypeSyntax && action.ReturnType is not NullableTypeSyntax && returnTypeString != "string") || returnTypeString == "DateTime")
+                        {
+                            returnTypeString += "?";
+                        }
+                        returnTypeString = $"<{returnTypeString}>";
+                        fetchMethodName = "fetch";
+                    }
+
+                    if (returnTypeString == "<ContentResult>") { returnTypeString = "<String>"; }
+                    if (returnTypeString == "<JsonResult>") { returnTypeString = "<Any>"; }
+
+
+                    if (action.Headers != null)
+                    {
+                        parameters.Add($"headers: {action.ActionName}Headers");
+                    }
+
+                    string? bodyParameter = action.Parameters.FirstOrDefault(p => p.Source == ParameterSource.Body)?.Identifier;
+
+                    List<string> formParamsBuilder = new();
+                    IEnumerable<Parameter> formParameters = action.Parameters.Where(p => p.Source == ParameterSource.Form);
+                    if (formParameters.Any())
+                    {
+                        formParamsBuilder.Add("val data = MultipartBody.Builder()");
+                        formParamsBuilder.Add("    .setType(MultipartBody.FORM)");
+                        bodyParameter = "data";
+                        foreach (Parameter parameter in formParameters)
+                        {
+                            string type = ConvertType($"{parameter.Type}");
+                            if (type.StartsWith("byte[]"))
+                            {
+                                formParamsBuilder.Add($"    .addFormDataPart(\"{parameter.Identifier}\", \"{parameter.Identifier}\", {parameter.Identifier}.toRequestBody(\"application/octet-stream\".toMediaTypeOrNull()))");
+                            }
+                            else
+                            {
+                                formParamsBuilder.Add($"    .addFormDataPart(\"{parameter.Identifier}\", {parameter.Identifier}.toString())");
+                            }
+                        }
+                        formParamsBuilder.Add("    .build()");
+                    }
+
+                    List<string> headerParamBuilder = new();
+                    string headersParam = "null";
+                    IEnumerable<Parameter> headerParameters = action.Parameters.Where(p => p.Source == ParameterSource.Header);
+                    if (headerParameters.Any() || action.Headers != null)
+                    {
+                        headersParam = "headersToSend";
+                        headerParamBuilder.Add($"val headersToSend = Headers.Builder()");
+                        foreach (string header in action.Headers?.ToList() ?? new())
+                        {
+                            headerParamBuilder.Add($"    .add(\"{header}\", headers.{header})");
+                        }
+                        foreach (Parameter parameter in headerParameters)
+                        {
+                            headerParamBuilder.Add($"    .add(\"{parameter.Identifier}\", {parameter.Identifier}.toString())");
+                        }
+                        headerParamBuilder.Add("    .build()");
+                    }
+
+                    List<string> asyncArguments = action.Parameters.Select(p => p.Identifier).ToList();
+                    if (outputConfig.UrlPrefix != null)
+                    {
+                        asyncArguments.AddRange(Regex.Matches(outputConfig.UrlPrefix, "{param:(.*?)}").Select(m => m.Groups[1].Value).ToList());
+                    }
+                    if (action.Headers != null)
+                    {
+                        asyncArguments.Add("headers");
+                    }
+
+                    if (action.Headers != null)
+                    {
+                        lines.Add($"    data class {action.ActionName}Headers({string.Join(", ", action.Headers.Select(h => $"val {h}: String"))})");
+                    }
+                    lines.Add($"    fun {ConvertIdentifier(action.ActionName)}({string.Join(", ", parameters)}): ServiceResponse{returnTypeString} {{");
+                    lines.AddRange(formParamsBuilder.Select(f => $"        {f}"));
+                    lines.AddRange(headerParamBuilder.Select(f => $"        {f}"));
+                    lines.Add($"        return GasparServiceHelper().{fetchMethodName}{returnTypeString}(\"{httpMethod}\", \"{url}\", {bodyParameter ?? "null"}, {headersParam})");
+                    lines.Add($"    }}");
+                    lines.Add($"    suspend fun {ConvertIdentifier(action.ActionName)}Async({string.Join(", ", parameters)}): ServiceResponse{returnTypeString} {{");
+                    lines.Add($"        return withContext(Dispatchers.IO) {{ {ConvertIdentifier(action.ActionName)}({string.Join(", ", asyncArguments)}) }}");
+                    lines.Add($"    }}");
+                }
+            }
+            lines.Add($"}}");
+            lines.Add("");
+
+            return lines;
         }
 
 
