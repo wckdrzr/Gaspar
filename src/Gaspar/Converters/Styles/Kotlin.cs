@@ -305,12 +305,12 @@ namespace WCKDRZR.Gaspar.Converters
                 "import kotlinx.serialization.serializer",
                 "import kotlinx.coroutines.Dispatchers",
                 "import kotlinx.coroutines.withContext",
-                "",
             ];
             if (outputConfig.ModelPath != null) {
                 lines.Add($"import {outputConfig.ModelPath}.*");
             }
 
+            lines.Add("");
             return lines;            
         }
 
@@ -554,7 +554,7 @@ namespace WCKDRZR.Gaspar.Converters
                             }
                             else
                             {
-                                formParamsBuilder.Add($"    .addFormDataPart(\"{parameter.Identifier}\", {parameter.Identifier}.toString())");
+                                formParamsBuilder.Add($"    .addFormDataPart(\"{parameter.Identifier}\", {parameter.Identifier}{(parameter.Type?.ToString() != "string" ? ".toString()" : "")})");
                             }
                         }
                         formParamsBuilder.Add("    .build()");
@@ -573,7 +573,7 @@ namespace WCKDRZR.Gaspar.Converters
                         }
                         foreach (Parameter parameter in headerParameters)
                         {
-                            headerParamBuilder.Add($"    .add(\"{parameter.Identifier}\", {parameter.Identifier}.toString())");
+                            headerParamBuilder.Add($"    .add(\"{parameter.Identifier}\", {parameter.Identifier}{(parameter.Type?.ToString() != "string" ? ".toString()" : "")})");
                         }
                         headerParamBuilder.Add("    .build()");
                     }
