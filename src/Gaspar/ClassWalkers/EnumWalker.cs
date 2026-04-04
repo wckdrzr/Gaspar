@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using WCKDRZR.Gaspar.Extensions;
 using WCKDRZR.Gaspar.Models;
 using Microsoft.CodeAnalysis;
@@ -44,6 +43,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                     values[member.Identifier.ToString()] =
                         member.AttributeLists.StringAttributeValue("Value")
                         ?? member.AttributeLists.StringAttributeValue("Name")
+                        ?? member.AttributeLists.StringValueOfAttribute("JsonStringEnumMemberName")
                         ?? (
                             member.EqualsValue != null
                                 ? member.EqualsValue.Value.ToString()
