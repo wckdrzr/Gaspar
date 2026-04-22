@@ -565,7 +565,7 @@ namespace WCKDRZR.Gaspar.Converters
                         }
                         foreach (Parameter parameter in headerParameters)
                         {
-                            headerParamBuilder.Add($"    \"{parameter.Identifier}\": String({parameter.Identifier}),");
+                            headerParamBuilder.Add($"    \"{parameter.Identifier}\": String(describing: {parameter.Identifier}),");
                         }
                         if (formParameters.Any())
                         {
