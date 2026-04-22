@@ -454,7 +454,7 @@ namespace WCKDRZR.Gaspar.Converters
                 List<string> parameters = new();
                 foreach (Parameter parameter in action.Parameters)
                 {
-                    string newParam = $"{parameter.Identifier}: {ConvertType($"{parameter.Type}")}";
+                    string newParam = $"{parameter.Identifier}: {ParseType($"{parameter.Type}", outputConfig)}";
                     if (parameter.DefaultValue != null)
                     {
                         newParam += $" = {parameter.DefaultValue}";
