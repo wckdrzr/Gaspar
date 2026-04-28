@@ -505,7 +505,7 @@ namespace WCKDRZR.Gaspar.Converters
                 {
                     string httpMethod = action.HttpMethod.ToUpper();
 
-                    string url = outputConfig.AddUrlPrefix(action.Route).Replace("{param:", "{");
+                    string url = outputConfig.AddUrlPrefix(action.Route).Replace("{", "${").Replace("{param:", "{");
                     url += action.Parameters.QueryString(OutputType.CSharp);
 
                     string returnTypeString = "";
