@@ -161,8 +161,8 @@ namespace WCKDRZR.Gaspar.Converters
 
             if (model.Enumerations.Count > 0)
             {
-                lines.Add($"{Indent(1)}var id: Int = 0");
-                lines.Add($"{Indent(1)}var name: String = \"\"");
+                model.Properties.Insert(0, new Property { Identifier = "name", Type = "string" });
+                model.Properties.Insert(0, new Property { Identifier = "id", Type = "int" });
             }
 
             if (indexSignature != null)
