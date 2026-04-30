@@ -389,6 +389,9 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("                }");
             lines.Add("            }");
             lines.Add("        }");
+            lines.Add("        if (bodyData == null && method in setOf(\"POST\", \"PUT\", \"PATCH\")) {");
+            lines.Add("            bodyData = ByteArray(0).toRequestBody(null)");
+            lines.Add("        }");
             lines.Add("        val request = Request.Builder()");
             lines.Add("            .method(method, bodyData)");
             lines.Add("            .url(url)");
