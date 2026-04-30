@@ -266,6 +266,18 @@ namespace WCKDRZR.Gaspar.Converters
                 lines.Add($"enum {enumModel.Identifier}: {(numeric ? "Double" : "String")}, Codable, CaseIterable {{");
                 lines.Add($"    case {string.Join(", ", enumModel.Values.Select(v => ConvertIdentifier(v.Key) + $" = {(double.TryParse(v.Value?.ToString(), out double num) ? num : $"\"{v.Value}\"")}"))}");
             }
+            else if (Config.Models?.UseEnumValue == true)
+            {
+                lines.Add($"enum {enumModel.Identifier}: Double, Codable, CaseIterable {{");
+                string caseLine = "";
+
+                List<string> keys = enumModel.Values.Keys.ToList();
+                for (int i = 0; i < keys.Count; i++)
+                {
+                    caseLine += $"{(caseLine != "" ? ", " : "")}{ConvertIdentifier(keys[i])} = {i}";
+                }
+                lines.Add($"    case {caseLine}");
+            }
             else
             {
                 lines.Add($"enum {enumModel.Identifier}: Codable {{");

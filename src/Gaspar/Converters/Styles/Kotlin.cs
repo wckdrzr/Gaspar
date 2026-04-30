@@ -237,17 +237,23 @@ namespace WCKDRZR.Gaspar.Converters
             bool numeric = enumModel.Values.Any(e => double.TryParse(e.Value?.ToString(), out _));
             string? valueType = enumModel.Values.Any(e => e.Value != null) ? (numeric ? "Float" : "String") : null;
 
-            if (valueType != null)
+            if (valueType != null || Config.Models?.UseEnumValue == true)
             {
                 lines.Add($"@Serializable(with = {enumModel.Identifier}Serializer::class)");
             }
-            lines.Add($"enum class {enumModel.Identifier}{(valueType != null ? $"(val value: {valueType})" : "")} {{");
+            lines.Add($"enum class {enumModel.Identifier}{(valueType != null ? $"(val value: {valueType})" : (Config.Models?.UseEnumValue == true ? $"(val value: Float)" : ""))} {{");
 
+            int i = 0;
             foreach (KeyValuePair<string, object?> value in enumModel.Values)
             {
                 if (valueType != null)
                 {
                     lines.Add($"    {value.Key}({(numeric ? $"{value.Value}f" : $"\"{value.Value}\"")}),");
+                }
+                else if (Config.Models?.UseEnumValue == true)
+                {
+                    lines.Add($"    {value.Key}({i}f),");
+                    i++;
                 }
                 else
                 {
@@ -255,6 +261,11 @@ namespace WCKDRZR.Gaspar.Converters
                 }
             }
             lines.Add("}");
+
+            if (valueType == null && Config.Models?.UseEnumValue == true)
+            {
+                valueType = "Float";
+            }
 
             if (valueType != null)
             {
