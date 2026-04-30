@@ -112,7 +112,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                 .Select(f => new Property
                                 {
                                     Identifier = f.Declaration.Variables.First().GetText().ToString(),
-                                    Type = f.Declaration.Type.ToString(),
+                                    Type = f.AttributeLists.StringAttributeValue(nameof(options.TypeOverride)) ?? f.Declaration.Type.ToString(),
                                     JsonPropertyName = f.AttributeLists.StringValueOfAttribute("JsonPropertyName"),
                                     ExportFor = f.GetExportType(_config, nodeOutputType),
                                 }).ToList(),
@@ -122,7 +122,7 @@ namespace WCKDRZR.Gaspar.ClassWalkers
                                 .Select(p => new Property
                                 {
                                     Identifier = p.Identifier.ToString(),
-                                    Type = p.Type.ToString(),
+                                    Type = p.AttributeLists.StringAttributeValue(nameof(options.TypeOverride)) ?? p.Type.ToString(),
                                     DefaultValue = p.Initializer?.Value.ToString(),
                                     JsonPropertyName = p.AttributeLists.StringValueOfAttribute("JsonPropertyName"),
                                     ExportFor = p.GetExportType(_config, nodeOutputType),

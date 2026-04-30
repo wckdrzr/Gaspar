@@ -154,6 +154,10 @@ The class provided must implement a generic `Deserialize<T>` method that returns
 
 - `[ExportFor(GasparType.Angular, ReturnTypeOverride = "MyType"]`
 
+**TypeOverride**    `string`    Similar to above, but for properties and fields.  Allows you to override the type name that is generated.  Particularly useful for Enumerator output. Use as follows:
+
+- `[ExportOptions(TypeOverride = "List<Enum_Properties>"]`
+
 **Headers**    `Array of strings`    For controller actions, this allows you to specify headers that will be sent with the request.  You can already use `[FromHeader]`, but this can report missing headers back to the user.  The `Headers` options keeps header properties hidden from users calling the endpoint incorrectly; whist allowing you to see and specify the values from your calling code.
 
 Specifying an empty array will add a `Dictionary<string, string>` property (or equivalent) to allow any number of name/values pairs, defined when calling.

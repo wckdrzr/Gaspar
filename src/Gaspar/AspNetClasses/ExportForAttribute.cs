@@ -30,6 +30,11 @@ namespace WCKDRZR.Gaspar
         public string? ReturnTypeOverride { get; set; }
 
         /// <summary>
+        /// Allows you to override the type name that is generated.  Particularly useful for Enumerator output.
+        /// </summary>
+        public string? TypeOverride { get; set; }
+
+        /// <summary>
         /// For C# Service Communications, if the JSON returned by the decorated action won't deserialize through the Newtonsoft serializer, add the name of your custom serialize class (use nameof()).
         /// </summary>
         public string? Serializer { get; set; }
