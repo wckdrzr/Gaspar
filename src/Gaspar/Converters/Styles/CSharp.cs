@@ -195,7 +195,12 @@ namespace WCKDRZR.Gaspar.Converters
                         }
                         foreach (Parameter parameter in headerParameters)
                         {
-                            headerParamBuilder.Add($"headersToSend.Add(\"{parameter.Identifier}\", {parameter.Identifier}.ToString());");
+                            string toStringStatement = ".ToString()";
+                            if (IsOptional(parameter.Type, outputConfig))
+                            {
+                                toStringStatement = "?.ToString() ?? \"\"";
+                            }
+                            headerParamBuilder.Add($"headersToSend.Add(\"{parameter.Identifier}\", {parameter.Identifier}{toStringStatement});");
                         }
                     }
 
@@ -260,6 +265,15 @@ namespace WCKDRZR.Gaspar.Converters
         public List<string> ModelNamespace(Model model, ConfigurationTypeOutput outputConfig)
         {
             throw new NotImplementedException();
+        }
+        
+        private bool IsOptional(TypeSyntax? type, ConfigurationTypeOutput outputConfig)
+            => IsOptional(type?.ToString() ?? "", outputConfig);
+        private bool IsOptional(string propertyName, ConfigurationTypeOutput outputConfig)
+        {
+            List<string> explicitlyNulled = new() { "number", "boolean", "any" };
+            return propertyName.EndsWith("?")
+                || (outputConfig.AddInferredNullables && !explicitlyNulled.Contains(propertyName));
         }
     }
 }

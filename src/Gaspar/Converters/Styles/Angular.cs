@@ -275,7 +275,12 @@ namespace WCKDRZR.Gaspar.Converters
                         headerParams.Add($"let headersToSend: Record<string, string> = {(action.Headers == null ? "{}" : "headers")}");
                         foreach (Parameter parameter in headerParameters)
                         {
-                            headerParams.Add($"if ({parameter.Identifier}) {{ headersToSend['{parameter.Identifier}'] = {parameter.Identifier}.toString(); }}");
+                            string toStringStatement = ".toString()";
+                            if (IsOptional(parameter.Type, outputConfig))
+                            {
+                                toStringStatement = "?.toString() ?: \"\"";
+                            }
+                            headerParams.Add($"if ({parameter.Identifier}) {{ headersToSend['{parameter.Identifier}'] = {parameter.Identifier}{toStringStatement}; }}");
                         }
                     }
                     if (httpMethod == "get" && headerParams.Any())
@@ -342,6 +347,15 @@ namespace WCKDRZR.Gaspar.Converters
         public void PreProcess(CSharpFiles files)
         {
             return;
+        }
+
+        private bool IsOptional(TypeSyntax? type, ConfigurationTypeOutput outputConfig)
+            => IsOptional(type?.ToString() ?? "", outputConfig);
+        private bool IsOptional(string propertyName, ConfigurationTypeOutput outputConfig)
+        {
+            List<string> explicitlyNulled = new() { "number", "boolean", "any" };
+            return propertyName.EndsWith("?")
+                || (outputConfig.AddInferredNullables && !explicitlyNulled.Contains(propertyName));
         }
     }
 }

@@ -604,7 +604,12 @@ namespace WCKDRZR.Gaspar.Converters
                         requestOptions["headers"] = "headersToSend";
                         foreach (Parameter parameter in headerParameters)
                         {
-                            headerParams.Add($"if ({parameter.Identifier}) {{ headersToSend['{parameter.Identifier}'] = {parameter.Identifier}.toString(); }}");
+                            string toStringStatement = ".toString()";
+                            if (IsOptional(parameter.Type, outputConfig))
+                            {
+                                toStringStatement = "?.toString() ?: \"\"";
+                            }
+                            headerParams.Add($"if ({parameter.Identifier}) {{ headersToSend['{parameter.Identifier}'] = {parameter.Identifier}{toStringStatement}; }}");
                         }
                     }
 
@@ -758,6 +763,8 @@ namespace WCKDRZR.Gaspar.Converters
             return prefix;
         }
 
+        private bool IsOptional(TypeSyntax? type, ConfigurationTypeOutput outputConfig)
+            => IsOptional(type?.ToString() ?? "", outputConfig);
         private bool IsOptional(string propertyName, ConfigurationTypeOutput outputConfig)
         {
             List<string> explicitlyNulled = new() { "number", "boolean", "any" };

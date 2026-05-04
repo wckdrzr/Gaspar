@@ -590,7 +590,12 @@ namespace WCKDRZR.Gaspar.Converters
                         }
                         foreach (Parameter parameter in headerParameters)
                         {
-                            headerParamBuilder.Add($"    .add(\"{parameter.Identifier}\", {parameter.Identifier}{(parameter.Type?.ToString() != "string" ? ".toString()" : "")})");
+                            string toStringStatement = ".toString()";
+                            if (IsOptional(parameter.Type, outputConfig))
+                            {
+                                toStringStatement = "?.toString() ?: \"\"";
+                            }
+                            headerParamBuilder.Add($"    .add(\"{parameter.Identifier}\", {parameter.Identifier}{(parameter.Type?.ToString() != "string" ? toStringStatement : "")})");
                         }
                         headerParamBuilder.Add("    .build()");
                     }
@@ -770,6 +775,8 @@ namespace WCKDRZR.Gaspar.Converters
             return "";
         }
 
+        private bool IsOptional(TypeSyntax? type, ConfigurationTypeOutput outputConfig)
+            => IsOptional(type?.ToString() ?? "", outputConfig);
         private bool IsOptional(string propertyName, ConfigurationTypeOutput outputConfig)
         {
             List<string> explicitlyNulled = new() { "number", "boolean", "any" };
