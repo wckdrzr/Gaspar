@@ -278,7 +278,7 @@ namespace WCKDRZR.Gaspar.Converters
                             string toStringStatement = ".toString()";
                             if (IsOptional(parameter.Type, outputConfig))
                             {
-                                toStringStatement = "?.toString() ?: \"\"";
+                                toStringStatement = "?.toString() ?? \"\"";
                             }
                             headerParams.Add($"if ({parameter.Identifier}) {{ headersToSend['{parameter.Identifier}'] = {parameter.Identifier}{toStringStatement}; }}");
                         }
