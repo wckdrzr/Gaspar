@@ -526,12 +526,12 @@ namespace WCKDRZR.Gaspar.Converters
                     string fetchMethodName = "fetchVoid";
                     if (action.ReturnTypeOverride != null)
                     {
-                        returnTypeString = $"<{ConvertType(action.ReturnTypeOverride)}>";
+                        returnTypeString = $"<{ParseType(action.ReturnTypeOverride, outputConfig)}>";
                         fetchMethodName = "fetch";
                     }
                     else if (action.ReturnType != null)
                     {
-                        returnTypeString = ConvertType(action.ReturnType.ToString());
+                        returnTypeString = ParseType(action.ReturnType.ToString(), outputConfig);
                         if ((action.ReturnType is PredefinedTypeSyntax && action.ReturnType is not NullableTypeSyntax && returnTypeString != "string") || returnTypeString == "DateTime")
                         {
                             returnTypeString += "?";
