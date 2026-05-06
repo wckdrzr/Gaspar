@@ -552,7 +552,7 @@ namespace WCKDRZR.Gaspar.Converters
                 else
                 {
                     string url = outputConfig.AddUrlPrefix(action.Route).Replace("{", "${").Replace("{param:", "{");
-                    url += action.Parameters.QueryString(OutputType.TypeScript, "$");
+                    url += action.Parameters.QueryString(OutputType.TypeScript);
                     if (!string.IsNullOrEmpty(outputConfig.UrlHandlerFunction))
                     {
                         url = $"{outputConfig.UrlHandlerFunction}(`{url}`)";

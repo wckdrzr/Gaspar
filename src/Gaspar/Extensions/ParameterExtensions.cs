@@ -7,18 +7,25 @@ namespace WCKDRZR.Gaspar.Extensions
 {
     internal static class ParameterExtensions
     {
-        public static string QueryString(this List<Parameter> parameters, OutputType outputType, string variablePrefix = "")
+        public static string QueryString(this List<Parameter> parameters, OutputType outputType)
         {
             string qs = "";
 
-            string coalesceMark = "";
+            string coalesceMark = "??";
+            string variableOpener = "{";
+            string variableCloser = "}";
             switch (outputType) {
                 case OutputType.Angular:
                 case OutputType.TypeScript:
                     coalesceMark = "||";
+                    variableOpener = "${";
                     break;
-                case OutputType.CSharp:
-                    coalesceMark = "??";
+                case OutputType.Swift:
+                    variableOpener = "\\(";
+                    variableCloser = ")";
+                    break;
+                case OutputType.Kotlin:
+                    coalesceMark = "?:";
                     break;
                 case OutputType.Python:
                     coalesceMark = "or";
@@ -48,7 +55,7 @@ namespace WCKDRZR.Gaspar.Extensions
 
                 string parameterIdentifier = parameter.Identifier;
 
-                qs += parameterIdentifier + "=" + variablePrefix + "{" + parameterIdentifier + coalesce + "}" + (i < queryStringParameters.Count - 1 ? "&" : "");
+                qs += parameterIdentifier + "=" + variableOpener + parameterIdentifier + coalesce + variableCloser + (i < queryStringParameters.Count - 1 ? "&" : "");
 
                 i++;
             }

@@ -229,7 +229,7 @@ namespace WCKDRZR.Gaspar.Converters
                 else
                 {
                     string url = outputConfig.AddUrlPrefix(action.Route).Replace("{", "${").Replace("{param:", "{");;
-                    url += action.Parameters.QueryString(OutputType.Angular, "$");
+                    url += action.Parameters.QueryString(OutputType.Angular);
                     if (!string.IsNullOrEmpty(outputConfig.UrlHandlerFunction))
                     {
                         url = $"{outputConfig.UrlHandlerFunction}(`{url}`)";

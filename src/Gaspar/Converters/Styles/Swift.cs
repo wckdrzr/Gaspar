@@ -490,7 +490,7 @@ namespace WCKDRZR.Gaspar.Converters
 
                     string url = outputConfig.AddUrlPrefix(action.Route).Replace("{param:", "{");
                     url = Regex.Replace(url, "{(.*?)}", "\\($1)");
-                    url += action.Parameters.QueryString(OutputType.CSharp);
+                    url += action.Parameters.QueryString(OutputType.Swift);
 
                     string returnTypeString = "";
                     string fetchMethodName = "fetchVoid";
