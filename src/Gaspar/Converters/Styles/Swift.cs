@@ -446,6 +446,11 @@ namespace WCKDRZR.Gaspar.Converters
             {
                 lines.AddRange(ControllerHelperFile(outputConfig));
             }
+            else
+            {
+                lines.Add("import Foundation");
+                lines.Add("");
+            }
 
             return lines;
         }
