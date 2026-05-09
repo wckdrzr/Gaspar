@@ -476,7 +476,7 @@ namespace WCKDRZR.Gaspar.Converters
 
                 if (outputConfig.UrlPrefix != null)
                 {
-                    parameters.AddRange(Regex.Matches(outputConfig.UrlPrefix, "{param:(.*?)}").Select(m => $"string {m.Groups[1].Value}").ToList());
+                    parameters.AddRange(Regex.Matches(outputConfig.UrlPrefix, "{param:(.*?)}").Select(m => $"{m.Groups[1].Value}: String").ToList());
                 }
 
                 if (action.BadMethodReason != null)
