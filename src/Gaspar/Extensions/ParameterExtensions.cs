@@ -26,6 +26,7 @@ namespace WCKDRZR.Gaspar.Extensions
                     break;
                 case OutputType.Kotlin:
                     coalesceMark = "?:";
+                    variableOpener = "${";
                     break;
                 case OutputType.Python:
                     coalesceMark = "or";
