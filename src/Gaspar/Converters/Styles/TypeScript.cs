@@ -68,13 +68,13 @@ namespace WCKDRZR.Gaspar.Converters
         public TypeScriptConverter(Configuration config, List<Model> allModels)
         {
             Config = config;
+        }
 
-            ConfigurationTypeOutput modelOutputConfig = config.Models == null
+        public void PrepareForControllerOutput(List<Model> allModels, ConfigurationTypeOutput controllerOutputConfig)
+        {
+            ConfigurationTypeOutput modelOutputConfig = Config.Models == null
                 ? new() { Type = OutputType.TypeScript, Location = "" }
-                : config.Models.Output.FirstOrDefault(c => c.Type == OutputType.TypeScript) ?? config.Models.Output[0];
-            ConfigurationTypeOutput controllerOutputConfig = config.Controllers == null
-                ? new() { Type = OutputType.TypeScript, Location = "" }
-                : config.Controllers.Output.FirstOrDefault(c => c.Type == OutputType.TypeScript) ?? config.Controllers.Output[0];
+                : Config.Models.Output.FirstOrDefault(c => c.Type == OutputType.TypeScript) ?? Config.Models.Output[0];
             
             foreach (KeyValuePair<string, string> sharedModel in controllerOutputConfig.SharedModelFiles)
             {
@@ -82,7 +82,7 @@ namespace WCKDRZR.Gaspar.Converters
                 CSharpFiles files = new();
                 foreach (string fileName in modelFiles)
                 {
-                    files.Add(Exporter.ParseModels(fileName, config));
+                    files.Add(Exporter.ParseModels(fileName, Config));
                     Exporter.FullyQualifyNestedClassTypes(ref files);
                 }
                 

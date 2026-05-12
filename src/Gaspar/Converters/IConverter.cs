@@ -136,6 +136,11 @@ namespace WCKDRZR.Gaspar.Converters
 
             if (_config.Controllers != null)
             {
+                if (converter is TypeScriptConverter tsConverter)
+                {
+                    tsConverter.PrepareForControllerOutput(_allModels, outputConfig);
+                }
+
                 lines.AddRange(OutputHeader.Controllers(converter, outputConfig, outputConfig.Location));
 
                 files.DeDuplicateControllerAndActionNames(outputConfig.Type, _allTypes, _config.Controllers.ServiceName);
