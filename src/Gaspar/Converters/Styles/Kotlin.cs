@@ -365,6 +365,10 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("    private val client: OkHttpClient = OkHttpClient.Builder()");
             lines.Add("        .callTimeout(Duration.ofSeconds(30))");
             lines.Add("        .build()");
+            lines.Add("    val json = Json {");
+            lines.Add("        ignoreUnknownKeys = true");
+            lines.Add("        coerceInputValues = true");
+            lines.Add("    }");
             lines.Add("    fun fetchVoid(method: String, url: String, body: Any? = null, headers: Headers? = null): ServiceResponse<VoidObject> {");
             lines.Add("        return fetch<VoidObject>(method, url, body, headers)");
             lines.Add("    }");
@@ -389,11 +393,11 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("        body?.let { body ->");
             lines.Add("            bodyData = when (body) {");
             lines.Add("                is RequestBody -> body");
-            lines.Add("                is String -> Json.encodeToString(body).toRequestBody(jsonMediaType)");
+            lines.Add("                is String -> json.encodeToString(body).toRequestBody(jsonMediaType)");
             lines.Add("                else -> {");
             lines.Add("                    try {");
             lines.Add("                        val bodySerializer = serializer(body::class, emptyList(), false)");
-            lines.Add("                        Json.encodeToString(bodySerializer, body).toRequestBody(jsonMediaType)");
+            lines.Add("                        json.encodeToString(bodySerializer, body).toRequestBody(jsonMediaType)");
             lines.Add("                    } catch (_: Exception) {");
             lines.Add("                        body.toString().toRequestBody(jsonMediaType)");
             lines.Add("                    }");
@@ -419,7 +423,7 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("            if (responseBody.isBlank()) {");
             lines.Add("                return ServiceResponse(null, null)");
             lines.Add("            }");
-            lines.Add("            val response = Json.decodeFromString<T>(responseBody)");
+            lines.Add("            val response = json.decodeFromString<T>(responseBody)");
             lines.Add("            return ServiceResponse(");
             lines.Add("                response,");
             lines.Add("                null");
@@ -433,7 +437,7 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("        var response = ServiceResponse<T>(null, null)");
             lines.Add("        val responseBody = httpResponse.body.string()");
             lines.Add("        try {");
-            lines.Add("            response.error = Json.decodeFromString<ActionResultError>(responseBody)");
+            lines.Add("            response.error = json.decodeFromString<ActionResultError>(responseBody)");
             lines.Add("        } catch (_: Exception) {");
             lines.Add("            response = error(\"Gaspar: Service call to $url failed to connect\", responseBody, httpResponse.code)");
             lines.Add("        }");
