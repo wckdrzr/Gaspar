@@ -320,6 +320,10 @@ namespace WCKDRZR.Gaspar.Converters
             if (outputConfig.ModelPath != null) {
                 lines.Add($"import {outputConfig.ModelPath}.*");
             }
+            foreach (string ns in outputConfig.ModelNamespaces)
+            {
+                lines.Add($"import {ns}");
+            }
 
             lines.Add("");
             return lines;            
@@ -457,7 +461,7 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("        )");
             lines.Add("    }");
             lines.Add("    @PublishedApi internal fun logMessage(message: String) {");
-            lines.Add("        Log.d(\"Gaspar\", message)");
+            lines.Add("        " + (outputConfig.LoggingReceiver == null ? "Log.d(\"Gaspar\", message)" : $"{outputConfig.LoggingReceiver}.gasparError(message)"));
             lines.Add("    }");
             lines.Add("}");
 

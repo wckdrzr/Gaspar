@@ -547,11 +547,12 @@ For CSharp, TypeScript and Angular controllers (optional):
   In both the above examples, you will add `"UrlHandlerFunction": "MyUrlHelper"` to the config.
   *make sure to include the namespace/import to your function in the config (see below)*
 
-For CSharp controllers (all optional):
+For CSharp, Swift and Kotlin controllers (all optional):
 
-- **LoggingReceiver**    `string`    When using your exported service communication endpoint, if there's an error receiving the response or deserializing it, the error will be logged to the console (using `Console.WriteLine`).  If you would like the error to be absorbed by your own logging system you can provide a static logging class name here, for example:
+- **LoggingReceiver**    `string`    When using your exported service communication endpoint, if there's an error receiving the response or deserializing it, the error will be logged to the console (as well as being available in the ServiceResponse).  If you would like the error to be handled by your own logging system instead you can provide a static logging class name here, for example:
   
   ```csharp
+  // C#
   internal static class MyLogger
   {
       public static void GasparError(string message)
@@ -560,14 +561,34 @@ For CSharp controllers (all optional):
       }
   }
   ```
+  ```kotlin
+  // Kotlin
+  object MyLogger {
+  {
+      fun gasparError(message: String) {
+          //handle error
+      }
+  }
+  ```
+  ```swift
+  // Swift
+  struct MyLogger {
+  {
+      static func gasparError(_ message: String) {
+          //handle error
+      }
+  }
+  ```
   
-  In the above example, you will add `"LoggingReceiver": "MyLogger"` to the config.  Alternatively you can add a `GasparError()` method (as above) to your existing logging class (provided it's a static class).
+  In the above examples, you will add `"LoggingReceiver": "MyLogger"` to the config.  Create the objects as above, or just add the `GasparError` method (as above) to your existing logging class.
   
   If your logging class throws an error, that error will be written to the console, followed by the original error.
   
-  *make sure to include the namespace to your class in the config (see below)*
+  *for C# and Kotlin, make sure to include the namespace/using to your class in the config (see below)*
 
-- **ModelNamespaces**    `Array of strings`    List of namespaces to include at the top of your exported Service Communication class.  This would include the namespaces to custom types in the export, or your serializer and logging tools
+For CSharp and Kotlin controllers (optional):
+
+- **ModelNamespaces**    `Array of strings`    List of namespaces/usings to include at the top of your exported Service Communication class.  This would include the namespaces to custom types in the export, or your serializer and logging tools
 
 For TypeScript and Angular models and controllers (all optional)
 

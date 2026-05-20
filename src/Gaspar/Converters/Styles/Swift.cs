@@ -430,7 +430,7 @@ namespace WCKDRZR.Gaspar.Converters
             lines.Add("        )");
             lines.Add("    }");
             lines.Add("    private static func log(_ message: String) {");
-            lines.Add("        print(\"Gaspar: \\(message)\")");
+            lines.Add("        " + (outputConfig.LoggingReceiver == null ? "print(\"Gaspar: \\(message)\")" : $"{outputConfig.LoggingReceiver}.gasparError(message)"));
             lines.Add("    }");
             lines.Add("}");
 
